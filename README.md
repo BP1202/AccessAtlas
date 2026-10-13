@@ -55,6 +55,33 @@ git switch -c feat/your-feature-name
 
 ---
 
+## Backend Development
+
+The backend service is located in the [`backend/`](./backend/) directory and is built using FastAPI and Python 3.12+.
+
+```powershell
+# Navigate to backend
+cd backend
+
+# Run automated tests
+pytest
+
+# Run development server
+uvicorn app.main:app --reload --port 8000
+```
+
+Verify availability via `GET /health`:
+```json
+{
+  "status": "ok",
+  "service": "accessatlas-backend"
+}
+```
+
+See [`backend/README.md`](./backend/README.md) for full setup, virtual environment, and linting instructions.
+
+---
+
 ## License
 
 This project is licensed under the terms of the MIT License.

@@ -240,10 +240,10 @@ Implementation tasks should follow:
 - Structured error handling.
 - Testable external integration clients.
 - Deterministic domain logic where appropriate.
-- Pytest-based automated verification.
-- Ruff for Python linting and formatting once configured.
+- Ruff for Python linting and formatting.
+- Continuous integration via `.github/workflows/backend-ci.yml` (Ruff lint, Ruff format check, Pytest).
 
-The exact package layout is established by the backend-foundation issue.
+The backend package layout is established in `backend/` with dependencies managed via `pyproject.toml`.
 
 ## 10. Frontend standards
 

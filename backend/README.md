@@ -118,3 +118,28 @@ Verify code formatting conforms to project style:
 ```powershell
 ruff format --check .
 ```
+
+---
+
+## Continuous Integration (CI)
+
+GitHub Actions runs automated backend verification on pull requests targeting `dev` or `main` and on pushes affecting the `backend/` directory ([`.github/workflows/backend-ci.yml`](../.github/workflows/backend-ci.yml)).
+
+The workflow executes on Python 3.12 with `contents: read` permissions:
+
+1. **Dependency Installation**:
+   ```bash
+   pip install -e ".[dev]"
+   ```
+2. **Linting Check**:
+   ```bash
+   ruff check .
+   ```
+3. **Format Check**:
+   ```bash
+   ruff format --check .
+   ```
+4. **Test Suite**:
+   ```bash
+   pytest -v
+   ```

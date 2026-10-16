@@ -301,3 +301,113 @@ def test_invalid_input_validation() -> None:
     with pytest.raises(ValueError) as exc:
         client.get_insights("urn:entity:movie", [])
     assert "at least one valid entity ID" in str(exc.value)
+
+
+def test_live_smoke_skip_when_api_key_missing(
+    monkeypatch: pytest.MonkeyPatch,
+    capsys: pytest.CaptureFixture[str],
+) -> None:
+    """Verify live smoke returns 1 and prints skip message when API key is missing."""
+    from app.qloo.live_smoke_test import run_live_smoke
+
+    settings = Settings(_env_file=(), QLOO_API_KEY=None)
+    exit_code = run_live_smoke(settings=settings)
+    captured = capsys.readouterr().out
+
+    assert exit_code == 1
+    assert "[SKIP] QLOO_API_KEY is not configured" in captured
+
+
+def test_live_smoke_zero_search_entities_fails_verification(
+    monkeypatch: pytest.MonkeyPatch,
+    capsys: pytest.CaptureFixture[str],
+) -> None:
+    """Verify live smoke test fails verification if search returns zero entities."""
+    from app.qloo.live_smoke_test import run_live_smoke
+
+    settings = Settings(_env_file=(), QLOO_API_KEY="test_key_abc")
+
+    def empty_search_transport(request: httpx.Request) -> httpx.Response:
+        return httpx.Response(200, json={"success": True, "results": []})
+
+    monkeypatch.setattr(
+        "app.qloo.live_smoke_test.QlooClient",
+        lambda settings: QlooClient(
+            settings=settings,
+            transport=httpx.MockTransport(empty_search_transport),
+        ),
+    )
+
+    exit_code = run_live_smoke(settings=settings)
+    captured = capsys.readouterr().out
+
+    assert exit_code == 1
+    assert "Credential status: configured" in captured
+    assert "test_key_abc" not in captured
+    assert "Incomplete verification: Search returned zero entities" in captured
+    assert "Live Smoke Test Completed Successfully" not in captured
+
+
+def test_live_smoke_success_path_does_not_leak_key(
+    monkeypatch: pytest.MonkeyPatch,
+    capsys: pytest.CaptureFixture[str],
+) -> None:
+    """Verify successful smoke test execution exits 0 without printing any key slice."""
+    from app.qloo.live_smoke_test import run_live_smoke
+
+    secret_key = "super_secret_qloo_token_123"
+    settings = Settings(_env_file=(), QLOO_API_KEY=secret_key)
+
+    def success_transport(request: httpx.Request) -> httpx.Response:
+        if request.url.path == "/search":
+            return httpx.Response(
+                200,
+                json={
+                    "success": True,
+                    "results": [
+                        {
+                            "entity_id": "ent-1",
+                            "name": "Sample Entity",
+                            "type": "urn:entity:brand",
+                        }
+                    ],
+                },
+            )
+        elif request.url.path == "/v2/insights":
+            return httpx.Response(
+                200,
+                json={
+                    "success": True,
+                    "results": {
+                        "entities": [
+                            {
+                                "entity_id": "ent-2",
+                                "name": "Recommended Entity",
+                                "type": "urn:entity",
+                                "subtype": "urn:entity:movie",
+                            }
+                        ]
+                    },
+                },
+            )
+        return httpx.Response(404, json={})
+
+    monkeypatch.setattr(
+        "app.qloo.live_smoke_test.QlooClient",
+        lambda settings: QlooClient(
+            settings=settings,
+            transport=httpx.MockTransport(success_transport),
+        ),
+    )
+
+    exit_code = run_live_smoke(settings=settings)
+    captured = capsys.readouterr().out
+
+    assert exit_code == 0
+    assert "Credential status: configured" in captured
+    # Ensure no slice of secret_key is present anywhere in output
+    assert "super" not in captured
+    assert "secret" not in captured
+    assert "123" not in captured
+    assert "Outcome: Request succeeded" in captured
+    assert "Live Smoke Test Completed Successfully" in captured

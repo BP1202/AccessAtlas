@@ -183,7 +183,7 @@ class QlooClient:
             data = response.json()
         except Exception as exc:
             raise QlooResponseError(
-                f"Malformed JSON response from Qloo on {endpoint_label}: {exc}"
+                f"Malformed JSON response from Qloo on {endpoint_label}."
             ) from exc
 
         if not isinstance(data, dict):
@@ -224,11 +224,9 @@ class QlooClient:
         try:
             response = self._client.get("/search", params=params)
         except httpx.TimeoutException as exc:
-            raise QlooTimeoutError(f"Request to Qloo /search timed out: {exc}") from exc
+            raise QlooTimeoutError("Request to Qloo /search timed out.") from exc
         except httpx.RequestError as exc:
-            raise QlooResponseError(
-                f"Network error contacting Qloo /search: {exc}"
-            ) from exc
+            raise QlooResponseError("Network error contacting Qloo /search.") from exc
 
         data = self._handle_response(response, "/search")
 
@@ -298,12 +296,10 @@ class QlooClient:
         try:
             response = self._client.get("/v2/insights", params=params)
         except httpx.TimeoutException as exc:
-            raise QlooTimeoutError(
-                f"Request to Qloo /v2/insights timed out: {exc}"
-            ) from exc
+            raise QlooTimeoutError("Request to Qloo /v2/insights timed out.") from exc
         except httpx.RequestError as exc:
             raise QlooResponseError(
-                f"Network error contacting Qloo /v2/insights: {exc}"
+                "Network error contacting Qloo /v2/insights."
             ) from exc
 
         data = self._handle_response(response, "/v2/insights")

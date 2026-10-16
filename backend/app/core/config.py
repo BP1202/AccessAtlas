@@ -34,6 +34,8 @@ class Settings(BaseSettings):
     )
 
     APP_ENV: str = "development"
+    QLOO_API_KEY: str | None = None
+    QLOO_BASE_URL: str = "https://hackathon.api.qloo.com"
 
 
 @lru_cache

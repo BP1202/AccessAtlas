@@ -171,9 +171,9 @@ The evidence model should support, where relevant:
 - Applicable scope.
 - Whether the information is sufficient for the requirement being evaluated.
 
-The exact schema will be introduced in the venue-evidence implementation issue.
+The evidence foundation schema is implemented in `backend/app/evidence` (`EvidenceRecord`, `AttributeEvidence`, `EvidenceClaim`, `EvidenceSource`, `VenueIdentity`, `ExperienceIdentity`, and `InMemoryVenueEvidenceRepository`). Detailed specification and vocabulary are documented in `docs/EVIDENCE.md`.
 
-Do not assume that an official venue webpage guarantees every detail is current.
+Real venue data collection is not operational; synthetic fixtures are used for development and testing. Do not assume that an official venue webpage guarantees every detail is current.
 
 ## 10. Possibility Engine
 

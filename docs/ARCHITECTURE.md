@@ -177,31 +177,29 @@ Real venue data collection is not operational; synthetic fixtures are used for d
 
 ## 10. Possibility Engine
 
-The Possibility Engine is a deterministic domain service.
+The deterministic Possibility Engine is implemented in `backend/app/possibility` (`PossibilityEngine`, `ParticipationRequirement`, `PossibilityAssessment`, `RequirementAssessment`). Detailed specification, vocabulary, and precedence rules are documented in `docs/POSSIBILITY_ENGINE.md`.
 
 Inputs:
 
-- Explicit user requirements.
-- Normalized venue evidence.
-- Relevant evaluation context.
+- Explicit user requirements (`ParticipationRequirement`).
+- Independently sourced venue and experience evidence (`EvidenceRecord`).
+- Reproducible timezone-aware evaluation timestamp (`evaluation_time`).
 
 Outputs:
 
-- Requirement-level evaluations.
-- Supporting evidence references.
-- Missing information.
+- Requirement-level evaluations (`RequirementAssessment`).
+- Preserved supporting or conflicting evidence references.
+- Missing information and explicit confirmation needs.
 - Identified conflicts.
-- An overall suitability state.
+- An overall suitability outcome (`PossibilityOutcome`).
 
 Primary states:
 
-1. Verified fit.
-2. Needs confirmation.
-3. Requirement conflict.
+1. `VERIFIED_FIT`: All mandatory requirements are supported by verified evidence.
+2. `NEEDS_CONFIRMATION`: Information is missing, conflicting, expired, out of scope, or non-machine-evaluable (or no mandatory requirements were provided).
+3. `REQUIREMENT_CONFLICT`: At least one mandatory requirement is contradicted by applicable evidence.
 
-The exact aggregation rules must be defined and covered by tests before implementation.
-
-The language model may explain the result but must not silently modify it.
+The language model may explain the result in downstream planning but must not silently modify or override deterministic evaluations.
 
 ## 11. Participation planning
 

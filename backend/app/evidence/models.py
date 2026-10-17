@@ -129,12 +129,25 @@ class EvidenceClaim(BaseModel):
         description="Specific contextual notes, dimensions, or qualifications",
     )
     source: EvidenceSource = Field(description="Independent source provenance")
+    valid_until: datetime | None = Field(
+        default=None,
+        description="Optional timezone-aware datetime when this claim expires",
+    )
 
     @field_validator("details")
     @classmethod
     def strip_empty_details(cls, v: str | None) -> str | None:
         if v is not None and not v.strip():
             return None
+        return v
+
+    @field_validator("valid_until")
+    @classmethod
+    def validate_valid_until_timezone(cls, v: datetime | None) -> datetime | None:
+        if v is not None and (v.tzinfo is None or v.tzinfo.utcoffset(v) is None):
+            raise ValueError(
+                "valid_until must be timezone-aware (tzinfo cannot be None)."
+            )
         return v
 
 

@@ -109,24 +109,17 @@ Do not assume endpoint paths exist before they are implemented and tested.
 
 ## 6. Agent responsibilities
 
-LangGraph coordinates the workflow.
+LangGraph coordinates the discovery and participation planning workflow.
 
-The agent may:
+The core orchestration workflow is implemented in `backend/app/agent` (`AccessAtlasAgent`, `create_agent_graph`, `WorkflowNodes`, `CandidateResolver`, `build_candidate_participation_plan`). Complete documentation of graph topology, trust boundaries, and grounded planning contracts is provided in `docs/AGENT_ORCHESTRATION.md`.
 
-- Interpret a visitor's goal.
-- Identify missing essential inputs.
-- Select appropriate tools.
-- Resolve cultural interests.
-- Request cultural discovery.
-- Investigate actual experience candidates.
-- Request venue evidence.
-- Invoke the Possibility Engine.
-- Reassess the plan when information is missing.
-- Generate an actionable explanation and visit plan.
+Node sequence:
+1. `discover`: Qloo cultural discovery bounded to `max_candidates`.
+2. `resolve`: Explicit mapping of cultural entities to venue identifiers via `CandidateResolver`.
+3. `evaluate`: Deterministic evaluation with the Possibility Engine for resolved entities.
+4. `plan`: Grounded participation plan generation with confirmation questions and next actions.
 
-The agent must not override deterministic hard-requirement conflicts.
-
-Agent state transitions and tool outcomes must be inspectable.
+The agent preserves all deterministic hard-requirement outcomes and never infers sensitive user requirements from cultural signals. Real pilot-city entity mapping and venue data collection remain future work.
 
 ## 7. Qloo integration boundary
 
@@ -203,18 +196,20 @@ The language model may explain the result in downstream planning but must not si
 
 ## 11. Participation planning
 
-Planning uses the discovery results and suitability evaluations to propose a practical next step.
+Planning uses cultural discovery results and deterministic suitability evaluations to propose structured, actionable next steps for each candidate (`CandidateParticipationPlan`).
 
-A plan may include:
+A plan includes:
 
-- An experience rationale.
-- Suggested visit sequence.
-- Stated requirements and their evidence status.
-- Questions requiring confirmation.
-- Preparation suggestions.
-- Source references.
+- Cultural discovery candidate reference (`QlooEntity`).
+- Explicit mapping and resolution status (`RESOLVED`, `UNMAPPED`, `MISSING_EVIDENCE`).
+- Possibility Engine assessment, only when legitimately evaluated.
+- Supported findings verified by independent evidence.
+- Unresolved evidence gaps (missing, expired, or conflicting attributes).
+- Specific confirmation questions grounded directly in actual evidence gaps.
+- Grounded next actions distinguishing verified fits from items needing confirmation.
+- Preserved source provenance references.
 
-The plan must distinguish proposals from verified bookings, confirmations or completed external actions.
+The plan strictly distinguishes culturally relevant candidates from verified practical fits and never claims that a venue was contacted or a booking was checked when no such integration completed.
 
 ## 12. Data boundaries
 

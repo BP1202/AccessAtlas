@@ -1,114 +1,94 @@
-# AccessAtlas — Ahmedabad Pilot Source & Evidence Register (Stage A)
+# AccessAtlas — Ahmedabad Pilot Source & Evidence Register (Stage B)
 
-> **Status:** Stage A Source Register (Review Corrections).  
+> **Status:** Stage B Implemented Source Register.  
 > **Retrieval Datetime:** 2026-10-18T16:25:00+05:30.  
-> **Verification Level:** `SOURCE_RETRIEVED` (Official web publication review only; **`UNVERIFIED_INDEPENDENTLY`** on site).  
-> **Notice:** All claims in this register represent preliminary research extracted from official venue websites and identified secondary sources. They are marked `PROPOSED` or `UNKNOWN` and have not yet been imported into application runtime fixtures.
+> **Implementation Module:** [`backend/app/evidence/pilot_ahmedabad.py`](../../backend/app/evidence/pilot_ahmedabad.py).  
+> **Notice:** All claims in this register have been integrated into `backend/app/evidence/pilot_ahmedabad.py`.
 
 ---
 
 ## 1. Verified Source Register
 
-The following primary and secondary sources were consulted during Stage A investigation:
-
-| Source ID | Source Type | Organization / Title | URL | Verified At (ISO 8601) | Authority & Scope | Factual Verification Level |
-|---|---|---|---|---|---|---|
-| `SRC_AHM_CAL_01` | `official_venue_website` | Sarabhai Foundation — Tour Guidelines | `https://www.calicomuseum.org/tour-guidelines/` | `2026-10-18T16:25:00+05:30` | Primary official source for Calico Museum entry, capacity, timings, and access policies. | `SOURCE_RETRIEVED` (Published web text) |
-| `SRC_AHM_CAL_02` | `official_venue_website` | Calico Museum of Textiles — Homepage & Contacts | `https://www.calicomuseum.org/` | `2026-10-18T16:25:00+05:30` | Official location, email, and contact numbers. | `SOURCE_RETRIEVED` (Published web text) |
-| `SRC_AHM_KLM_01` | `official_venue_website` | Kasturbhai Lalbhai Museum — Guidelines & FAQ | `https://kasturbhailalbhaimuseum.com/` | `2026-10-18T16:25:00+05:30` | Primary official source for tour times, small-batch bookings, and contact details. | `SOURCE_RETRIEVED` (Published web text) |
-| `SRC_AHM_KLM_02` | `third_party_directory` | Museums of India — Kasturbhai Lalbhai Museum Profile | `https://museumsofindia.org/` | `2026-10-18T16:25:00+05:30` | Secondary directory detailing architectural history and collection scope. | `SOURCE_RETRIEVED` (Secondary directory) |
-| `SRC_AHM_CNF_01` | `official_venue_website` | Conflictorium — Official Website & Ahmedabad Location | `https://www.conflictorium.org/` | `2026-10-18T16:25:00+05:30` | Primary official source for Gool Lodge address, hours, admission, and email. | `SOURCE_RETRIEVED` (Published web text) |
-| `SRC_AHM_CNF_02` | `official_venue_website` | Conflictorium — Locations & Raipur Branch Information | `https://www.conflictorium.org/` | `2026-10-18T16:25:00+05:30` | Disambiguation source establishing separate Raipur branch details. | `SOURCE_RETRIEVED` (Published web text) |
-
----
-
-## 2. Proposed Claim-Level Evidence: Calico Museum of Textiles
-
-### Venue Identity
-- **Proposed Venue ID:** `prop_ven_in_ahm_calico`
-- **Name:** Calico Museum of Textiles (Sarabhai Foundation)
-- **Address:** "The Retreat", Opp. Underbridge, Shahibaug, Ahmedabad, Gujarat 380004, India.
-
-| Attribute (from `EvidenceAttribute`) | Scope | Proposed Value | Source ID | Exact Source Wording / Faithful Paraphrase | Machine Evaluability & Classification | Proposed Status |
-|---|---|---|---|---|---|---|
-| `STEP_FREE_ENTRANCE` | `ClaimScope.VENUE` | `None` | `SRC_AHM_CAL_01` | Published text: *"The Foundation is currently unable to offer wheelchair access to visitors."* Physical entrance threshold and gate geometry are not published. | Not evaluable as physical threshold; converting wheelchair policy to entrance claim is unsupported. | `UNKNOWN` (Wheelchair policy documented) |
-| `INTERNAL_ELEVATOR` | `ClaimScope.VENUE` | `None` | `SRC_AHM_CAL_01` | Galleries are spread over historic haveli multi-story structures. Elevator existence is not explicitly stated on official channels. | Not evaluable (silence on official channels). | `UNKNOWN` |
-| `RESERVATION_REQUIRED` | `ClaimScope.VENUE` | `True` | `SRC_AHM_CAL_01` | Entry is free of charge but strictly regulated via advance online registration opening 90 days ahead. Capped at 20 persons per tour. | Direct boolean (`True`). Advance window (90 days) preserved in `details`. | `PROPOSED` |
-| `SENSORY_ADAPTED_SESSION` | `ClaimScope.VENUE` | `None` | `SRC_AHM_CAL_01` | Low illumination is maintained for scientific textile conservation. No specialized sensory-adapted sessions are offered. | Not evaluable as an adapted session. Conservation lighting recorded in notes. | `UNKNOWN` |
-| `COMPANION_ENTRY_POLICY` | `ClaimScope.VENUE` | `None` | `SRC_AHM_CAL_01` | Official policy is silent on personal assistant or carer admission for visitors with disabilities. (Child accompaniment rule: 10–15 accompanied; under 10 prohibited). | Not evaluable for disability companion policy. Child rules recorded as admission qualifications. | `UNKNOWN` |
-| `CONTACT_FOR_ACCESS_INFO` | `ClaimScope.VENUE` | `None` | `SRC_AHM_CAL_02` | General contact published: `calicomuseum@gmail.com`; Phones: +91 (79) 22868172 / +91 (79) 22865995. No dedicated accessibility contact published. | General contact details only; does not substantiate dedicated accessibility coordination. | `UNKNOWN` |
-| `STEP_FREE_RESTROOM` | `ClaimScope.VENUE` | `None` | `SRC_AHM_CAL_01` | No published data on accessible restroom doors or grab rails. | Not evaluable. | `UNKNOWN` |
-| `SERVICE_ANIMAL_POLICY` | `ClaimScope.VENUE` | `None` | `SRC_AHM_CAL_01` | Official policy is silent regarding guide dogs or service animals. | Not evaluable. | `UNKNOWN` |
-| `SEATING_AVAILABLE` | `ClaimScope.VENUE` | `None` | `SRC_AHM_CAL_01` | Continuous walking tour across multiple levels; rest bench frequency is unstated. | Not evaluable. | `UNKNOWN` |
-| `ACCESSIBLE_PARKING` | `ClaimScope.VENUE` | `None` | `SRC_AHM_CAL_01` | Parking exists within the estate, but dedicated accessible stall dimensions are unrecorded. | Not evaluable. | `UNKNOWN` |
-
-### Experience Identity 1: The Haveli Galleries Tour
-- **Proposed Experience ID:** `prop_exp_in_ahm_calico_haveli`
-- **Title:** The Haveli Galleries Morning Tour
-- **Venue Link:** `prop_ven_in_ahm_calico`
-
-| Attribute | Scope | Proposed Value | Source ID | Supporting Source Evidence | Proposed Status |
+| Source ID | Source Type | Organization / Title | URL | Verified At (ISO 8601) | Authority & Scope |
 |---|---|---|---|---|---|
-| `RESERVATION_REQUIRED` | `ClaimScope.EXPERIENCE` | `True` | `SRC_AHM_CAL_01` | 10:30 AM – 12:30 PM slot; mandatory online registration opens 90 days ahead; 20-person cap. | `PROPOSED` |
-| `STEP_FREE_ENTRANCE` | `ClaimScope.EXPERIENCE` | `None` | `SRC_AHM_CAL_01` | Historic wooden haveli multi-story structure; specific threshold steps uncataloged. | `UNKNOWN` |
-
-### Experience Identity 2: The Chauk Galleries Tour
-- **Proposed Experience ID:** `prop_exp_in_ahm_calico_chauk`
-- **Title:** The Chauk Galleries Afternoon Tour
-- **Venue Link:** `prop_ven_in_ahm_calico`
-
-| Attribute | Scope | Proposed Value | Source ID | Supporting Source Evidence | Proposed Status |
-|---|---|---|---|---|---|
-| `RESERVATION_REQUIRED` | `ClaimScope.EXPERIENCE` | `True` | `SRC_AHM_CAL_01` | 2:30 PM – 4:30 PM slot; mandatory online registration opens 90 days ahead; 20-person cap. | `PROPOSED` |
-| `STEP_FREE_ENTRANCE` | `ClaimScope.EXPERIENCE` | `None` | `SRC_AHM_CAL_01` | Split-level pavilions; specific threshold steps uncataloged. | `UNKNOWN` |
+| `SRC_AHM_CAL_01` | `official_venue_website` | Sarabhai Foundation — Tour Guidelines | `https://www.calicomuseum.org/tour-guidelines/` | `2026-10-18T16:25:00+05:30` | Official guidelines for Calico entry, group caps, punctuality, and access policies. |
+| `SRC_AHM_CAL_02` | `official_venue_website` | Calico Museum of Textiles — Homepage & Contacts | `https://www.calicomuseum.org/` | `2026-10-18T16:25:00+05:30` | Official address, contact email, and phone numbers. |
+| `SRC_AHM_KLM_01` | `official_venue_website` | Kasturbhai Lalbhai Museum — Guidelines & FAQ | `https://kasturbhailalbhaimuseum.com/` | `2026-10-18T16:25:00+05:30` | Official source for guided tour times, batch caps, and booking contacts. |
+| `SRC_AHM_CNF_01` | `official_venue_website` | Conflictorium — Official Website (Ahmedabad) | `https://www.conflictorium.org/` | `2026-10-18T16:25:00+05:30` | Official source for Gool Lodge address, walk-in hours, and dialogue contacts. |
 
 ---
 
-## 3. Proposed Claim-Level Evidence: Kasturbhai Lalbhai Museum
+## 2. Integrated Evidence Records & Claims
 
-### Venue Identity
-- **Proposed Venue ID:** `prop_ven_in_ahm_kasturbhai`
-- **Name:** Kasturbhai Lalbhai Museum
-- **Address:** Lalbaug, Shahibaug, Ahmedabad, Gujarat 380004, India.
+### 2.1 Calico Museum of Textiles (`ven_in_ahm_calico`)
+- **Location:** "The Retreat", Opp. Underbridge, Shahibaug, Ahmedabad, Gujarat 380004.
+- **Approved Qloo Entity ID:** `783C0235-681D-4235-BA4D-A57992F7C97A`.
 
-| Attribute (from `EvidenceAttribute`) | Scope | Proposed Value | Source ID | Exact Source Wording / Faithful Paraphrase | Machine Evaluability & Classification | Proposed Status |
+| Attribute | Scope | Value | Source ID | Exact Source Wording / Note | Evaluability | Status |
 |---|---|---|---|---|---|---|
-| `RESERVATION_REQUIRED` | `ClaimScope.VENUE` | `True` | `SRC_AHM_KLM_01` | Unguided walk-in visits not permitted for ordinary visits. Entry strictly via pre-booked guided tours (phone/email booking required). | Direct boolean (`True`). 4 daily slots (10am, 12pm, 2:30pm, 4pm), ~12 person cap recorded in `details`. | `PROPOSED` |
-| `CONTACT_FOR_ACCESS_INFO` | `ClaimScope.VENUE` | `None` | `SRC_AHM_KLM_01` | Phone: +91 (79) 2286-5456 / +91 (79) 2286-6376; Email: `klmuseum16@gmail.com`. | General booking contact only; does not substantiate dedicated accessibility coordination. | `UNKNOWN` |
-| `STEP_FREE_ENTRANCE` | `ClaimScope.VENUE` | `None` | `SRC_AHM_KLM_01` | Official website does not specify if the 1905 heritage colonial house or modern Batley wing has ramp access. | Not evaluable. | `UNKNOWN` |
-| `INTERNAL_ELEVATOR` | `ClaimScope.VENUE` | `None` | `SRC_AHM_KLM_01` | Presence of an elevator within the two-story heritage domestic structure is unstated. | Not evaluable. | `UNKNOWN` |
-| `SEATING_AVAILABLE` | `ClaimScope.VENUE` | `None` | `SRC_AHM_KLM_01` | Presence of seating along tour routes or in gallery rooms is unstated. | Not evaluable. | `UNKNOWN` |
-| `STEP_FREE_RESTROOM` | `ClaimScope.VENUE` | `None` | `SRC_AHM_KLM_01` | Campus restroom accessibility details are unrecorded. | Not evaluable. | `UNKNOWN` |
-| `SERVICE_ANIMAL_POLICY` | `ClaimScope.VENUE` | `None` | `SRC_AHM_KLM_01` | No guidance published regarding assistance dogs. | Not evaluable. | `UNKNOWN` |
-| `COMPANION_ENTRY_POLICY` | `ClaimScope.VENUE` | `None` | `SRC_AHM_KLM_01` | No carer / companion admission policy published. | Not evaluable. | `UNKNOWN` |
+| `WHEELCHAIR_ACCESS` | `VENUE` | `False` | `SRC_AHM_CAL_01` | *"The Foundation is currently unable to offer wheelchair access to visitors."* | Machine evaluable (`EQUALS`) | `SOURCE_BACKED` |
+| `RESERVATION_REQUIRED` | `VENUE` | `True` | `SRC_AHM_CAL_01` | Free online registration opens 90 days in advance; strictly capped at 20 visitors per tour. | Machine evaluable (`EQUALS`) | `SOURCE_BACKED` |
+| `STEP_FREE_ENTRANCE` | `VENUE` | `None` | `SRC_AHM_CAL_01` | Physical entrance threshold geometry unrecorded on official channels. | Not evaluable | `UNKNOWN` |
+| `INTERNAL_ELEVATOR` | `VENUE` | `None` | `SRC_AHM_CAL_01` | Elevator presence is not explicitly stated on official channels. | Not evaluable | `UNKNOWN` |
+| `STEP_FREE_RESTROOM` | `VENUE` | `None` | `SRC_AHM_CAL_01` | Restroom dimensions and grab rails unrecorded. | Not evaluable | `UNKNOWN` |
+| `SERVICE_ANIMAL_POLICY`| `VENUE` | `None` | `SRC_AHM_CAL_01` | Assistance animal policy unstated. | Not evaluable | `UNKNOWN` |
+| `COMPANION_ENTRY_POLICY`| `VENUE`| `None` | `SRC_AHM_CAL_01` | Disability carer policy unstated. (Child policy: under 10 prohibited; 10–15 accompanied). | Not evaluable | `UNKNOWN` |
+| `SEATING_AVAILABLE` | `VENUE` | `None` | `SRC_AHM_CAL_01` | Rest bench frequency along guided route unrecorded. | Not evaluable | `UNKNOWN` |
+| `CONTACT_FOR_ACCESS_INFO`| `VENUE`| `None` | `SRC_AHM_CAL_02` | General administrative contacts only; dedicated access coordinator unrecorded. | Not evaluable | `UNKNOWN` |
+
+#### Linked Experiences
+1. **The Haveli Galleries Morning Tour (`exp_in_ahm_calico_haveli`)**:
+   - `RESERVATION_REQUIRED = True` (10:30 AM – 12:30 PM slot, capped at 20, 90-day window).
+   - `STEP_FREE_ENTRANCE = UNKNOWN` (historic split-level wooden haveli).
+2. **The Chauk Galleries Afternoon Tour (`exp_in_ahm_calico_chauk`)**:
+   - `RESERVATION_REQUIRED = True` (2:30 PM – 4:30 PM slot, capped at 20, 90-day window).
+   - `STEP_FREE_ENTRANCE = UNKNOWN` (split-level pavilions).
 
 ---
 
-## 4. Proposed Claim-Level Evidence: Conflictorium (Ahmedabad)
+### 2.2 Kasturbhai Lalbhai Museum (`ven_in_ahm_kasturbhai`)
+- **Location:** Lalbaug, Shahibaug, Ahmedabad, Gujarat 380004.
+- **Approved Qloo Entity ID:** `36537424-5653-418C-A39E-33C17214D423`.
 
-### Venue Identity
-- **Proposed Venue ID:** `prop_ven_in_ahm_conflictorium`
-- **Name:** Conflictorium — Museum of Conflict (Ahmedabad)
-- **Address:** Gool Lodge, Opp. R.C. High School of Commerce, Delhi Chakla, Mirzapur, Ahmedabad, Gujarat 380001, India.
-
-| Attribute (from `EvidenceAttribute`) | Scope | Proposed Value | Source ID | Exact Source Wording / Faithful Paraphrase | Machine Evaluability & Classification | Proposed Status |
+| Attribute | Scope | Value | Source ID | Exact Source Wording / Note | Evaluability | Status |
 |---|---|---|---|---|---|---|
-| `RESERVATION_REQUIRED` | `ClaimScope.VENUE` | `False` | `SRC_AHM_CNF_01` | Free walk-in entry for ordinary museum visits; individual visits do not require advance ticketing. (Special events may require RSVP). | Direct boolean (`False`). Ordinary vs. special-event distinction noted in `details`. | `PROPOSED` |
-| `CONTACT_FOR_ACCESS_INFO` | `ClaimScope.VENUE` | `None` | `SRC_AHM_CNF_01` | Email: `dialogue@conflictorium.org`; Phone: +91 (79) 25620747. | General institutional contact only; does not substantiate dedicated accessibility coordination. | `UNKNOWN` |
-| `STEP_FREE_ENTRANCE` | `ClaimScope.VENUE` | `None` | `SRC_AHM_CNF_01` | Gool Lodge is a 1920s heritage house with a raised plinth. Physical ramp availability is unconfirmed on official website. | Not evaluable on official text (silence). | `UNKNOWN` |
-| `INTERNAL_ELEVATOR` | `ClaimScope.VENUE` | `None` | `SRC_AHM_CNF_01` | Multi-story domestic bungalow with historic wooden staircase; elevator presence unstated. | Not evaluable. | `UNKNOWN` |
-| `SEATING_AVAILABLE` | `ClaimScope.VENUE` | `None` | `SRC_AHM_CNF_01` | Interactive rooms feature various chairs/desks, but dedicated resting seating along circulation paths is uncataloged. | Not evaluable. | `UNKNOWN` |
-| `STEP_FREE_RESTROOM` | `ClaimScope.VENUE` | `None` | `SRC_AHM_CNF_01` | Restroom dimensions and accessibility are unrecorded. | Not evaluable. | `UNKNOWN` |
-| `SERVICE_ANIMAL_POLICY` | `ClaimScope.VENUE` | `None` | `SRC_AHM_CNF_01` | No published assistance animal policy. | Not evaluable. | `UNKNOWN` |
-| `COMPANION_ENTRY_POLICY` | `ClaimScope.VENUE` | `None` | `SRC_AHM_CNF_01` | No carer / companion admission policy published. | Not evaluable. | `UNKNOWN` |
+| `RESERVATION_REQUIRED` | `VENUE` | `True` | `SRC_AHM_KLM_01` | Guided tours only; phone/email pre-booking mandatory; 4 daily slots, capped at ~12. | Machine evaluable (`EQUALS`) | `SOURCE_BACKED` |
+| `STEP_FREE_ENTRANCE` | `VENUE` | `None` | `SRC_AHM_KLM_01` | Ramp access to 1905 house or Batley wing unrecorded. | Not evaluable | `UNKNOWN` |
+| `INTERNAL_ELEVATOR` | `VENUE` | `None` | `SRC_AHM_KLM_01` | Elevator to upper floors unrecorded. | Not evaluable | `UNKNOWN` |
+| `SEATING_AVAILABLE` | `VENUE` | `None` | `SRC_AHM_KLM_01` | Tour route seating unrecorded. | Not evaluable | `UNKNOWN` |
+| `STEP_FREE_RESTROOM` | `VENUE` | `None` | `SRC_AHM_KLM_01` | Restroom accessibility unrecorded. | Not evaluable | `UNKNOWN` |
+| `SERVICE_ANIMAL_POLICY`| `VENUE` | `None` | `SRC_AHM_KLM_01` | Assistance animal policy unrecorded. | Not evaluable | `UNKNOWN` |
+| `COMPANION_ENTRY_POLICY`| `VENUE`| `None` | `SRC_AHM_KLM_01` | Carer admission policy unrecorded. | Not evaluable | `UNKNOWN` |
+| `CONTACT_FOR_ACCESS_INFO`| `VENUE`| `None` | `SRC_AHM_KLM_01` | General booking contacts only; dedicated access coordination unrecorded. | Not evaluable | `UNKNOWN` |
+
+#### Linked Experience
+- **Guided Heritage House & Gallery Tour (`exp_in_ahm_klm_guided_tour`)**:
+  - `RESERVATION_REQUIRED = True` (4 slots daily, capped at ~12 people).
 
 ---
 
-## 5. Discrepancy & Conflict Register
+### 2.3 Conflictorium — Museum of Conflict (`ven_in_ahm_conflictorium`)
+- **Location:** Gool Lodge, Opp. R.C. High School of Commerce, Delhi Chakla, Mirzapur, Ahmedabad, Gujarat 380001.
+- **Approved Qloo Entity ID:** `8090F76A-F5EE-4931-8942-12B1FF3C4996`.
 
-| Venue | Attribute / Subject | Official Primary Position | Secondary Discrepancy / Incompatibility | Severity & Risk Assessment | Mitigation Rule |
-|---|---|---|---|---|---|
-| **Calico Museum** | Wheelchair Accessibility | Official site explicitly states: *"The Foundation is currently unable to offer wheelchair access to visitors."* | Generic online travel portals and map aggregators occasionally show automated "Wheelchair accessible" green checkmarks. | **High Risk:** Relying on unverified secondary tags would lead a mobility device user to arrive at an inaccessible facility. | Primary official statement supersedes generic aggregator metadata. Record policy limitation; mark threshold attributes as requiring direct inquiry. |
-| **Calico Museum** | Walk-in Admission | Official site mandates strict online registration opening 90 days in advance; 20-person tour limit; gates close 15 min prior. | Informal travel blogs frequently describe Calico as "Free museum entry in Ahmedabad" without emphasizing compulsory pre-booking and lockouts. | **Moderate Risk:** Visitors arriving without reservations are turned away. | Record `RESERVATION_REQUIRED = True` with mandatory confirmation notes and booking window details. |
-| **Conflictorium** | Geographical Location & Branch | Conflictorium operates in Mirzapur, Ahmedabad (Gool Lodge). | Conflictorium opened a second physical branch in Raipur, Chhattisgarh (Katora Talaab) in 2022. Several online listings conflate the phone numbers and contact emails (`raipur@conflictorium.org`). | **High Risk:** Sending visitor inquiries or geotargeting to Raipur instead of Ahmedabad. | Strict locality filtering in identity schemas (`prop_ven_in_ahm_conflictorium`). Discard Raipur-specific contact information. |
-| **Kasturbhai Lalbhai** | Walk-in Admission | Official site mandates guided tour bookings via phone or email in advance (4 daily slots, capped at ~12). | Tourism directories and travel aggregator sites occasionally list the museum as general walk-in without highlighting compulsory guided tour slots. | **Moderate Risk:** Visitors arriving expecting unguided walk-in entry are denied access. | Record `RESERVATION_REQUIRED = True` with advance phone/email requirement. |
+| Attribute | Scope | Value | Source ID | Exact Source Wording / Note | Evaluability | Status |
+|---|---|---|---|---|---|---|
+| `RESERVATION_REQUIRED` | `VENUE` | `False` | `SRC_AHM_CNF_01` | Free walk-in ordinary admission (Tue–Sun, 11am–7pm). Special events may require RSVP. | Machine evaluable (`EQUALS`) | `SOURCE_BACKED` |
+| `STEP_FREE_ENTRANCE` | `VENUE` | `None` | `SRC_AHM_CNF_01` | Raised street plinth visible in photos; physical ramp unconfirmed on official site. | Not evaluable | `UNKNOWN` |
+| `INTERNAL_ELEVATOR` | `VENUE` | `None` | `SRC_AHM_CNF_01` | Multi-story bungalow with wooden staircase; elevator presence unstated. | Not evaluable | `UNKNOWN` |
+| `SEATING_AVAILABLE` | `VENUE` | `None` | `SRC_AHM_CNF_01` | Exhibition circulation seating unrecorded. | Not evaluable | `UNKNOWN` |
+| `STEP_FREE_RESTROOM` | `VENUE` | `None` | `SRC_AHM_CNF_01` | Restroom accessibility unrecorded. | Not evaluable | `UNKNOWN` |
+| `SERVICE_ANIMAL_POLICY`| `VENUE` | `None` | `SRC_AHM_CNF_01` | Assistance animal policy unrecorded. | Not evaluable | `UNKNOWN` |
+| `COMPANION_ENTRY_POLICY`| `VENUE`| `None` | `SRC_AHM_CNF_01` | Carer admission policy unrecorded. | Not evaluable | `UNKNOWN` |
+| `CONTACT_FOR_ACCESS_INFO`| `VENUE`| `None` | `SRC_AHM_CNF_01` | General dialogue contacts only; dedicated access desk unrecorded. | Not evaluable | `UNKNOWN` |
+
+---
+
+## 3. Discrepancy & Exclusion Register
+
+| Subject | Official Primary Position | Discrepancy / Excluded Entity | Mitigation Rule |
+|---|---|---|---|
+| **Calico Wheelchair Access** | Published: *"The Foundation is currently unable to offer wheelchair access to visitors."* | Third-party travel aggregators occasionally show automated "Wheelchair accessible" checkmarks. | Primary statement supersedes secondary aggregators. Recorded as `WHEELCHAIR_ACCESS=False`; surfaced in plans. |
+| **Calico Booking Horizon** | Online booking opens 90 days ahead; strictly capped at 20 visitors per tour. | Travel blogs mention "free entry museum" without explaining compulsory pre-booking and gate lockouts. | Recorded as `RESERVATION_REQUIRED=True` with explicit 90-day booking window qualifications. |
+| **Conflictorium Raipur Branch** | Ahmedabad location is Gool Lodge, Mirzapur, Ahmedabad 380001. | Qloo entity `7A72825D-1C1F-4433-9113-AE6DADA44862` represents Conflictorium Raipur, Chhattisgarh. | Strictly excluded from candidate resolver. |
+| **Conflictorium Duplicate Entity** | Ahmedabad candidate verified as `8090F76A-F5EE-4931-8942-12B1FF3C4996`. | Qloo entity `D191DAE2-2CE7-4301-8CD3-EE7B38D68A4D` is a duplicate with inconsistent metadata. | Strictly excluded from candidate resolver. |

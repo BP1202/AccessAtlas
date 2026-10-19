@@ -164,7 +164,8 @@ def build_candidate_participation_plan(
                 "questions above."
             )
 
-        # Ensure operational wheelchair access limitations are surfaced in plans
+        # Ensure published operational wheelchair limitations are surfaced
+        # as venue advisories
         if resolved_candidate.evidence_record:
             venue_ev = resolved_candidate.evidence_record.venue_evidence
             wc_attr_ev = venue_ev.get(EvidenceAttribute.WHEELCHAIR_ACCESS)
@@ -172,7 +173,9 @@ def build_candidate_participation_plan(
                 for clm in wc_attr_ev.claims:
                     if clm.value is False:
                         policy_detail = clm.details or wc_attr_ev.summary
-                        wc_notice = f"Venue operational policy: {policy_detail}"
+                        wc_notice = (
+                            f"Venue advisory (operational policy): {policy_detail}"
+                        )
                         if wc_notice not in suggested_next_actions:
                             suggested_next_actions.append(wc_notice)
                         src_key = clm.source.url or clm.source.title

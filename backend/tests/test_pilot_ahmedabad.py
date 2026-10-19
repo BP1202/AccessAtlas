@@ -471,3 +471,294 @@ def test_existing_synthetic_fixtures_remain_unchanged() -> None:
     assert scope_record.venue.venue_id == "syn_ven_castle_museum"
     assert scope_record.experience is not None
     assert scope_record.experience.experience_id == "syn_exp_tower_tour"
+
+
+# --- Task 2: Safety & Policy Boundary Tests ---
+
+
+def test_step_free_request_receives_needs_confirmation_despite_wheelchair_policy() -> (
+    None
+):
+    """Visitor requesting STEP_FREE_ENTRANCE receives NEEDS_CONFIRMATION for Calico.
+
+    Verifies that the published wheelchair policy is not converted to
+    STEP_FREE_ENTRANCE=False, which would prematurely cause REQUIREMENT_CONFLICT.
+    """
+    calico = create_calico_museum_record()
+    engine = PossibilityEngine()
+
+    req = ParticipationRequirement(
+        requirement_id="req_step_free",
+        attribute=EvidenceAttribute.STEP_FREE_ENTRANCE,
+        operator=ConditionOperator.EQUALS,
+        expected_value=True,
+        priority=RequirementPriority.MANDATORY,
+        scope=ClaimScope.VENUE,
+    )
+
+    assessment = engine.evaluate(
+        record=calico,
+        requirements=[req],
+        evaluation_time=datetime(2026, 10, 19, 12, 0, 0, tzinfo=UTC),
+    )
+
+    assert assessment.aggregate_outcome == PossibilityOutcome.NEEDS_CONFIRMATION
+    assert assessment.assessments[0].outcome == RequirementOutcome.MISSING_EVIDENCE
+
+
+def test_published_wheelchair_policy_visible_as_source_backed_advisory() -> None:
+    """Published wheelchair policy is surfaced as an advisory with source provenance."""
+    calico = create_calico_museum_record()
+    engine = PossibilityEngine()
+
+    # User requires reservation (which is supported)
+    req = ParticipationRequirement(
+        requirement_id="req_res",
+        attribute=EvidenceAttribute.RESERVATION_REQUIRED,
+        operator=ConditionOperator.EQUALS,
+        expected_value=True,
+        priority=RequirementPriority.MANDATORY,
+        scope=ClaimScope.VENUE,
+    )
+
+    entity = QlooEntity(
+        entity_id=QLOO_ID_CALICO,
+        name="Calico Museum of Textiles",
+        entity_type="urn:entity:place",
+    )
+
+    resolved = resolve_candidate(
+        entity=entity,
+        resolver=create_ahmedabad_candidate_resolver(),
+        evidence_repo=create_ahmedabad_pilot_repository(),
+    )
+    assert resolved.status == CandidateResolutionStatus.RESOLVED
+
+    assessment = engine.evaluate(
+        record=calico,
+        requirements=[req],
+        evaluation_time=datetime(2026, 10, 19, 12, 0, 0, tzinfo=UTC),
+    )
+
+    from app.agent.planning import build_candidate_participation_plan
+
+    resolved_with_eval = resolved.model_copy(
+        update={"possibility_assessment": assessment}
+    )
+    plan = build_candidate_participation_plan(resolved_with_eval, [req])
+
+    # 1. Outcome remains VERIFIED_FIT for the requested requirement
+    assert plan.possibility_assessment is not None
+    assert (
+        plan.possibility_assessment.aggregate_outcome == PossibilityOutcome.VERIFIED_FIT
+    )
+
+    # 2. Advisory is visible in suggested next actions
+    advisory_items = [
+        act
+        for act in plan.suggested_next_actions
+        if "Venue advisory (operational policy)" in act
+    ]
+    assert len(advisory_items) == 1
+    assert "currently unable to offer wheelchair access" in advisory_items[0]
+
+    # 3. Provenance source is included
+    src_urls = [s.url for s in plan.provenance_sources if s.url]
+    assert "https://www.calicomuseum.org/tour-guidelines/" in src_urls
+
+
+def test_no_personal_characteristic_inferred_from_cultural_interests() -> None:
+    """Verify that no user personal characteristic is inferred from cultural query."""
+
+    def mock_qloo_search_transport(request: httpx.Request) -> httpx.Response:
+        return httpx.Response(
+            200,
+            json={
+                "success": True,
+                "results": [
+                    {
+                        "entity_id": QLOO_ID_CALICO,
+                        "name": "Calico Museum of Textiles",
+                        "type": "urn:entity:place",
+                    }
+                ],
+            },
+        )
+
+    settings = Settings(_env_file=(), QLOO_API_KEY="test_key")
+    client = QlooClient(
+        settings=settings,
+        transport=httpx.MockTransport(mock_qloo_search_transport),
+    )
+    agent = create_ahmedabad_agent(qloo_client=client)
+
+    workflow_input = AgentWorkflowInput(
+        cultural_query="Indian court textiles and Pichhwais",
+        target_type="urn:entity:place",
+        max_candidates=1,
+        requirements=[],  # Zero practical requirements specified
+    )
+
+    output = agent.run(workflow_input)
+    assert len(output.plans) == 1
+    plan = output.plans[0]
+
+    # Advisory is surfaced purely as an institutional policy advisory,
+    # without attributing wheelchair use or disability to the user.
+    for act in plan.suggested_next_actions:
+        assert "you use" not in act.lower()
+        assert "your disability" not in act.lower()
+        assert "your wheelchair" not in act.lower()
+
+
+def test_planning_layer_preserves_exact_aggregate_outcome_from_engine() -> None:
+    """Planning layer must strictly preserve PossibilityEngine's aggregate outcome."""
+    calico = create_calico_museum_record()
+    engine = PossibilityEngine()
+
+    entity = QlooEntity(
+        entity_id=QLOO_ID_CALICO,
+        name="Calico Museum of Textiles",
+        entity_type="urn:entity:place",
+    )
+    resolved = resolve_candidate(
+        entity=entity,
+        resolver=create_ahmedabad_candidate_resolver(),
+        evidence_repo=create_ahmedabad_pilot_repository(),
+    )
+
+    from app.agent.planning import build_candidate_participation_plan
+
+    eval_time = datetime(2026, 10, 19, 12, 0, 0, tzinfo=UTC)
+
+    # Case 1: Supported mandatory -> VERIFIED_FIT
+    req_res = ParticipationRequirement(
+        requirement_id="req_res",
+        attribute=EvidenceAttribute.RESERVATION_REQUIRED,
+        operator=ConditionOperator.EQUALS,
+        expected_value=True,
+        priority=RequirementPriority.MANDATORY,
+    )
+    ass_fit = engine.evaluate(calico, [req_res], eval_time)
+    assert ass_fit.aggregate_outcome == PossibilityOutcome.VERIFIED_FIT
+    plan_fit = build_candidate_participation_plan(
+        resolved.model_copy(update={"possibility_assessment": ass_fit}),
+        [req_res],
+    )
+    assert (
+        plan_fit.possibility_assessment.aggregate_outcome
+        == PossibilityOutcome.VERIFIED_FIT
+    )
+
+    # Case 2: Unknown mandatory -> NEEDS_CONFIRMATION
+    req_step = ParticipationRequirement(
+        requirement_id="req_step",
+        attribute=EvidenceAttribute.STEP_FREE_ENTRANCE,
+        operator=ConditionOperator.EQUALS,
+        expected_value=True,
+        priority=RequirementPriority.MANDATORY,
+    )
+    ass_conf = engine.evaluate(calico, [req_step], eval_time)
+    assert ass_conf.aggregate_outcome == PossibilityOutcome.NEEDS_CONFIRMATION
+    plan_conf = build_candidate_participation_plan(
+        resolved.model_copy(update={"possibility_assessment": ass_conf}),
+        [req_step],
+    )
+    assert (
+        plan_conf.possibility_assessment.aggregate_outcome
+        == PossibilityOutcome.NEEDS_CONFIRMATION
+    )
+
+    # Case 3: Contradicted mandatory -> REQUIREMENT_CONFLICT
+    req_wc = ParticipationRequirement(
+        requirement_id="req_wc",
+        attribute=EvidenceAttribute.WHEELCHAIR_ACCESS,
+        operator=ConditionOperator.EQUALS,
+        expected_value=True,
+        priority=RequirementPriority.MANDATORY,
+    )
+    ass_conflic = engine.evaluate(calico, [req_wc], eval_time)
+    assert ass_conflic.aggregate_outcome == PossibilityOutcome.REQUIREMENT_CONFLICT
+    plan_conflic = build_candidate_participation_plan(
+        resolved.model_copy(update={"possibility_assessment": ass_conflic}),
+        [req_wc],
+    )
+    assert (
+        plan_conflic.possibility_assessment.aggregate_outcome
+        == PossibilityOutcome.REQUIREMENT_CONFLICT
+    )
+
+
+def test_venue_level_policy_and_experience_level_evidence_remain_distinguishable() -> (
+    None
+):
+    """Venue-level policy does not silently overwrite experience-level requirements."""
+    haveli_record = create_ahmedabad_pilot_repository().get_by_experience_id(
+        EXP_ID_CALICO_HAVELI
+    )
+    assert haveli_record is not None
+    engine = PossibilityEngine()
+
+    # Requirement asks specifically for experience-level wheelchair access
+    exp_req = ParticipationRequirement(
+        requirement_id="req_exp_wc",
+        attribute=EvidenceAttribute.WHEELCHAIR_ACCESS,
+        operator=ConditionOperator.EQUALS,
+        expected_value=False,
+        priority=RequirementPriority.MANDATORY,
+        scope=ClaimScope.EXPERIENCE,
+    )
+
+    assessment = engine.evaluate(
+        record=haveli_record,
+        requirements=[exp_req],
+        evaluation_time=datetime(2026, 10, 19, 12, 0, 0, tzinfo=UTC),
+    )
+
+    # Because WHEELCHAIR_ACCESS is recorded at VENUE scope, not EXPERIENCE scope,
+    # the conservative applicability rule yields INSUFFICIENT_SCOPE, not SUPPORTED.
+    assert assessment.assessments[0].outcome == RequirementOutcome.INSUFFICIENT_SCOPE
+    assert assessment.aggregate_outcome == PossibilityOutcome.NEEDS_CONFIRMATION
+
+
+def test_unrelated_venues_do_not_inherit_calico_policy() -> None:
+    """Conflictorium and Kasturbhai must not inherit Calico's wheelchair advisory."""
+    cnf = create_conflictorium_record()
+    klm = create_kasturbhai_lalbhai_record()
+
+    # Neither record defines WHEELCHAIR_ACCESS
+    assert EvidenceAttribute.WHEELCHAIR_ACCESS not in cnf.venue_evidence
+    assert EvidenceAttribute.WHEELCHAIR_ACCESS not in klm.venue_evidence
+
+    # Build plan for Conflictorium
+    entity_cnf = QlooEntity(
+        entity_id=QLOO_ID_CONFLICTIORIUM_AHMEDABAD,
+        name="Conflictorium",
+        entity_type="urn:entity:place",
+    )
+    resolved_cnf = resolve_candidate(
+        entity=entity_cnf,
+        resolver=create_ahmedabad_candidate_resolver(),
+        evidence_repo=create_ahmedabad_pilot_repository(),
+    )
+    engine = PossibilityEngine()
+    req = ParticipationRequirement(
+        requirement_id="req_res",
+        attribute=EvidenceAttribute.RESERVATION_REQUIRED,
+        operator=ConditionOperator.EQUALS,
+        expected_value=False,
+        priority=RequirementPriority.MANDATORY,
+    )
+    ass_cnf = engine.evaluate(cnf, [req], datetime(2026, 10, 19, 12, 0, 0, tzinfo=UTC))
+
+    from app.agent.planning import build_candidate_participation_plan
+
+    plan_cnf = build_candidate_participation_plan(
+        resolved_cnf.model_copy(update={"possibility_assessment": ass_cnf}),
+        [req],
+    )
+
+    # Conflictorium plan must not contain Calico's wheelchair advisory
+    for act in plan_cnf.suggested_next_actions:
+        assert "unable to offer wheelchair access" not in act
+        assert "Venue advisory (operational policy)" not in act

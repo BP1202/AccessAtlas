@@ -1,17 +1,18 @@
 # AccessAtlas — Ahmedabad Pilot Evidence Research (Stage A)
 
-> **Status:** Stage A Research Deliverable (Pre-Integration).  
+> **Status:** Stage A Research Deliverable (Review Corrections).  
 > **Pilot City:** Ahmedabad, Gujarat, India.  
 > **Review Status:** `NEEDS_REVIEW` / `PROPOSED`.  
-> **Notice:** This document contains research observations and source-grounded evidence proposals. No claims have been integrated into runtime evidence fixtures, and no Qloo entity mappings have been confirmed.
+> **Verification Level:** `SOURCE_RETRIEVED` (Published website documentation only; **`NOT_INDEPENDENTLY_AUDITED`** on site).  
+> **Notice:** This document contains research observations and source-grounded evidence proposals. No claims have been imported into runtime evidence fixtures, and no Qloo entity mappings have been confirmed.
 
 ---
 
 ## 1. Executive Summary & Pilot Scope
 
-Ahmedabad, recognized as India's first UNESCO World Heritage City (2017), possesses an extraordinary concentration of vernacular, colonial, modern, and industrial architectural heritage. Cultural institutions in Ahmedabad frequently occupy converted heritage havelis, colonial bungalows, and institutional estates. 
+Ahmedabad, recognized as India's first UNESCO World Heritage City (2017), possesses an extraordinary concentration of vernacular, colonial, modern, and industrial architectural heritage. Cultural institutions in Ahmedabad frequently occupy converted heritage havelis, colonial residential bungalows, and institutional estates.
 
-This presents unique accessibility dynamics:
+This presents distinct accessibility and operational dynamics:
 - Many cultural experiences are housed in historic multi-level residential structures constructed before the advent of modern barrier-free design standards.
 - Conservation restrictions on historic fabric often limit retrofitting of elevators, mechanical lifts, and concrete ramps.
 - Several premier institutions enforce strict conservation protocols (e.g. low-lux illumination, controlled group sizes, compulsory guided tours, and advance registration).
@@ -20,6 +21,9 @@ Stage A establishes independent, source-backed evidence dossiers for three found
 1. **Calico Museum of Textiles** (Shahibaug)
 2. **Kasturbhai Lalbhai Museum** (Shahibaug)
 3. **Conflictorium — Museum of Conflict** (Mirzapur location — strictly distinguished from its Raipur branch)
+
+### Critical Research Principle: Verification vs. Source Retrieval
+Every observation in this document reflects **published text retrieved from official web channels** on specified retrieval dates. It must **not** be conflated with on-site physical auditing or direct operational confirmation. Missing information is recorded strictly as **`UNKNOWN`**; silence is never interpreted as a negative answer.
 
 ---
 
@@ -37,29 +41,50 @@ Visits to the Calico Museum are strictly conducted as organized, supervised guid
 2. **The Chauk Galleries Tour (Experience)**: Focuses on historical court costumes, Mughal and regional textiles, carpets, and armor. Conducted in the afternoon (2:30 PM – 4:30 PM).
 3. **Udyana Garden Tour (Experience)**: Focuses on the botanical grounds and outdoor pavilions. Conducted Thursdays only (3:30 PM – 5:00 PM).
 
-### 2.3 Source-Backed Evidence & Operational Policies
-- **Wheelchair Accessibility (`STEP_FREE_ENTRANCE` / `INTERNAL_ELEVATOR`)**:
-  - *Official Statement:* *"The Foundation is currently unable to offer wheelchair access to visitors."*
-  - *Context:* The museum is spread over multiple split levels with uneven stone and wood flooring, narrow door jambs, low lintels, and historic staircases.
-  - *Evaluation Status:* **`CONTRADICTED`** for wheelchair step-free access requirements at both venue and experience scopes.
-- **Advance Booking & Capacity (`RESERVATION_REQUIRED`)**:
-  - *Official Statement:* Prior online registration through the official website is mandatory. Entry is free of cost, but capped at **20 persons per tour**.
-  - *Lead Time:* Online registration opens **90 days in advance**. Multiple bookings for the same tour are automatically cancelled.
-  - *Punctuality:* Entry gates close promptly 15 minutes before tour commencement; late arrivals are strictly denied entry.
-- **Sensory & Environmental Conditions (`SENSORY_ENVIRONMENT` / `QUIET_SPACE`)**:
-  - *Official Statement:* Galleries are maintained with **low illumination** based on scientific conservation research to prevent photo-degradation of fragile organic fibers and vegetable dyes.
-  - *Visitor Notice:* Visitors are explicitly advised that human eyes require several minutes to adjust to the dim ambient lighting upon entry.
-- **Age Restrictions & Companion Policies (`COMPANION_POLICY`)**:
-  - *Child Policy:* Children below 10 years of age are **not permitted** on any tour. Children between 10 and 15 years old are admitted only when accompanied by a parent, guardian, or tutor.
-  - *Photography:* Photography, videography, bags, and electronic equipment are strictly prohibited within the galleries.
-- **Contact & Access Confirmation (`CONTACT_FOR_ACCESS_INFO`)**:
-  - Official Phone: +91 (79) 22868172 / +91 (79) 22865995
-  - Official Email: `calicomuseum@gmail.com`
+### 2.3 Operational Policies & Claim-Level Nuances
 
-### 2.4 Explicit Unknowns
-- Dedicated accessible restroom dimensions and grab bars (`STEP_FREE_RESTROOM`): **`UNKNOWN`** (no official data published).
-- Assistance/service animal admission (`SERVICE_ANIMAL_POLICY`): **`UNKNOWN`** (silence in official policy; requires direct confirmation).
-- Dedicated accessible parking bays (`ACCESSIBLE_PARKING`): **`UNKNOWN`** (parking exists within the estate, but dedicated accessible stall dimensions are unrecorded).
+#### Wheelchair Accessibility Policy vs. Physical Entrance
+- **Exact Official Published Text:** *"The Foundation is currently unable to offer wheelchair access to visitors."*
+- **Operational Meaning:** Wheelchair accommodation is officially not supported on tours within the museum estate.
+- **Distinction from Entrance Threshold (`STEP_FREE_ENTRANCE`):** The published policy explicitly addresses overall wheelchair accommodation. It does **not** document the physical threshold geometry, presence/absence of an entrance step, or threshold ramp availability at the outer gates. Automatically converting this policy into `STEP_FREE_ENTRANCE = False` is an unsupported assumption. Therefore:
+  - Wheelchair accommodation status: Explicitly unsupported by policy.
+  - Physical `STEP_FREE_ENTRANCE`: Strictly **`UNKNOWN` / `NEEDS_RECHECK`** pending direct inquiry or on-site audit.
+  - Vocabulary Note: AccessAtlas `EvidenceAttribute` currently lacks an overarching `WHEELCHAIR_ACCESSIBLE` enum.
+
+#### Internal Circulation & Elevators (`INTERNAL_ELEVATOR`)
+- **Published Fact:** Galleries are spread over split levels and historic multi-story domestic havelis.
+- **Elevator Status:** The official website makes **no explicit statement** regarding mechanical lifts or elevators. Extrapolating that "no elevators exist" from the historic haveli architecture is unverified.
+- **Status:** Strictly **`UNKNOWN`** on official channels.
+
+#### Advance Booking Window vs. Minimum Lead Time (`RESERVATION_REQUIRED`)
+- **Exact Official Published Text:** Prior online registration through the official website is mandatory. Entry is free of cost, but capped at **20 persons per tour**.
+- **Booking Window:** Online registration **opens 90 days in advance** of the tour date.
+- **Clarification:** This is the *advance opening horizon* (bookings become available up to 90 days prior), **not** a "minimum 90-day lead time". Visitors may book any time between the 90-day mark and the tour date, provided vacancies remain.
+- **Punctuality & Cancellation:** Multiple bookings for the same tour are automatically cancelled. Entry gates close promptly 15 minutes before tour commencement; late arrivals are strictly denied entry.
+
+#### Textile Conservation Illumination vs. Sensory Sessions
+- **Exact Official Published Text:** Galleries are maintained with **low illumination** based on scientific conservation research to prevent photo-degradation of fragile organic fibers and vegetable dyes. Visitors are notified that eyes require several minutes to adjust to the dim ambient lighting upon entry.
+- **Distinction:** This is an intrinsic conservation lighting condition, **not** a `SENSORY_ADAPTED_SESSION` (which represents modified or sensory-friendly quiet hours for neurodivergent visitors).
+
+#### Child Supervision Rules vs. Companion / Carer Policies
+- **Exact Official Published Text:** Children below 10 years of age are **not permitted** on any tour. Children between 10 and 15 years old are admitted only when accompanied by a parent, guardian, or tutor.
+- **Distinction from `COMPANION_ENTRY_POLICY`:** In AccessAtlas, `COMPANION_ENTRY_POLICY` represents policies for support persons, carers, or personal assistants accompanying disabled visitors. Child minimum age (10+) and parental accompaniment are general admission constraints, not disability companion policies.
+- **Status for `COMPANION_ENTRY_POLICY`:** Strictly **`UNKNOWN`** (unrecorded on official website).
+
+#### General Venue Contact vs. Dedicated Access Coordination
+- **Official Contact Details:** Email `calicomuseum@gmail.com`; Phones +91 (79) 22868172 / +91 (79) 22865995.
+- **Distinction:** These are published general administrative contacts. They do **not** substantiate a dedicated accessibility inquiry desk (`CONTACT_FOR_ACCESS_INFO`).
+- **Status for `CONTACT_FOR_ACCESS_INFO`:** Strictly **`UNKNOWN` / `NEEDS_RECHECK`**.
+
+### 2.4 Explicit Unknowns Summary
+- Dedicated step-free entrance (`STEP_FREE_ENTRANCE`): **`UNKNOWN`**.
+- Internal elevator (`INTERNAL_ELEVATOR`): **`UNKNOWN`**.
+- Accessible restroom (`STEP_FREE_RESTROOM`): **`UNKNOWN`**.
+- Assistance / service animal admission (`SERVICE_ANIMAL_POLICY`): **`UNKNOWN`**.
+- Companion / carer entry policy (`COMPANION_ENTRY_POLICY`): **`UNKNOWN`**.
+- Rest seating frequency on tour route (`SEATING_AVAILABLE`): **`UNKNOWN`**.
+- Accessible parking bays (`ACCESSIBLE_PARKING`): **`UNKNOWN`**.
+- Dedicated accessibility contact (`CONTACT_FOR_ACCESS_INFO`): **`UNKNOWN`**.
 
 ---
 
@@ -75,27 +100,31 @@ Visits to the Calico Museum are strictly conducted as organized, supervised guid
 - **Campus Grounds (Venue Scope)**: Tree-lined pathways, outdoor sculpture displays, amphitheater, and administrative buildings.
 - **Heritage House & Gallery Tours (Experience Scope)**: Conducted guided tours through the historic domestic interiors and modern display wings.
 
-### 3.3 Source-Backed Evidence & Operational Policies
-- **Reservation & Entry (`RESERVATION_REQUIRED`)**:
-  - Visits are strictly by **conducted tour only**; general walk-in visits are not permitted.
-  - Advance booking via telephone or email is required.
-  - Tours are conducted in small batches (capped at approximately 12 people).
-- **Tour Timings & Schedule (`OPENING_AND_SESSIONS`)**:
-  - Open Tuesday to Sunday; closed Mondays and public holidays.
-  - Four daily tour slots: 10:00 AM, 12:00 PM, 2:30 PM, 4:00 PM.
-  - Each tour duration is approximately 30 minutes.
-- **Bag & Security Policies**:
-  - Bags, cameras, and luggage are not permitted inside the houses; complimentary lockers are provided.
-- **Contact Information (`CONTACT_FOR_ACCESS_INFO`)**:
-  - Official Phones: +91 (79) 2286-5456 / +91 (79) 2286-6376
-  - Official Email: `klmuseum16@gmail.com`
+### 3.3 Operational Policies & Claim-Level Nuances
 
-### 3.4 Explicit Unknowns
-- Wheelchair access / ramp provision to the 1905 ancestral home (`STEP_FREE_ENTRANCE`): **`UNKNOWN`** on official website.
-- Elevator access to upper domestic floors (`INTERNAL_ELEVATOR`): **`UNKNOWN`** (historic bungalow architecture; presence of retrofitted elevators is unrecorded).
-- Resting seating along the 30-minute tour route (`SEATING_AVAILABLE`): **`UNKNOWN`**.
-- Accessible restroom availability on campus (`STEP_FREE_RESTROOM`): **`UNKNOWN`**.
+#### Ordinary Admission vs. Special Event Admission
+- **Ordinary Admission (`RESERVATION_REQUIRED`)**:
+  - General walk-in admission is **not permitted** for regular museum visits.
+  - Visits are strictly by **conducted tour only**.
+  - Advance booking via telephone (+91 79 2286-5456 / +91 79 2286-6376) or email (`klmuseum16@gmail.com`) is mandatory.
+  - Tours are conducted in small batches (capped at approximately 12 people).
+  - Open Tuesday to Sunday; closed Mondays and public holidays. Four daily tour slots: 10:00 AM, 12:00 PM, 2:30 PM, 4:00 PM. Each tour duration is approximately 30 minutes.
+- **Special Events / Exhibitions**:
+  - Temporary art exhibitions in the Claude Batley wing or cultural performances in the amphitheater may operate under separate event-specific guidelines announced per program.
+
+#### Contact Information vs. Dedicated Access Service
+- **Published Contacts:** Telephone numbers and email address are provided for booking tours and general inquiries.
+- **Distinction:** No dedicated accessibility desk or accessibility officer is mentioned.
+- **Status for `CONTACT_FOR_ACCESS_INFO`:** Strictly **`UNKNOWN`**.
+
+### 3.4 Explicit Unknowns Summary
+- Step-free entrance ramp to 1905 ancestral home (`STEP_FREE_ENTRANCE`): **`UNKNOWN`**.
+- Elevator access to upper domestic floors (`INTERNAL_ELEVATOR`): **`UNKNOWN`**.
+- Seating along the 30-minute tour route (`SEATING_AVAILABLE`): **`UNKNOWN`**.
+- Accessible restroom availability (`STEP_FREE_RESTROOM`): **`UNKNOWN`**.
 - Service dog policy (`SERVICE_ANIMAL_POLICY`): **`UNKNOWN`**.
+- Carer / companion entry policy (`COMPANION_ENTRY_POLICY`): **`UNKNOWN`**.
+- Dedicated accessibility contact (`CONTACT_FOR_ACCESS_INFO`): **`UNKNOWN`**.
 
 ---
 
@@ -114,42 +143,57 @@ Visits to the Calico Museum are strictly conducted as organized, supervised guid
 - Housed in **Gool Lodge**, a historic 1920s Parsi residential bungalow in the historic walled city of Ahmedabad.
 - A participatory museum exploring social conflict, non-violence, the Indian Constitution, and human rights through experiential installations (e.g. Memory Lab, Empathy Alley, The Third Space).
 
-### 4.3 Source-Backed Evidence & Operational Policies
-- **Admission & Timings (`OPENING_AND_SESSIONS` / `RESERVATION_REQUIRED`)**:
-  - Admission is **free and open to the public**.
-  - Timings: 11:00 AM to 7:00 PM, Tuesday to Sunday. Closed on Mondays.
-  - Advance timed reservation is not mandatory for general admission, though prior notice is recommended for workshops.
-- **Digital Accessibility (`AUDIO_DESCRIPTION` / Assistive Tech)**:
-  - The official website integrates accessibility tools (screen-reader compatibility and high-contrast accessibility menu).
-- **Contact Information (`CONTACT_FOR_ACCESS_INFO`)**:
-  - Official Phone: +91 (79) 25620747
-  - Official Email: `dialogue@conflictorium.org` / `conflictorium@gmail.com`
+### 4.3 Operational Policies & Claim-Level Nuances
 
-### 4.4 Explicit Unknowns & Structural Concerns
-- Physical Step-Free Entrance (`STEP_FREE_ENTRANCE`): **`UNKNOWN`** on official channels. (Photographic evidence indicates plinth steps at the street threshold of Gool Lodge, but exact ramp existence or portable ramp deployment is unrecorded on official channels).
-- Internal Multi-Level Circulation (`INTERNAL_ELEVATOR`): **`UNKNOWN`** (Gool Lodge features an upper floor and mezzanine accessed by historic wooden stairs; elevator installation is unverified).
-- Accessible Restrooms (`STEP_FREE_RESTROOM`): **`UNKNOWN`**.
-- Ambient Sensory Profile (`SENSORY_ENVIRONMENT`): The museum features interactive sound exhibits (audio recordings of political speeches, audio telephone booths). Ambient volume levels during active sessions are unrecorded.
+#### Ordinary Walk-In Admission vs. Special Events
+- **Ordinary Walk-In Admission (`RESERVATION_REQUIRED = False`)**:
+  - General walk-in admission to Gool Lodge is **free and open to the public**.
+  - Operating hours: 11:00 AM to 7:00 PM, Tuesday to Sunday. Closed on Mondays.
+  - No tickets or advance reservations are required for individual or family walk-in visits.
+- **Special-Event Admission**:
+  - Organized workshops, theatrical readings, film screenings, and curated community dialogues in "The Third Space" may require prior sign-up or RSVP depending on event capacity.
+
+#### Physical Access Observations vs. Official Documentation
+- **Physical Entrance (`STEP_FREE_ENTRANCE`)**: Third-party architectural photographs show raised masonry plinth steps at the street facade of Gool Lodge. However, the official website makes **no statement** regarding physical accessibility, portable ramps, or alternative ground-level access.
+- **Rule:** Silence on official channels must remain **`UNKNOWN`**. We do not record negative claims from unverified imagery.
+- **Internal Circulation (`INTERNAL_ELEVATOR`)**: Gool Lodge features an upper floor and mezzanine accessed by historic wooden stairs; elevator installation is unstated on official channels -> **`UNKNOWN`**.
+
+#### Digital Accessibility vs. Physical Accessibility
+- **Website Features:** The official website integrates digital accessibility tools (screen-reader compatibility and contrast adjustment options).
+- **Distinction:** Digital web accessibility must not be conflated with on-site physical accessibility.
+
+#### Contact Information vs. Dedicated Access Service
+- **Published Contacts:** Email `dialogue@conflictorium.org` / `conflictorium@gmail.com`; Phone +91 (79) 25620747.
+- **Distinction:** General inquiry contacts do not prove a dedicated accessibility service.
+- **Status for `CONTACT_FOR_ACCESS_INFO`:** Strictly **`UNKNOWN`**.
+
+### 4.4 Explicit Unknowns Summary
+- Step-free entrance (`STEP_FREE_ENTRANCE`): **`UNKNOWN`**.
+- Internal elevator (`INTERNAL_ELEVATOR`): **`UNKNOWN`**.
+- Accessible restroom (`STEP_FREE_RESTROOM`): **`UNKNOWN`**.
+- Seating available throughout galleries (`SEATING_AVAILABLE`): **`UNKNOWN`**.
+- Service animal policy (`SERVICE_ANIMAL_POLICY`): **`UNKNOWN`**.
+- Companion entry policy (`COMPANION_ENTRY_POLICY`): **`UNKNOWN`**.
+- Dedicated access contact (`CONTACT_FOR_ACCESS_INFO`): **`UNKNOWN`**.
 
 ---
 
 ## 5. Summary Matrix of Proposed Evidence
 
-| Candidate Venue | Scope | Reservation Required | Step-Free Entrance | Elevator | Low-Light Sensory | Contact Available |
-|---|---|---|---|---|---|---|
-| **Calico Museum of Textiles** | Venue | **Yes** (90d advance) | **No** (Explicitly unsupported) | **No** (Multi-level stairs) | **Yes** (Low lux conservation) | **Yes** (`calicomuseum@gmail.com`) |
-| **Calico: Haveli Tour** | Experience | **Yes** (Morning slot, cap 20) | **No** (Multi-level haveli) | **No** | **Yes** | **Yes** |
-| **Calico: Chauk Tour** | Experience | **Yes** (Afternoon slot, cap 20) | **No** (Split levels) | **No** | **Yes** | **Yes** |
-| **Kasturbhai Lalbhai Museum** | Venue | **Yes** (Phone/Email booking) | `UNKNOWN` | `UNKNOWN` | `UNKNOWN` | **Yes** (`klmuseum16@gmail.com`) |
-| **Kasturbhai Lalbhai Museum** | Experience | **Yes** (4 tours daily, cap 12) | `UNKNOWN` | `UNKNOWN` | `UNKNOWN` | **Yes** |
-| **Conflictorium (Ahmedabad)** | Venue | **No** (Free walk-in) | `UNKNOWN` | `UNKNOWN` | `UNKNOWN` | **Yes** (`dialogue@conflictorium.org`) |
+| Candidate Venue | Scope | Reservation Required | Step-Free Entrance | Internal Elevator | Seating | Service Animals | Dedicated Access Contact |
+|---|---|---|---|---|---|---|---|
+| **Calico Museum of Textiles** | Venue | **Yes** (Opens 90d ahead; cap 20) | `UNKNOWN` (Policy unoffered) | `UNKNOWN` | `UNKNOWN` | `UNKNOWN` | `UNKNOWN` (General only) |
+| **Calico: Haveli Tour** | Experience | **Yes** (Morning slot; cap 20) | `UNKNOWN` | `UNKNOWN` | `UNKNOWN` | `UNKNOWN` | `UNKNOWN` |
+| **Calico: Chauk Tour** | Experience | **Yes** (Afternoon slot; cap 20) | `UNKNOWN` | `UNKNOWN` | `UNKNOWN` | `UNKNOWN` | `UNKNOWN` |
+| **Kasturbhai Lalbhai Museum** | Venue | **Yes** (Phone/Email booking) | `UNKNOWN` | `UNKNOWN` | `UNKNOWN` | `UNKNOWN` | `UNKNOWN` (General only) |
+| **Kasturbhai Lalbhai Museum** | Experience | **Yes** (4 tours daily; cap ~12) | `UNKNOWN` | `UNKNOWN` | `UNKNOWN` | `UNKNOWN` | `UNKNOWN` |
+| **Conflictorium (Ahmedabad)** | Venue | **No** (Free walk-in) | `UNKNOWN` | `UNKNOWN` | `UNKNOWN` | `UNKNOWN` | `UNKNOWN` (General only) |
 
 ---
 
 ## 6. Pre-Integration Checklist for Stage B
 
-Before importing these records into runtime fixtures or candidate resolvers:
-1. Conduct direct, standardized email/phone communications with venue coordinators to resolve explicit unknowns.
-2. Verify whether Calico Museum offers any accommodations for visitors with visual or auditory impairments.
-3. Verify whether Kasturbhai Lalbhai Museum has portable threshold ramps for ground-floor pavilions.
-4. Establish reviewed Qloo entity lookup without guessing identifiers.
+Before importing any claims into runtime fixtures or candidate resolvers:
+1. **Direct Primary Venue Inquiries**: Conduct standardized email and phone communications to resolve explicit unknowns (accessible restrooms, ramp availability, seating, assistance animal policies).
+2. **Qloo Identity Review**: Execute authorized manual lookup script (`python -m app.qloo.ahmedabad_lookup`) from the backend directory and review results with the developer.
+3. **Schema Vocabulary Alignment**: Address schema gaps (such as general wheelchair accessibility and child admission age) via claim details rather than schema mutation.

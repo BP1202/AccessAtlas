@@ -2,7 +2,7 @@
 
 FastAPI service foundation for the AccessAtlas cultural discovery and participation-planning platform.
 
-> **Status Notice**: This backend service implements the local process availability endpoint (`GET /health`), configuration loading, and a verified, testable Qloo cultural discovery integration (`app.qloo`). Agent orchestration (LangGraph), database persistence, frontend, and external venue evidence sourcing are not yet operational.
+> **Status Notice**: This backend service implements the local process availability endpoint (`GET /health`), configuration loading, Qloo cultural discovery integration (`app.qloo`), independently sourced venue evidence repository (`app.evidence`), deterministic Possibility Engine (`app.possibility`), LangGraph agent orchestration (`app.agent`), and the Discovery API (`POST /api/v1/discover`) for the Ahmedabad pilot. Persistent PostgreSQL storage and frontend are scheduled for subsequent stages.
 
 ---
 
@@ -82,6 +82,32 @@ Expected JSON response:
   "service": "accessatlas-backend"
 }
 ```
+
+### 6. Verify the Discovery API (Ahmedabad Pilot)
+
+Execute a cultural discovery and participation planning query via `POST /api/v1/discover`:
+
+```powershell
+$body = @{
+    city = "Ahmedabad"
+    cultural_interests = @("textiles", "historic museum")
+    requirements = @(
+        @{
+            requirement_id = "req_res"
+            attribute = "reservation_required"
+            scope = "venue"
+            priority = "mandatory"
+            operator = "equals"
+            expected_value = $true
+        }
+    )
+    max_candidates = 3
+} | ConvertTo-Json -Depth 5
+
+Invoke-RestMethod -Uri "http://127.0.0.1:8000/api/v1/discover" -Method Post -ContentType "application/json" -Body $body
+```
+
+For complete API documentation, schema definitions, and error handling conventions, see [`docs/API.md`](../docs/API.md).
 
 Interactive API documentation is available at `http://127.0.0.1:8000/docs` in non-production environments.
 

@@ -9,7 +9,7 @@ from app.agent.models import (
     CandidateResolutionStatus,
     ResolvedCandidate,
 )
-from app.evidence.models import EvidenceSource
+from app.evidence.models import EvidenceAttribute, EvidenceSource, EvidenceStatus
 from app.possibility.models import (
     ParticipationRequirement,
     PossibilityOutcome,
@@ -163,6 +163,25 @@ def build_candidate_participation_plan(
                 "Contact venue accessibility coordinator to resolve the confirmation "
                 "questions above."
             )
+
+        # Ensure published operational wheelchair limitations are surfaced
+        # as venue advisories
+        if resolved_candidate.evidence_record:
+            venue_ev = resolved_candidate.evidence_record.venue_evidence
+            wc_attr_ev = venue_ev.get(EvidenceAttribute.WHEELCHAIR_ACCESS)
+            if wc_attr_ev and wc_attr_ev.status == EvidenceStatus.SOURCE_BACKED:
+                for clm in wc_attr_ev.claims:
+                    if clm.value is False:
+                        policy_detail = clm.details or wc_attr_ev.summary
+                        wc_notice = (
+                            f"Venue advisory (operational policy): {policy_detail}"
+                        )
+                        if wc_notice not in suggested_next_actions:
+                            suggested_next_actions.append(wc_notice)
+                        src_key = clm.source.url or clm.source.title
+                        if src_key not in seen_source_urls:
+                            seen_source_urls.add(src_key)
+                            provenance_sources.append(clm.source)
 
     return CandidateParticipationPlan(
         candidate=entity,

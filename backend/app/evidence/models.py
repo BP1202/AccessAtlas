@@ -63,6 +63,9 @@ class EvidenceAttribute(StrEnum):
     STEP_FREE_RESTROOM = "step_free_restroom"
     ACCESSIBLE_PARKING = "accessible_parking"
     CONTACT_FOR_ACCESS_INFO = "contact_for_access_info"
+    # Captures published operational wheelchair accommodation policies,
+    # distinct from architectural entrance threshold geometry (STEP_FREE_ENTRANCE).
+    WHEELCHAIR_ACCESS = "wheelchair_access"
 
 
 class EvidenceSource(BaseModel):

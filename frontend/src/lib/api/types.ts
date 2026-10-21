@@ -1,7 +1,13 @@
 /**
  * TypeScript domain contracts matching the AccessAtlas backend Discovery API.
  *
- * Source of truth: docs/API.md and backend/app/api/v1/schemas.py.
+ * Source of truth:
+ * - backend/app/api/v1/schemas.py
+ * - backend/app/agent/models.py
+ * - backend/app/possibility/models.py
+ * - backend/app/evidence/models.py
+ * - docs/API.md
+ *
  * Must NOT invent confidence ratings, accessibility scores, or frontend-calculated
  * suitability outcomes.
  */
@@ -154,5 +160,7 @@ export interface HealthResponse {
 }
 
 export interface ApiErrorDetail {
-  detail: string | Array<{ loc?: (string | number)[]; msg?: string; type?: string }>;
+  detail:
+    | string
+    | Array<{ loc?: (string | number)[]; msg?: string; type?: string }>;
 }

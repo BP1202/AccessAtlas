@@ -1,8 +1,8 @@
 # AccessAtlas — Frontend Foundation
 
-Next.js frontend application for **AccessAtlas**, an agentic cultural discovery and participation planning platform developed for the Qloo Agentic Hackathon.
+Next.js frontend application for **AccessAtlas**, a visitor-first cultural discovery and participation planning platform.
 
-> **Status Notice**: This package implements the foundational Next.js application, responsive layout, accessible typography, foundational UI and feedback components, typed backend API client, Vitest unit test suite, and Playwright end-to-end smoke verification for the **Ahmedabad Pilot MVP**. The interactive discovery form and results explorer are scheduled for subsequent issues.
+> **Status Notice**: This package implements the foundational Next.js application, responsive layout, accessible typography, foundational UI and feedback components, typed backend API client, centralized visitor-facing assessment labels, Vitest unit test suite, and Playwright end-to-end smoke verification for the **Ahmedabad Pilot**.
 
 ---
 
@@ -12,27 +12,32 @@ Next.js frontend application for **AccessAtlas**, an agentic cultural discovery 
 |---|---|---|---|
 | Framework | **Next.js** (App Router) | `16.4.2` | Core web application framework with Turbopack |
 | Language | **TypeScript** | `^5` | Strict type safety and domain models |
-| Styling | **Tailwind CSS** | `^4` | Utility-first styling with responsive tokens |
-| Component Testing | **Vitest** & **React Testing Library** | `5.0.5` / `16.3.3` | Fast component & API client unit tests |
-| DOM Environment | **jsdom** | `^29.1.1` | Headless browser DOM simulation for tests |
-| End-to-End Testing | **Playwright** | `^1.64.1` | Headless Chromium smoke verification |
+| Styling | **Tailwind CSS** | `^4` | Warm neutral editorial styling with responsive tokens |
+| Component Testing | **Vitest** & **React Testing Library** | `5.0.5` / `16.3.2` | Fast component & API client unit tests |
+| DOM Environment | **jsdom** | `27.4.0` | Headless browser DOM simulation for tests |
+| End-to-End Testing | **Playwright** | `^1.58.2` | Headless Chromium desktop & mobile smoke verification |
 
 ---
 
-## Architecture & Security Boundaries
+## Visitor-First Product Principles
 
-### 1. Backend Isolation & Credential Safety
-- **No Direct Third-Party Calls**: The frontend **never** connects directly to Qloo or external services. All cultural discovery signals and venue assessments are mediated through the AccessAtlas FastAPI backend.
-- **Credential Protection**: `QLOO_API_KEY` exists exclusively in the backend runtime configuration. Privileged API keys or provider tokens are **never** bundled into browser code, exposed in environment variables with the `NEXT_PUBLIC_` prefix, or returned to clients.
-- **Environment-Safe Backend URL**: The frontend references `NEXT_PUBLIC_BACKEND_URL` (defaulting safely to `http://127.0.0.1:8000`).
+1. **Visitor-Focused Language**: Public pages prioritize the visitor's outing. Internal engineering terminology (such as "Possibility Engine", "Qloo discovery", or backend model names) is translated into clear, respectful language:
+   - `VERIFIED_FIT` $\rightarrow$ *"Meets your stated requirements"*
+   - `NEEDS_CONFIRMATION` $\rightarrow$ *"Some details need checking"*
+   - `REQUIREMENT_CONFLICT` $\rightarrow$ *"A stated requirement may not be met"*
+   - Provenance $\rightarrow$ *"Where this information comes from"*
+2. **Honesty Over False Certainty**: Meeting stated requirements indicates that published venue documentation supports those specific details. It is never presented as a guarantee of universal accessibility or current ticket availability.
+3. **Respect for Privacy**: No sensitive health, disability, or identity characteristics are inferred from cultural tastes. Visitors indicate practical requirements (e.g. advance registration, seating) without needing to justify them.
+4. **Backend Isolation**: `QLOO_API_KEY` exists exclusively in the backend runtime. The frontend communicates strictly with the AccessAtlas FastAPI service (`POST /api/v1/discover`).
 
-### 2. CORS & Proxy Policy
-- In local development, the Next.js dev server runs on `http://127.0.0.1:3000` while the backend runs on `http://127.0.0.1:8000`.
-- For production deployment, requests should be routed through a same-origin reverse proxy (e.g., `/api/*` forwarded to the FastAPI backend) or a strict, origin-restricted CORS allowlist. **Unrestricted wildcard (`*`) CORS in production is strictly prohibited.**
+---
 
-### 3. Product Invariants
-- **No Inferred Invariants**: The frontend never infers medical conditions, physical disabilities, or protected personal characteristics from cultural interests.
-- **Deterministic Suitability**: Suitability assessments rely strictly on the 3-state Possibility Engine (`VERIFIED_FIT`, `NEEDS_CONFIRMATION`, `REQUIREMENT_CONFLICT`). The frontend does not calculate speculative scores, confidence percentages, or popularity-weighted badges.
+## Route Structure
+
+- `/` — Homepage: Editorial introduction, value proposition, visit details explanation, and reviewed Ahmedabad pilot spaces.
+- `/explore` — Explore Ahmedabad: Overview of the upcoming 3-stage discovery flow (Interests $\rightarrow$ Visit preferences $\rightarrow$ Discoveries).
+- `/how-it-works` — How AccessAtlas Works: Methodology, 3-state evaluation explanation, source provenance, and privacy commitment.
+- `/about` — About AccessAtlas: Product mission, Ahmedabad heritage context, and visit verification standards.
 
 ---
 
@@ -42,14 +47,17 @@ Next.js frontend application for **AccessAtlas**, an agentic cultural discovery 
 frontend/
 ├── .env.example              # Safe template for client configuration
 ├── e2e/                      # Playwright end-to-end tests
-│   └── smoke.spec.ts         # Landing page and navigation smoke test
+│   └── smoke.spec.ts         # Desktop & mobile smoke test, negative jargon assertions
 ├── playwright.config.ts      # Playwright runner and webServer configuration
 ├── src/
 │   ├── app/                  # Next.js App Router pages and layouts
-│   │   ├── globals.css       # Tailwind CSS v4 entrypoint
+│   │   ├── about/            # /about page
+│   │   ├── explore/          # /explore destination page
+│   │   ├── how-it-works/     # /how-it-works methodology page
+│   │   ├── globals.css       # Tailwind CSS v4 entrypoint with warm neutral theme
 │   │   ├── layout.tsx        # Accessible RootLayout with Skip Link, Header, Footer
-│   │   ├── page.tsx          # Minimal AccessAtlas landing page
-│   │   └── page.test.tsx     # Landing page component unit test
+│   │   ├── page.tsx          # Visitor-first cultural landing page
+│   │   └── page.test.tsx     # Landing page component unit test & negative jargon checks
 │   ├── components/
 │   │   ├── feedback/         # Loading, empty, and error state components
 │   │   │   ├── EmptyState.tsx
@@ -70,10 +78,13 @@ frontend/
 │   ├── config/
 │   │   └── env.ts            # Environment-safe backend URL helper
 │   ├── lib/
-│   │   └── api/              # Typed backend client & domain models
-│   │       ├── client.ts     # AccessAtlasApiClient class & error handlers
-│   │       ├── client.test.ts# Offline client unit tests
-│   │       └── types.ts      # TypeScript schemas matching docs/API.md
+│   │   ├── api/              # Typed backend client & domain models
+│   │   │   ├── client.ts     # AccessAtlasApiClient class & error handlers
+│   │   │   ├── client.test.ts# Offline client unit tests
+│   │   │   ├── contract.test.ts # Schema drift verification against backend contract
+│   │   │   └── types.ts      # TypeScript schemas matching docs/API.md
+│   │   └── constants/
+│   │       └── labels.ts     # Centralized visitor-facing assessment translations
 │   └── test/
 │       └── setup.ts          # Vitest setup & @testing-library/jest-dom matchers
 ├── tsconfig.json             # TypeScript configuration with @/* path alias
@@ -87,7 +98,6 @@ frontend/
 All commands below should be executed from the `frontend/` directory:
 
 ```powershell
-# Navigate to the frontend directory
 cd C:\Pro\AccessAtlas\frontend
 ```
 
@@ -99,15 +109,11 @@ npm install
 
 ### 2. Configure Environment
 
-The application defaults safely to `http://127.0.0.1:8000` without requiring an environment file.
+Copy `.env.example` to `.env.local` if custom backend URL is required (never commit `.env.local`):
 
-To configure local overrides:
-1. Inspect `.env.example` in `frontend/`.
-2. Create `.env.local` inside `frontend/` (or repository root):
-   ```ini
-   NEXT_PUBLIC_BACKEND_URL=http://127.0.0.1:8000
-   ```
-3. **Never** stage or commit `.env.local` to Git.
+```powershell
+Copy-Item .env.example .env.local
+```
 
 ### 3. Run Development Server
 
@@ -115,47 +121,28 @@ To configure local overrides:
 npm run dev
 ```
 
-Open [http://127.0.0.1:3000](http://127.0.0.1:3000) in your browser.
+The application is accessible at `http://localhost:3000`.
 
----
-
-## Verification & Quality Tooling
-
-### Run Vitest Unit Tests
-
-Executes all component and API client unit tests completely offline:
+### 4. Run Unit & Component Tests
 
 ```powershell
 npm run test
 ```
 
-### Run TypeScript Type Check
-
-Verifies strict type safety across all files without emitting code:
+### 5. Type-Check & Lint
 
 ```powershell
 npm run type-check
-```
-
-### Run ESLint
-
-Verifies project code style and rules conformance:
-
-```powershell
 npm run lint
 ```
 
-### Build Production Bundle
-
-Tests Next.js Turbopack compilation and page pre-rendering:
+### 6. Build Production Bundle
 
 ```powershell
 npm run build
 ```
 
-### Run Playwright End-to-End Smoke Test
-
-Executes headless Chromium smoke tests against the built Next.js application:
+### 7. Run Playwright Smoke Tests
 
 ```powershell
 npm run test:e2e

@@ -88,18 +88,61 @@ export class AccessAtlasApiClient {
 
   /**
    * Execute cultural discovery and participation planning via POST /api/v1/discover.
+   *
+   * Enforces strict backend contract fidelity:
+   * - City defaults to "Ahmedabad"
+   * - cultural_interests: 1 to 5 non-empty strings (max 100 chars each)
+   * - requirements: validated participation requirements
+   * - max_candidates: 1 to 20
+   * - No extraneous fields sent (preventing 422 extra="forbid" errors)
    */
   async discover(request: DiscoverRequest): Promise<DiscoverResponse> {
     const url = `${this.baseUrl}/api/v1/discover`;
-    try {
-      const payload: DiscoverRequest = {
-        city: request.city || "Ahmedabad",
-        cultural_interests: request.cultural_interests,
-        requirements: request.requirements ?? [],
-        max_candidates: request.max_candidates ?? 5,
-        evaluation_time: request.evaluation_time ?? null,
-      };
 
+    // Client-side preflight validation matching backend invariants
+    if (!request.cultural_interests || request.cultural_interests.length === 0) {
+      throw new ApiClientError(
+        422,
+        "cultural_interests must contain at least one item."
+      );
+    }
+
+    const cleanedInterests = request.cultural_interests.map((item, idx) => {
+      const trimmed = item.trim();
+      if (!trimmed) {
+        throw new ApiClientError(
+          422,
+          `cultural_interests item at index ${idx} must not be empty or blank.`
+        );
+      }
+      if (trimmed.length > 100) {
+        throw new ApiClientError(
+          422,
+          `cultural_interests item at index ${idx} exceeds maximum length of 100 characters.`
+        );
+      }
+      return trimmed;
+    });
+
+    if (cleanedInterests.length > 5) {
+      throw new ApiClientError(
+        422,
+        "cultural_interests may contain at most 5 items."
+      );
+    }
+
+    const payload: DiscoverRequest = {
+      city: request.city?.trim() || "Ahmedabad",
+      cultural_interests: cleanedInterests,
+      requirements: request.requirements ?? [],
+      max_candidates: request.max_candidates ?? 5,
+    };
+
+    if (request.evaluation_time !== undefined && request.evaluation_time !== null) {
+      payload.evaluation_time = request.evaluation_time;
+    }
+
+    try {
       const response = await fetch(url, {
         method: "POST",
         headers: {

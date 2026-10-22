@@ -46,6 +46,10 @@ describe("Landing Page (HomePage) — Visitor-First Experience", () => {
 
     expect(mockPush).toHaveBeenCalledWith("/explore?interest=Haveli%20courtyards");
 
+    const helpMeDiscoverLink = screen.getByRole("link", { name: /help me discover/i });
+    expect(helpMeDiscoverLink).toBeInTheDocument();
+    expect(helpMeDiscoverLink).toHaveAttribute("href", "/explore?path=help");
+
     const howItWorksLink = screen.getByRole("link", { name: /see how it works/i });
     expect(howItWorksLink).toBeInTheDocument();
     expect(howItWorksLink).toHaveAttribute("href", "/how-it-works");

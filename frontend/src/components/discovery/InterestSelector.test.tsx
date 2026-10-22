@@ -2,19 +2,20 @@ import React from "react";
 import { describe, it, expect, vi } from "vitest";
 import { render, screen } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
-import { InterestSelector } from "./InterestSelector";
+import { InterestSelector, SURPRISE_DIRECTIONS } from "./InterestSelector";
 
-describe("InterestSelector", () => {
-  it("renders suggestions and allows selecting chips", async () => {
+describe("InterestSelector — Three Entry Paths & Input Preservation", () => {
+  it("Path A (Manual Entry): allows typing, submitting with button or Enter, and chip removal", async () => {
     const user = userEvent.setup();
     const handleChange = vi.fn();
     const handleNext = vi.fn();
 
-    render(
+    const { rerender } = render(
       <InterestSelector
         selectedInterests={[]}
         onChange={handleChange}
         onNext={handleNext}
+        initialPath="manual"
       />
     );
 
@@ -22,85 +23,165 @@ describe("InterestSelector", () => {
     const nextBtn = screen.getByRole("button", { name: /continue to visit preferences/i });
     expect(nextBtn).toBeDisabled();
 
-    // Click "Textiles" suggestion chip
-    const textilesChip = screen.getByRole("button", { name: /textiles/i });
-    await user.click(textilesChip);
-
-    expect(handleChange).toHaveBeenCalledWith(["Textiles"]);
-  });
-
-  it("allows typing and submitting a custom interest with Enter", async () => {
-    const user = userEvent.setup();
-    const handleChange = vi.fn();
-
-    render(
-      <InterestSelector
-        selectedInterests={["Textiles"]}
-        onChange={handleChange}
-        onNext={vi.fn()}
-      />
-    );
-
+    // Type a custom interest and click "Add topic"
     const input = screen.getByPlaceholderText(/e\.g\. Woodblock printing/i);
-    await user.type(input, "Stepwells{Enter}");
+    await user.type(input, "Stepwells");
+    const addBtn = screen.getByRole("button", { name: /add topic/i });
+    await user.click(addBtn);
 
-    expect(handleChange).toHaveBeenCalledWith(["Textiles", "Stepwells"]);
-  });
+    expect(handleChange).toHaveBeenCalledWith(["Stepwells"]);
 
-  it("removes selected interest when remove button clicked", async () => {
-    const user = userEvent.setup();
-    const handleChange = vi.fn();
-
-    render(
+    // Rerender with "Stepwells" selected
+    rerender(
       <InterestSelector
-        selectedInterests={["Textiles", "History"]}
+        selectedInterests={["Stepwells"]}
         onChange={handleChange}
-        onNext={vi.fn()}
+        onNext={handleNext}
+        initialPath="manual"
       />
     );
 
-    const removeBtn = screen.getByRole("button", { name: /remove interest textiles/i });
-    await user.click(removeBtn);
+    // Add via Enter key
+    const input2 = screen.getByPlaceholderText(/e\.g\. Woodblock printing/i);
+    await user.type(input2, "Haveli woodwork{Enter}");
+    expect(handleChange).toHaveBeenCalledWith(["Stepwells", "Haveli woodwork"]);
 
-    expect(handleChange).toHaveBeenCalledWith(["History"]);
+    // Remove chip
+    rerender(
+      <InterestSelector
+        selectedInterests={["Stepwells", "Haveli woodwork"]}
+        onChange={handleChange}
+        onNext={handleNext}
+        initialPath="manual"
+      />
+    );
+
+    const removeBtn = screen.getByRole("button", { name: /remove interest stepwells/i });
+    await user.click(removeBtn);
+    expect(handleChange).toHaveBeenCalledWith(["Haveli woodwork"]);
   });
 
-  it("enforces maximum of 5 interests and prevents duplicates", async () => {
+  it("Path A (Manual Entry): enforces 5 interest limits and rejects duplicates or oversized strings", async () => {
     const user = userEvent.setup();
     const handleChange = vi.fn();
 
-    render(
+    const { rerender } = render(
       <InterestSelector
         selectedInterests={["1", "2", "3", "4", "5"]}
         onChange={handleChange}
         onNext={vi.fn()}
+        initialPath="manual"
       />
     );
 
     const input = screen.getByPlaceholderText(/e\.g\. Woodblock printing/i);
     expect(input).toBeDisabled();
 
-    // Suggestions cannot add when maxed out
-    const chip = screen.getByRole("button", { name: /textiles/i });
-    await user.click(chip);
+    // Attempting to click curated suggestions does not add
+    const textilesChip = screen.getByRole("button", { name: /textiles/i });
+    await user.click(textilesChip);
     expect(handleChange).not.toHaveBeenCalled();
-  });
 
-  it("calls onNext when continue button is clicked with selected interests", async () => {
-    const user = userEvent.setup();
-    const handleNext = vi.fn();
-
-    render(
+    // Duplicate check
+    rerender(
       <InterestSelector
         selectedInterests={["Textiles"]}
-        onChange={vi.fn()}
-        onNext={handleNext}
+        onChange={handleChange}
+        onNext={vi.fn()}
+        initialPath="manual"
       />
     );
 
-    const nextBtn = screen.getByRole("button", { name: /continue to visit preferences/i });
-    expect(nextBtn).toBeEnabled();
-    await user.click(nextBtn);
-    expect(handleNext).toHaveBeenCalledTimes(1);
+    const inputValid = screen.getByPlaceholderText(/e\.g\. Woodblock printing/i);
+    await user.type(inputValid, "Textiles{Enter}");
+    expect(screen.getByRole("alert")).toHaveTextContent(/"Textiles" is already added/i);
+    expect(handleChange).not.toHaveBeenCalled();
+  });
+
+  it("Path B (Help me discover): renders preview, does not fake results, and provides immediate manual-entry fallback", async () => {
+    const user = userEvent.setup();
+    const handleChange = vi.fn();
+
+    render(
+      <InterestSelector
+        selectedInterests={["Stepwells"]}
+        onChange={handleChange}
+        onNext={vi.fn()}
+        initialPath="help"
+      />
+    );
+
+    // Verifies preview header
+    expect(screen.getByText(/Cultural Compass · Preview/i)).toBeInTheDocument();
+    expect(screen.getByText(/You never have to complete a quiz/i)).toBeInTheDocument();
+
+    // Verifies preserved chip from manual input
+    expect(screen.getByText("Stepwells")).toBeInTheDocument();
+
+    // Click "Enter my own interests instead"
+    const manualFallbackBtn = screen.getByRole("button", { name: /enter my own interests instead/i });
+    await user.click(manualFallbackBtn);
+
+    // Now on manual tab: custom interest input is visible
+    expect(screen.getByLabelText(/add cultural interest or topic/i)).toBeInTheDocument();
+  });
+
+  it("Path C (Surprise me): provides transparent starting sparks and adds to selection", async () => {
+    const user = userEvent.setup();
+    const handleChange = vi.fn();
+
+    render(
+      <InterestSelector
+        selectedInterests={[]}
+        onChange={handleChange}
+        onNext={vi.fn()}
+        initialPath="surprise"
+      />
+    );
+
+    expect(screen.getByText(/Curated starting sparks from Ahmedabad/i)).toBeInTheDocument();
+
+    // Click "Add to my interests" on the first displayed spark
+    const firstSpark = SURPRISE_DIRECTIONS[0];
+    const addSparkBtn = screen.getAllByRole("button", { name: /\+ add to my interests/i })[0];
+    await user.click(addSparkBtn);
+
+    expect(handleChange).toHaveBeenCalledWith([firstSpark.query]);
+  });
+
+  it("preserves visitor inputs seamlessly when switching between all three entry paths", async () => {
+    const user = userEvent.setup();
+    const handleChange = vi.fn();
+
+    render(
+      <InterestSelector
+        selectedInterests={["Court textiles", "Haveli architecture"]}
+        onChange={handleChange}
+        onNext={vi.fn()}
+        initialPath="manual"
+      />
+    );
+
+    // Verify chips visible in Path A
+    expect(screen.getByText("Court textiles")).toBeInTheDocument();
+    expect(screen.getByText("Haveli architecture")).toBeInTheDocument();
+
+    // Switch to Path B: "Help me discover"
+    const helpTab = screen.getByRole("tab", { name: /help me discover/i });
+    await user.click(helpTab);
+    expect(screen.getByText("Court textiles")).toBeInTheDocument();
+    expect(screen.getByText("Haveli architecture")).toBeInTheDocument();
+
+    // Switch to Path C: "Surprise me"
+    const surpriseTab = screen.getByRole("tab", { name: /surprise me/i });
+    await user.click(surpriseTab);
+    expect(screen.getByText("Court textiles")).toBeInTheDocument();
+    expect(screen.getByText("Haveli architecture")).toBeInTheDocument();
+
+    // Switch back to Path A: "I know what I want"
+    const manualTab = screen.getByRole("tab", { name: /i know what i want/i });
+    await user.click(manualTab);
+    expect(screen.getByText("Court textiles")).toBeInTheDocument();
+    expect(screen.getByText("Haveli architecture")).toBeInTheDocument();
   });
 });

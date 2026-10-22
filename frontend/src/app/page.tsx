@@ -122,13 +122,13 @@ export default function HomePage() {
               </div>
             </form>
 
-            {/* Secondary Action: Help me discover & Surprise me */}
+            {/* Secondary Action: Help me discover, Surprise me & How it works */}
             <div className="mt-4 flex flex-wrap items-center justify-center gap-4 text-xs sm:text-sm">
               <Link
-                href="/how-it-works"
-                className="font-medium text-[#193a32] hover:text-[#c56f4d] underline underline-offset-4 dark:text-[#a8d5c4] dark:hover:text-[#f4f1ea] transition-colors"
+                href="/explore?path=help"
+                className="font-medium text-[#193a32] hover:text-[#c56f4d] underline underline-offset-4 dark:text-[#a8d5c4] dark:hover:text-[#f4f1ea] transition-colors inline-flex items-center gap-1"
               >
-                See how it works
+                <span>🧭 Help me discover</span>
               </Link>
               <span className="text-[#dfd8c8] dark:text-[#323731]">·</span>
               <button
@@ -138,6 +138,13 @@ export default function HomePage() {
               >
                 <span>✨ Surprise me</span>
               </button>
+              <span className="text-[#dfd8c8] dark:text-[#323731]">·</span>
+              <Link
+                href="/how-it-works"
+                className="font-medium text-[#62685d] hover:text-[#252923] underline underline-offset-4 dark:text-[#9da398] transition-colors"
+              >
+                See how it works
+              </Link>
             </div>
           </div>
 

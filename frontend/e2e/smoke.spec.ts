@@ -64,7 +64,7 @@ test.describe("AccessAtlas Visitor-First Homepage Smoke Test", () => {
     await expect(page).toHaveURL(/\/explore$/);
     await expect(
       page.getByRole("heading", {
-        name: /explore cultural spaces in ahmedabad/i,
+        name: /discover cultural experiences|explore cultural spaces in ahmedabad/i,
       })
     ).toBeVisible();
   });

@@ -1,38 +1,62 @@
 import React from "react";
-import { describe, it, expect } from "vitest";
+import { describe, it, expect, vi } from "vitest";
 import { render, screen } from "@testing-library/react";
+import userEvent from "@testing-library/user-event";
 import HomePage from "./page";
 
+const mockPush = vi.fn();
+vi.mock("next/navigation", () => ({
+  useRouter: () => ({
+    push: mockPush,
+  }),
+}));
+
 describe("Landing Page (HomePage) — Visitor-First Experience", () => {
-  it("renders main visitor-focused headline and lead text", () => {
+  it("renders approved curiosity-first headline and supporting text from UX_VISION.md", () => {
     render(<HomePage />);
     expect(
       screen.getByRole("heading", {
         level: 1,
-        name: /follow your curiosity/i,
+        name: /what if your next favourite place is somewhere you never thought to look/i,
       })
+    ).toBeInTheDocument();
+    expect(
+      screen.getByText(/AccessAtlas turns vague cultural curiosity into unexpected discoveries/i)
     ).toBeInTheDocument();
     expect(
       screen.getByText(/Currently exploring Ahmedabad · More cities to come/i)
     ).toBeInTheDocument();
   });
 
-  it("contains primary CTA linking to /explore and secondary CTA linking to /how-it-works", () => {
-    render(<HomePage />);
-    const exploreCta = screen.getAllByRole("link", {
-      name: /discover experiences/i,
-    })[0];
-    expect(exploreCta).toBeInTheDocument();
-    expect(exploreCta).toHaveAttribute("href", "/explore");
+  it("provides a dominant cultural search input with primary and secondary discovery actions", async () => {
+    const user = userEvent.setup();
+    mockPush.mockClear();
 
-    const howItWorksCta = screen.getByRole("link", {
-      name: /see how it works/i,
-    });
-    expect(howItWorksCta).toBeInTheDocument();
-    expect(howItWorksCta).toHaveAttribute("href", "/how-it-works");
+    render(<HomePage />);
+
+    const searchInput = screen.getByLabelText(/what cultural experiences are you curious about/i);
+    expect(searchInput).toBeInTheDocument();
+
+    const submitBtn = screen.getAllByRole("button", { name: /discover experiences/i })[0];
+    expect(submitBtn).toBeInTheDocument();
+
+    // Type query and submit
+    await user.type(searchInput, "Haveli courtyards");
+    await user.click(submitBtn);
+
+    expect(mockPush).toHaveBeenCalledWith("/explore?interest=Haveli%20courtyards");
+
+    const howItWorksLink = screen.getByRole("link", { name: /see how it works/i });
+    expect(howItWorksLink).toBeInTheDocument();
+    expect(howItWorksLink).toHaveAttribute("href", "/how-it-works");
+
+    const surpriseBtn = screen.getByRole("button", { name: /surprise me/i });
+    expect(surpriseBtn).toBeInTheDocument();
+    await user.click(surpriseBtn);
+    expect(mockPush).toHaveBeenCalledTimes(2);
   });
 
-  it("presents the 3-stage journey in visitor-friendly language", () => {
+  it("presents the 3-stage journey in visitor-friendly language without technical jargon", () => {
     render(<HomePage />);
     expect(
       screen.getByRole("heading", {

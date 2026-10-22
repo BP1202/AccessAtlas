@@ -2,7 +2,6 @@ import React from "react";
 import { describe, it, expect } from "vitest";
 import { render, screen } from "@testing-library/react";
 import HomePage from "./page";
-import { OUTCOME_LABELS } from "@/lib/constants/labels";
 
 describe("Landing Page (HomePage) — Visitor-First Experience", () => {
   it("renders main visitor-focused headline and lead text", () => {
@@ -10,46 +9,41 @@ describe("Landing Page (HomePage) — Visitor-First Experience", () => {
     expect(
       screen.getByRole("heading", {
         level: 1,
-        name: /find your kind of cultural experience/i,
+        name: /follow your curiosity/i,
       })
     ).toBeInTheDocument();
-    expect(screen.getByText(/Culture, on your terms/i)).toBeInTheDocument();
-    expect(screen.getByText(/Starting with Ahmedabad/i)).toBeInTheDocument();
+    expect(
+      screen.getByText(/Currently exploring Ahmedabad · More cities to come/i)
+    ).toBeInTheDocument();
   });
 
   it("contains primary CTA linking to /explore and secondary CTA linking to /how-it-works", () => {
     render(<HomePage />);
-    const exploreCta = screen.getByRole("link", {
-      name: /explore ahmedabad/i,
-    });
+    const exploreCta = screen.getAllByRole("link", {
+      name: /discover experiences/i,
+    })[0];
     expect(exploreCta).toBeInTheDocument();
     expect(exploreCta).toHaveAttribute("href", "/explore");
 
     const howItWorksCta = screen.getByRole("link", {
-      name: /how it works/i,
+      name: /see how it works/i,
     });
     expect(howItWorksCta).toBeInTheDocument();
     expect(howItWorksCta).toHaveAttribute("href", "/how-it-works");
   });
 
-  it("presents the 3 assessment states in visitor-friendly language", () => {
+  it("presents the 3-stage journey in visitor-friendly language", () => {
     render(<HomePage />);
     expect(
       screen.getByRole("heading", {
         level: 2,
-        name: /understanding visit details/i,
+        name: /how discovery connects to planning/i,
       })
     ).toBeInTheDocument();
 
-    expect(
-      screen.getAllByText(OUTCOME_LABELS.VERIFIED_FIT).length
-    ).toBeGreaterThan(0);
-    expect(
-      screen.getAllByText(OUTCOME_LABELS.NEEDS_CONFIRMATION).length
-    ).toBeGreaterThan(0);
-    expect(
-      screen.getAllByText(OUTCOME_LABELS.REQUIREMENT_CONFLICT).length
-    ).toBeGreaterThan(0);
+    expect(screen.getByText("Cultural curiosity")).toBeInTheDocument();
+    expect(screen.getByText("Your visit preferences")).toBeInTheDocument();
+    expect(screen.getByText("Your Visit Plan")).toBeInTheDocument();
   });
 
   it("lists the three reviewed Ahmedabad cultural spaces with authentic descriptions", () => {
@@ -57,7 +51,7 @@ describe("Landing Page (HomePage) — Visitor-First Experience", () => {
     expect(
       screen.getByRole("heading", {
         level: 2,
-        name: /cultural spaces in ahmedabad/i,
+        name: /reviewed cultural spaces/i,
       })
     ).toBeInTheDocument();
 

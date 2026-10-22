@@ -26,40 +26,41 @@ export const PreferenceSelector: React.FC<PreferenceSelectorProps> = ({
   isLoading = false,
   className = "",
 }) => {
-  // Group requirements by category
   const categories: Array<RequirementDefinition["category"]> = [
     "accessibility",
     "comfort",
     "planning",
   ];
 
-  // Count active preferences
   const activeCount = Object.values(preferences).filter(
     (state) => state !== "not_specified"
   ).length;
 
   return (
-    <div className={`space-y-8 ${className}`}>
+    <div className={`space-y-10 ${className}`}>
       {/* Header */}
       <div>
-        <span className="text-xs font-semibold uppercase tracking-wider text-teal-700 dark:text-teal-400">
-          Stage 2 of 2 · Visit Preferences
+        <span className="text-xs font-semibold uppercase tracking-widest text-[#c56f4d]">
+          Stage 02 · Practical Preferences
         </span>
-        <h2 className="mt-2 font-serif text-2xl font-semibold text-stone-900 sm:text-3xl dark:text-stone-50">
+        <h2 className="mt-3 font-serif text-3xl font-semibold text-[#252923] sm:text-4xl lg:text-5xl dark:text-[#f4f1ea]">
           What matters for your visit?
         </h2>
-        <p className="mt-2 text-sm text-stone-600 sm:text-base dark:text-stone-300">
+        <p className="mt-4 text-base sm:text-lg text-[#62685d] max-w-3xl leading-relaxed dark:text-[#9da398]">
           Choose only what is relevant for you or your companions. You don&apos;t need to explain why or disclose any personal details. AccessAtlas checks your choices against verified venue documentation.
         </p>
       </div>
 
       {/* Summary indicator */}
-      <div className="flex items-center justify-between rounded-lg bg-stone-100/80 px-4 py-2.5 text-xs text-stone-600 dark:bg-stone-800/60 dark:text-stone-300 border border-stone-200 dark:border-stone-700">
-        <span>
-          {activeCount === 0
-            ? "No specific preferences selected (standard cultural discovery)"
-            : `${activeCount} preference${activeCount > 1 ? "s" : ""} selected`}
-        </span>
+      <div className="flex items-center justify-between rounded-2xl bg-[#ede8dc]/80 px-6 py-4 text-sm text-[#252923] dark:bg-[#212520] dark:text-[#e4ded0] border border-[#dfd8c8] dark:border-[#323731]">
+        <div className="flex items-center gap-2">
+          <span className="h-2 w-2 rounded-full bg-[#193a32] dark:bg-[#a8d5c4]" />
+          <span>
+            {activeCount === 0
+              ? "No specific preferences selected (standard cultural discovery)"
+              : `${activeCount} requirement${activeCount > 1 ? "s" : ""} selected for deterministic evaluation`}
+          </span>
+        </div>
         {activeCount > 0 && (
           <button
             type="button"
@@ -68,21 +69,21 @@ export const PreferenceSelector: React.FC<PreferenceSelectorProps> = ({
                 onChange(req.attribute, "not_specified");
               });
             }}
-            className="text-stone-500 hover:text-stone-900 dark:hover:text-stone-100 underline text-xs"
+            className="text-[#c56f4d] hover:underline font-medium text-xs cursor-pointer"
           >
             Reset all
           </button>
         )}
       </div>
 
-      {/* Requirements by category */}
-      <div className="space-y-8">
+      {/* Requirements grouped by category */}
+      <div className="space-y-10">
         {categories.map((category) => {
           const reqs = SUPPORTED_REQUIREMENTS.filter((r) => r.category === category);
           return (
             <div key={category} className="space-y-4">
-              <div className="border-b border-stone-200 pb-2 dark:border-stone-800">
-                <h3 className="text-sm font-semibold uppercase tracking-wider text-stone-700 dark:text-stone-300">
+              <div className="border-b border-[#e6e0d4] pb-2 dark:border-[#323731]">
+                <h3 className="font-serif text-lg font-semibold text-[#193a32] dark:text-[#a8d5c4]">
                   {REQUIREMENT_CATEGORY_LABELS[category]}
                 </h3>
               </div>
@@ -93,35 +94,35 @@ export const PreferenceSelector: React.FC<PreferenceSelectorProps> = ({
                   return (
                     <div
                       key={req.attribute}
-                      className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 rounded-xl border border-stone-200 bg-white p-4 transition-colors dark:border-stone-800 dark:bg-stone-900/60"
+                      className="flex flex-col md:flex-row md:items-center justify-between gap-4 rounded-2xl border border-[#e6e0d4] bg-white p-5 sm:p-6 transition-all shadow-xs dark:border-[#323731] dark:bg-[#212520]"
                     >
-                      <div className="space-y-0.5 sm:max-w-md">
+                      <div className="space-y-1 md:max-w-xl">
                         <label
                           id={`label-${req.attribute}`}
-                          className="text-sm font-medium text-stone-900 dark:text-stone-100"
+                          className="font-serif text-base font-semibold text-[#252923] dark:text-[#f4f1ea]"
                         >
                           {req.label}
                         </label>
-                        <p className="text-xs text-stone-500 dark:text-stone-400">
+                        <p className="text-xs sm:text-sm text-[#62685d] dark:text-[#9da398]">
                           {req.description}
                         </p>
                       </div>
 
-                      {/* Tri-state segmented control */}
+                      {/* Segmented tri-state toggle */}
                       <div
                         role="radiogroup"
                         aria-labelledby={`label-${req.attribute}`}
-                        className="inline-flex rounded-lg border border-stone-200 bg-stone-100 p-1 dark:border-stone-700 dark:bg-stone-800 self-start sm:self-auto"
+                        className="inline-flex rounded-xl border border-[#dfd8c8] bg-[#ede8dc] p-1.5 dark:border-[#323731] dark:bg-[#191c19] self-start md:self-auto shrink-0"
                       >
                         <button
                           type="button"
                           role="radio"
                           aria-checked={currentState === "not_specified"}
                           onClick={() => onChange(req.attribute, "not_specified")}
-                          className={`rounded-md px-2.5 py-1 text-xs font-medium transition-all ${
+                          className={`rounded-lg px-3.5 py-1.5 text-xs font-medium transition-all cursor-pointer ${
                             currentState === "not_specified"
-                              ? "bg-white text-stone-900 shadow-sm dark:bg-stone-700 dark:text-stone-100"
-                              : "text-stone-500 hover:text-stone-900 dark:text-stone-400 dark:hover:text-stone-200"
+                              ? "bg-white text-[#252923] shadow-xs font-semibold dark:bg-[#212520] dark:text-[#f4f1ea]"
+                              : "text-[#62685d] hover:text-[#252923] dark:text-[#9da398] dark:hover:text-[#f4f1ea]"
                           }`}
                         >
                           Not specified
@@ -131,10 +132,10 @@ export const PreferenceSelector: React.FC<PreferenceSelectorProps> = ({
                           role="radio"
                           aria-checked={currentState === "optional"}
                           onClick={() => onChange(req.attribute, "optional")}
-                          className={`rounded-md px-2.5 py-1 text-xs font-medium transition-all ${
+                          className={`rounded-lg px-3.5 py-1.5 text-xs font-medium transition-all cursor-pointer ${
                             currentState === "optional"
-                              ? "bg-teal-700 text-white shadow-sm dark:bg-teal-600"
-                              : "text-stone-500 hover:text-stone-900 dark:text-stone-400 dark:hover:text-stone-200"
+                              ? "bg-[#c56f4d] text-white shadow-xs font-semibold"
+                              : "text-[#62685d] hover:text-[#252923] dark:text-[#9da398] dark:hover:text-[#f4f1ea]"
                           }`}
                         >
                           Nice to have
@@ -144,10 +145,10 @@ export const PreferenceSelector: React.FC<PreferenceSelectorProps> = ({
                           role="radio"
                           aria-checked={currentState === "mandatory"}
                           onClick={() => onChange(req.attribute, "mandatory")}
-                          className={`rounded-md px-2.5 py-1 text-xs font-medium transition-all ${
+                          className={`rounded-lg px-3.5 py-1.5 text-xs font-medium transition-all cursor-pointer ${
                             currentState === "mandatory"
-                              ? "bg-stone-900 text-white shadow-sm dark:bg-stone-100 dark:text-stone-900"
-                              : "text-stone-500 hover:text-stone-900 dark:text-stone-400 dark:hover:text-stone-200"
+                              ? "bg-[#193a32] text-[#f6f3eb] shadow-xs font-semibold dark:bg-[#2a584d]"
+                              : "text-[#62685d] hover:text-[#252923] dark:text-[#9da398] dark:hover:text-[#f4f1ea]"
                           }`}
                         >
                           Essential
@@ -163,10 +164,11 @@ export const PreferenceSelector: React.FC<PreferenceSelectorProps> = ({
       </div>
 
       {/* Navigation actions */}
-      <div className="flex flex-col-reverse sm:flex-row sm:items-center sm:justify-between gap-3 pt-6 border-t border-stone-200 dark:border-stone-800">
+      <div className="flex flex-col-reverse sm:flex-row sm:items-center sm:justify-between gap-4 pt-8 border-t border-[#e6e0d4] dark:border-[#323731]">
         <Button
           type="button"
           variant="outline"
+          size="lg"
           onClick={onBack}
           disabled={isLoading}
         >
@@ -174,10 +176,11 @@ export const PreferenceSelector: React.FC<PreferenceSelectorProps> = ({
         </Button>
         <Button
           type="button"
-          variant="primary"
+          variant="secondary"
+          size="lg"
           onClick={onSubmit}
           isLoading={isLoading}
-          size="lg"
+          className="px-8"
         >
           Find cultural experiences
         </Button>

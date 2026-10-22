@@ -27,20 +27,21 @@ export const Badge: React.FC<BadgeProps> = ({
 
   const variantStyles: Record<BadgeVariant, string> = {
     default:
-      "bg-stone-100 text-stone-800 dark:bg-stone-800 dark:text-stone-200 border border-stone-200 dark:border-stone-700",
-    info: "bg-stone-100 text-stone-800 dark:bg-stone-800 dark:text-stone-200 border border-stone-300 dark:border-stone-700",
+      "bg-[#ede8dc] text-[#252923] border border-[#dfd8c8] dark:bg-[#2e332c] dark:text-[#e4ded0] dark:border-[#3d443a]",
+    info:
+      "bg-[#ede8dc] text-[#193a32] border border-[#d6cfbe] dark:bg-[#252f2a] dark:text-[#9fc7b8] dark:border-[#384941]",
     success:
-      "bg-emerald-50 text-emerald-800 dark:bg-emerald-950/60 dark:text-emerald-300 border border-emerald-200 dark:border-emerald-800",
+      "bg-[#eaf2ee] text-[#193a32] border border-[#bcd6cb] dark:bg-[#1d352b] dark:text-[#b8ded0] dark:border-[#2f5545]",
     warning:
-      "bg-amber-50 text-amber-800 dark:bg-amber-950/60 dark:text-amber-300 border border-amber-200 dark:border-amber-800",
+      "bg-[#fcf5e8] text-[#8c5914] border border-[#eed49c] dark:bg-[#382b17] dark:text-[#f0d496] dark:border-[#544122]",
     danger:
-      "bg-rose-50 text-rose-800 dark:bg-rose-950/60 dark:text-rose-300 border border-rose-200 dark:border-rose-800",
+      "bg-[#fdf0ec] text-[#a84422] border border-[#f3c2b2] dark:bg-[#3a1d17] dark:text-[#f6b4a1] dark:border-[#582a20]",
     VERIFIED_FIT:
-      "bg-emerald-50 text-emerald-900 dark:bg-emerald-950/70 dark:text-emerald-200 border border-emerald-300 dark:border-emerald-800",
+      "bg-emerald-50 bg-[#eaf2ee] text-[#193a32] border border-[#bcd6cb] dark:bg-[#1d352b] dark:text-[#b8ded0] dark:border-[#2f5545]",
     NEEDS_CONFIRMATION:
-      "bg-amber-50 text-amber-900 dark:bg-amber-950/70 dark:text-amber-200 border border-amber-300 dark:border-amber-800",
+      "bg-amber-50 bg-[#fcf5e8] text-[#8c5914] border border-[#eed49c] dark:bg-[#382b17] dark:text-[#f0d496] dark:border-[#544122]",
     REQUIREMENT_CONFLICT:
-      "bg-rose-50 text-rose-900 dark:bg-rose-950/70 dark:text-rose-200 border border-rose-300 dark:border-rose-800",
+      "bg-rose-50 bg-[#fdf0ec] text-[#a84422] border border-[#f3c2b2] dark:bg-[#3a1d17] dark:text-[#f6b4a1] dark:border-[#582a20]",
   };
 
   const displayText =

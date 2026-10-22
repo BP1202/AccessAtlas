@@ -1,7 +1,8 @@
 "use client";
 
-import React, { useState } from "react";
+import React, { useState, Suspense } from "react";
 import Link from "next/link";
+import { useSearchParams } from "next/navigation";
 import { Container } from "@/components/ui/Container";
 import { Button } from "@/components/ui/Button";
 import { EmptyState } from "@/components/feedback/EmptyState";
@@ -33,9 +34,13 @@ const initialPreferences: Record<EvidenceAttribute, PreferenceState> =
     {} as Record<EvidenceAttribute, PreferenceState>
   );
 
-export default function ExplorePage() {
+function ExploreContent() {
+  const searchParams = useSearchParams();
   const [step, setStep] = useState<DiscoveryStep>("interests");
-  const [interests, setInterests] = useState<string[]>([]);
+  const [interests, setInterests] = useState<string[]>(() => {
+    const interestParam = searchParams?.get("interest");
+    return interestParam && interestParam.trim() ? [interestParam.trim()] : [];
+  });
   const [preferences, setPreferences] =
     useState<Record<EvidenceAttribute, PreferenceState>>(initialPreferences);
   const [isLoading, setIsLoading] = useState(false);
@@ -109,19 +114,19 @@ export default function ExplorePage() {
   };
 
   return (
-    <div className="py-10 md:py-16">
-      <Container size="lg">
-        {/* Navigation Breadcrumb */}
-        <div className="mb-6 flex items-center justify-between">
+    <div className="py-10 md:py-16 lg:py-20">
+      <Container size="xl">
+        {/* Navigation Breadcrumb & Stage Controls */}
+        <div className="mb-8 flex flex-wrap items-center justify-between gap-4">
           <Link
             href="/"
-            className="text-xs font-semibold uppercase tracking-wider text-stone-500 hover:text-stone-900 dark:hover:text-stone-200"
+            className="text-xs font-semibold uppercase tracking-wider text-[#62685d] hover:text-[#252923] dark:text-[#9da398] dark:hover:text-[#f4f1ea]"
           >
             ← Back to Overview
           </Link>
 
           {step === "results" && (
-            <div className="flex items-center gap-2">
+            <div className="flex items-center gap-3">
               <Button
                 type="button"
                 variant="outline"
@@ -143,34 +148,35 @@ export default function ExplorePage() {
         </div>
 
         {/* Page Main Header */}
-        <div className="mb-10 max-w-3xl">
-          <span className="text-xs font-semibold uppercase tracking-widest text-teal-700 dark:text-teal-400">
-            Ahmedabad Cultural Discovery
-          </span>
-          <h1 className="mt-2 font-serif text-3xl font-semibold tracking-tight text-stone-900 sm:text-4xl dark:text-stone-50">
+        <div className="mb-12 max-w-4xl">
+          <div className="inline-flex items-center gap-2 rounded-full bg-[#ede8dc] px-3.5 py-1 text-xs font-semibold uppercase tracking-wider text-[#193a32] border border-[#dfd8c8] dark:bg-[#252f2a] dark:text-[#a8d5c4] dark:border-[#384941]">
+            <span className="h-1.5 w-1.5 rounded-full bg-[#c56f4d]" />
+            <span>Ahmedabad Cultural Discovery</span>
+          </div>
+          <h1 className="mt-4 font-serif text-3xl font-semibold tracking-tight text-[#252923] sm:text-4xl md:text-5xl lg:text-6xl dark:text-[#f4f1ea]">
             Discover cultural experiences that fit your interests—and your visit
           </h1>
-          <p className="mt-3 text-base leading-relaxed text-stone-600 sm:text-lg dark:text-stone-300">
+          <p className="mt-4 text-lg leading-relaxed text-[#62685d] sm:text-xl font-light dark:text-[#9da398]">
             AccessAtlas connects what you love with what you need to know before you go.
           </p>
         </div>
 
-        {/* Step Indicator */}
-        <div className="mb-8 flex items-center gap-3 text-xs font-medium text-stone-500 dark:text-stone-400">
+        {/* Step Indicator Navigation */}
+        <div className="mb-12 flex items-center gap-4 text-xs font-semibold uppercase tracking-wider text-[#62685d] dark:text-[#9da398]">
           <button
             type="button"
             onClick={() => setStep("interests")}
-            className={`flex items-center gap-1.5 transition-colors ${
+            className={`flex items-center gap-2 transition-colors cursor-pointer ${
               step === "interests"
-                ? "font-semibold text-teal-800 dark:text-teal-300"
-                : "hover:text-stone-900 dark:hover:text-stone-200"
+                ? "text-[#193a32] dark:text-[#a8d5c4]"
+                : "hover:text-[#252923] dark:hover:text-[#f4f1ea]"
             }`}
           >
             <span
-              className={`flex h-5 w-5 items-center justify-center rounded-full text-[10px] ${
+              className={`flex h-6 w-6 items-center justify-center rounded-full text-xs font-bold ${
                 step === "interests"
-                  ? "bg-teal-700 text-white"
-                  : "bg-stone-200 text-stone-700 dark:bg-stone-800 dark:text-stone-300"
+                  ? "bg-[#193a32] text-white dark:bg-[#2a584d]"
+                  : "bg-[#ede8dc] text-[#62685d] dark:bg-[#262a25] dark:text-[#9da398]"
               }`}
             >
               1
@@ -184,19 +190,19 @@ export default function ExplorePage() {
               if (interests.length > 0) setStep("preferences");
             }}
             disabled={interests.length === 0}
-            className={`flex items-center gap-1.5 transition-colors ${
+            className={`flex items-center gap-2 transition-colors ${
               step === "preferences"
-                ? "font-semibold text-teal-800 dark:text-teal-300"
+                ? "text-[#193a32] dark:text-[#a8d5c4]"
                 : interests.length > 0
-                ? "hover:text-stone-900 dark:hover:text-stone-200"
-                : "opacity-50 cursor-not-allowed"
+                ? "hover:text-[#252923] cursor-pointer dark:hover:text-[#f4f1ea]"
+                : "opacity-40 cursor-not-allowed"
             }`}
           >
             <span
-              className={`flex h-5 w-5 items-center justify-center rounded-full text-[10px] ${
+              className={`flex h-6 w-6 items-center justify-center rounded-full text-xs font-bold ${
                 step === "preferences"
-                  ? "bg-teal-700 text-white"
-                  : "bg-stone-200 text-stone-700 dark:bg-stone-800 dark:text-stone-300"
+                  ? "bg-[#193a32] text-white dark:bg-[#2a584d]"
+                  : "bg-[#ede8dc] text-[#62685d] dark:bg-[#262a25] dark:text-[#9da398]"
               }`}
             >
               2
@@ -205,17 +211,17 @@ export default function ExplorePage() {
           </button>
           <span>→</span>
           <span
-            className={`flex items-center gap-1.5 ${
+            className={`flex items-center gap-2 ${
               step === "results"
-                ? "font-semibold text-teal-800 dark:text-teal-300"
-                : "opacity-60"
+                ? "text-[#193a32] font-semibold dark:text-[#a8d5c4]"
+                : "opacity-40"
             }`}
           >
             <span
-              className={`flex h-5 w-5 items-center justify-center rounded-full text-[10px] ${
+              className={`flex h-6 w-6 items-center justify-center rounded-full text-xs font-bold ${
                 step === "results"
-                  ? "bg-teal-700 text-white"
-                  : "bg-stone-200 text-stone-700 dark:bg-stone-800 dark:text-stone-300"
+                  ? "bg-[#193a32] text-white dark:bg-[#2a584d]"
+                  : "bg-[#ede8dc] text-[#62685d] dark:bg-[#262a25] dark:text-[#9da398]"
               }`}
             >
               3
@@ -224,9 +230,9 @@ export default function ExplorePage() {
           </span>
         </div>
 
-        {/* View Switcher */}
+        {/* View Switcher: Spacious Containers */}
         {step === "interests" && (
-          <div className="rounded-2xl border border-stone-200 bg-white p-6 sm:p-8 shadow-sm dark:border-stone-800 dark:bg-stone-900/60 max-w-3xl">
+          <div className="rounded-3xl border border-[#e6e0d4] bg-white p-8 sm:p-12 lg:p-14 shadow-xs dark:border-[#323731] dark:bg-[#212520] max-w-5xl">
             <InterestSelector
               selectedInterests={interests}
               onChange={setInterests}
@@ -236,7 +242,7 @@ export default function ExplorePage() {
         )}
 
         {step === "preferences" && (
-          <div className="rounded-2xl border border-stone-200 bg-white p-6 sm:p-8 shadow-sm dark:border-stone-800 dark:bg-stone-900/60 max-w-3xl">
+          <div className="rounded-3xl border border-[#e6e0d4] bg-white p-8 sm:p-12 lg:p-14 shadow-xs dark:border-[#323731] dark:bg-[#212520] max-w-5xl">
             <PreferenceSelector
               preferences={preferences}
               onChange={handlePreferenceChange}
@@ -248,18 +254,18 @@ export default function ExplorePage() {
         )}
 
         {step === "results" && (
-          <div className="space-y-8">
+          <div className="space-y-10 max-w-5xl">
             {isLoading && <DiscoveryLoading city="Ahmedabad" />}
 
             {!isLoading && error && (
-              <div className="max-w-2xl">
+              <div className="max-w-3xl space-y-4">
                 <ErrorDisplay
-                  title="Discovery Error"
+                  title="Discovery Notice"
                   message={error}
                   statusCode={statusCode}
                   onRetry={handleSearch}
                 />
-                <div className="mt-4">
+                <div>
                   <Button
                     type="button"
                     variant="outline"
@@ -273,22 +279,22 @@ export default function ExplorePage() {
             )}
 
             {!isLoading && !error && result && (
-              <div className="space-y-6">
-                {/* Result header banner */}
-                <div className="rounded-2xl border border-stone-200 bg-stone-50/80 p-6 dark:border-stone-800 dark:bg-stone-900/50">
-                  <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
+              <div className="space-y-8">
+                {/* Search Summary Banner */}
+                <div className="rounded-3xl border border-[#e6e0d4] bg-[#f6f3eb] p-8 dark:border-[#323731] dark:bg-[#191c19]">
+                  <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-6">
                     <div>
-                      <span className="text-xs font-semibold uppercase tracking-wider text-stone-500 dark:text-stone-400">
-                        Search Summary
+                      <span className="text-xs font-semibold uppercase tracking-widest text-[#c56f4d]">
+                        Cultural Discovery Summary
                       </span>
-                      <h2 className="mt-1 font-serif text-xl font-semibold text-stone-900 dark:text-stone-100">
+                      <h2 className="mt-1 font-serif text-2xl sm:text-3xl font-semibold text-[#252923] dark:text-[#f4f1ea]">
                         {result.plans.length} cultural candidate{result.plans.length === 1 ? "" : "s"} found for &ldquo;{interests.join(", ")}&rdquo;
                       </h2>
-                      <p className="mt-1 text-xs text-stone-600 dark:text-stone-400">
+                      <p className="mt-2 text-sm text-[#62685d] dark:text-[#9da398]">
                         {result.candidates_evaluated} candidates evaluated against verified Ahmedabad records.
                       </p>
                     </div>
-                    <div className="flex gap-2">
+                    <div className="flex gap-3 shrink-0">
                       <Button
                         type="button"
                         variant="outline"
@@ -310,7 +316,7 @@ export default function ExplorePage() {
                     onAction={() => setStep("interests")}
                   />
                 ) : (
-                  <div className="space-y-6" role="feed" aria-label="Cultural discovery candidates">
+                  <div className="space-y-8" role="feed" aria-label="Cultural discovery candidates">
                     {result.plans.map((plan, index) => (
                       <CandidateCard
                         key={plan.candidate.entity_id || index}
@@ -321,7 +327,7 @@ export default function ExplorePage() {
                 )}
 
                 {/* Grounding & Integrity Disclaimer */}
-                <div className="rounded-xl border border-stone-200/80 bg-stone-100/50 p-4 text-xs text-stone-500 dark:border-stone-800 dark:bg-stone-900/30 dark:text-stone-400">
+                <div className="rounded-2xl border border-[#dfd8c8] bg-[#ede8dc]/50 p-6 text-xs text-[#62685d] dark:border-[#323731] dark:bg-[#212520]/40 dark:text-[#9da398]">
                   <p>
                     <strong>Integrity Note:</strong> {DISCLAIMER_NOTE}
                   </p>
@@ -332,5 +338,19 @@ export default function ExplorePage() {
         )}
       </Container>
     </div>
+  );
+}
+
+export default function ExplorePage() {
+  return (
+    <Suspense
+      fallback={
+        <div className="py-20 text-center text-sm text-[#62685d]">
+          Loading discovery experience…
+        </div>
+      }
+    >
+      <ExploreContent />
+    </Suspense>
   );
 }

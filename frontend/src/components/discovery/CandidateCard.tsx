@@ -35,17 +35,21 @@ export const CandidateCard: React.FC<CandidateCardProps> = ({
   return (
     <article
       aria-label={`Cultural candidate: ${candidate.name}`}
-      className={`rounded-2xl border border-stone-200 bg-white p-6 shadow-sm transition-shadow hover:shadow-md dark:border-stone-800 dark:bg-stone-900 ${className}`}
+      className={`rounded-3xl border border-[#e6e0d4] bg-white p-6 sm:p-8 shadow-xs transition-all hover:shadow-sm dark:border-[#323731] dark:bg-[#212520] ${className}`}
     >
-      {/* Top Meta Bar */}
-      <div className="flex flex-wrap items-center justify-between gap-2 pb-3 border-b border-stone-100 dark:border-stone-800">
-        <div className="flex items-center gap-2">
-          <span className="font-mono text-xs uppercase tracking-wider text-stone-500 dark:text-stone-400">
+      {/* Top Meta & Resolution Status Bar */}
+      <div className="flex flex-wrap items-center justify-between gap-3 pb-4 border-b border-[#ede8dc] dark:border-[#323731]">
+        <div className="flex flex-wrap items-center gap-2.5">
+          <span className="font-mono text-xs uppercase tracking-wider text-[#c56f4d]">
             {candidate.entity_type}
             {candidate.subtype ? ` · ${candidate.subtype}` : ""}
           </span>
-          <span className="text-stone-300 dark:text-stone-700">|</span>
-          <span className="text-xs text-stone-500 dark:text-stone-400">
+          <span className="text-[#dfd8c8] dark:text-[#323731]">|</span>
+          <span className={`text-xs font-medium rounded-full px-2.5 py-0.5 ${
+            isResolved
+              ? "bg-[#eaf2ee] text-[#193a32] dark:bg-[#1d352b] dark:text-[#b8ded0]"
+              : "bg-[#ede8dc] text-[#62685d] dark:bg-[#2e332c] dark:text-[#9da398]"
+          }`}>
             {RESOLUTION_LABELS[resolution_status]}
           </span>
         </div>
@@ -58,31 +62,31 @@ export const CandidateCard: React.FC<CandidateCardProps> = ({
         )}
 
         {!isResolved && (
-          <span className="rounded-full bg-stone-100 px-3 py-1 text-xs font-medium text-stone-600 dark:bg-stone-800 dark:text-stone-400 border border-stone-200 dark:border-stone-700">
+          <span className="rounded-full bg-[#f6f3eb] px-3 py-1 text-xs font-medium text-[#62685d] border border-[#e6e0d4] dark:bg-[#191c19] dark:border-[#323731] dark:text-[#9da398]">
             Not yet evaluated against visit criteria
           </span>
         )}
       </div>
 
       {/* Main Title & Disambiguation */}
-      <div className="mt-4">
-        <h3 className="font-serif text-2xl font-semibold text-stone-900 dark:text-stone-50">
+      <div className="mt-5">
+        <h3 className="font-serif text-2xl sm:text-3xl font-semibold text-[#252923] dark:text-[#f4f1ea]">
           {candidate.name}
         </h3>
         {candidate.disambiguation && (
-          <p className="mt-1 text-sm text-stone-600 dark:text-stone-300 leading-relaxed">
+          <p className="mt-2 text-base text-[#62685d] leading-relaxed dark:text-[#9da398]">
             {candidate.disambiguation}
           </p>
         )}
       </div>
 
-      {/* Cultural Tags */}
+      {/* Cultural Tags from Qloo */}
       {candidate.tags && candidate.tags.length > 0 && (
-        <div className="mt-3 flex flex-wrap gap-1.5" aria-label="Cultural tags">
+        <div className="mt-4 flex flex-wrap gap-2" aria-label="Cultural tags">
           {candidate.tags.map((tag) => (
             <span
               key={tag.id || tag.name}
-              className="rounded-md bg-stone-100 px-2.5 py-0.5 text-xs text-stone-600 dark:bg-stone-800 dark:text-stone-300"
+              className="rounded-lg bg-[#ede8dc]/80 px-3 py-1 text-xs font-medium text-[#252923] dark:bg-[#2e332c] dark:text-[#e4ded0]"
             >
               {tag.name}
             </span>
@@ -92,33 +96,33 @@ export const CandidateCard: React.FC<CandidateCardProps> = ({
 
       {/* Visit Summary Highlights preview (if not expanded) */}
       {!isExpanded && (
-        <div className="mt-4 space-y-2">
+        <div className="mt-6 space-y-2.5 pt-4 border-t border-[#ede8dc] dark:border-[#323731]">
           {supported_findings.length > 0 && (
-            <div className="flex items-start gap-2 text-xs text-stone-700 dark:text-stone-300">
-              <span className="text-emerald-600 dark:text-emerald-400 font-bold select-none">✓</span>
-              <span>{supported_findings[0]}</span>
+            <div className="flex items-start gap-2 text-sm text-[#252923] dark:text-[#e4ded0]">
+              <span className="text-[#193a32] dark:text-[#a8d5c4] font-bold select-none">✓</span>
+              <span><strong>Verified:</strong> {supported_findings[0]}</span>
             </div>
           )}
           {unresolved_gaps.length > 0 && (
-            <div className="flex items-start gap-2 text-xs text-stone-600 dark:text-stone-400">
-              <span className="text-amber-600 dark:text-amber-400 font-bold select-none">?</span>
-              <span>Needs checking: {unresolved_gaps[0]}</span>
+            <div className="flex items-start gap-2 text-sm text-[#8c5914] dark:text-[#f0d496]">
+              <span className="font-bold select-none">?</span>
+              <span><strong>Needs confirmation:</strong> {unresolved_gaps[0]}</span>
             </div>
           )}
           {!isResolved && (
-            <p className="text-xs text-stone-500 italic">
-              This space was identified via cultural affinity signals, but verified operational documentation has not yet been cataloged for Ahmedabad.
+            <p className="text-sm text-[#62685d] italic dark:text-[#9da398]">
+              This space was identified via cultural affinity signals, but verified operational documentation has not yet been cataloged in our Ahmedabad pilot repository.
             </p>
           )}
         </div>
       )}
 
       {/* Expand/Collapse Action */}
-      <div className="mt-5 flex items-center justify-between border-t border-stone-100 pt-4 dark:border-stone-800">
+      <div className="mt-6 flex items-center justify-between pt-4 border-t border-[#ede8dc] dark:border-[#323731]">
         <Button
           type="button"
           variant={isExpanded ? "outline" : "primary"}
-          size="sm"
+          size="md"
           onClick={() => setIsExpanded(!isExpanded)}
           aria-expanded={isExpanded}
         >
@@ -128,7 +132,7 @@ export const CandidateCard: React.FC<CandidateCardProps> = ({
 
       {/* Expandable Visit Plan Component */}
       {isExpanded && (
-        <VisitPlanDetail plan={plan} className="mt-4" />
+        <VisitPlanDetail plan={plan} className="mt-6" />
       )}
     </article>
   );

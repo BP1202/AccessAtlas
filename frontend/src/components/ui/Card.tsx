@@ -12,7 +12,7 @@ export const Card: React.FC<CardProps> = ({
 }) => {
   return (
     <Component
-      className={`rounded-xl border border-slate-200 bg-white p-6 shadow-sm dark:border-slate-800 dark:bg-slate-900 ${className}`}
+      className={`rounded-2xl border border-[#e6e0d4] bg-white p-6 sm:p-7 shadow-xs transition-all duration-200 dark:border-[#323731] dark:bg-[#212520] ${className}`}
       {...props}
     >
       {children}
@@ -26,7 +26,7 @@ export const CardHeader: React.FC<React.HTMLAttributes<HTMLDivElement>> = ({
   ...props
 }) => {
   return (
-    <div className={`mb-4 flex flex-col gap-1.5 ${className}`} {...props}>
+    <div className={`mb-4 flex flex-col gap-2 ${className}`} {...props}>
       {children}
     </div>
   );
@@ -39,7 +39,7 @@ export const CardTitle: React.FC<React.HTMLAttributes<HTMLHeadingElement>> = ({
 }) => {
   return (
     <h3
-      className={`text-lg font-semibold tracking-tight text-slate-900 dark:text-slate-100 ${className}`}
+      className={`font-serif text-xl font-semibold tracking-tight text-[#252923] dark:text-[#f4f1ea] ${className}`}
       {...props}
     >
       {children}
@@ -54,7 +54,7 @@ export const CardDescription: React.FC<React.HTMLAttributes<HTMLParagraphElement
 }) => {
   return (
     <p
-      className={`text-sm text-slate-600 dark:text-slate-400 ${className}`}
+      className={`text-sm text-[#62685d] dark:text-[#9da398] ${className}`}
       {...props}
     >
       {children}
@@ -68,7 +68,7 @@ export const CardContent: React.FC<React.HTMLAttributes<HTMLDivElement>> = ({
   ...props
 }) => {
   return (
-    <div className={`text-sm text-slate-700 dark:text-slate-300 ${className}`} {...props}>
+    <div className={`text-sm text-[#252923] leading-relaxed dark:text-[#e4ded0] ${className}`} {...props}>
       {children}
     </div>
   );
@@ -81,7 +81,7 @@ export const CardFooter: React.FC<React.HTMLAttributes<HTMLDivElement>> = ({
 }) => {
   return (
     <div
-      className={`mt-6 flex items-center justify-between border-t border-slate-100 pt-4 dark:border-slate-800 ${className}`}
+      className={`mt-6 flex items-center justify-between border-t border-[#ede8dc] pt-4 dark:border-[#323731] ${className}`}
       {...props}
     >
       {children}

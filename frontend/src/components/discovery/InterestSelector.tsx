@@ -2,12 +2,12 @@ import React, { useState } from "react";
 import { Button } from "@/components/ui/Button";
 
 export const SUGGESTED_INTERESTS = [
-  "Textiles",
-  "Heritage architecture",
-  "Contemporary art",
-  "Craft traditions",
-  "History",
-  "Photography",
+  { name: "Textiles", description: "Court textiles, Gujarati block printing, weaving" },
+  { name: "Heritage architecture", description: "Centuries-old residential havelis, stepwells, stonework" },
+  { name: "Contemporary art", description: "Modern Indian art, sculpture parks, dynamic galleries" },
+  { name: "Craft traditions", description: "Living artisan traditions, pottery, woodcarving" },
+  { name: "History", description: "Walled city archives, freedom movement landmarks" },
+  { name: "Photography", description: "Lattice stonework, shadow play, heritage streetscapes" },
 ] as const;
 
 export interface InterestSelectorProps {
@@ -30,16 +30,13 @@ export const InterestSelector: React.FC<InterestSelectorProps> = ({
 
   const handleAddInterest = (rawInterest: string) => {
     const trimmed = rawInterest.trim();
-    if (!trimmed) {
-      return;
-    }
+    if (!trimmed) return;
 
     if (trimmed.length > 100) {
       setInputError("Interests must be 100 characters or fewer.");
       return;
     }
 
-    // Check if already selected (case-insensitive check, but preserve casing or capitalize)
     const exists = selectedInterests.some(
       (item) => item.toLowerCase() === trimmed.toLowerCase()
     );
@@ -75,38 +72,85 @@ export const InterestSelector: React.FC<InterestSelectorProps> = ({
     }
   };
 
-  const toggleSuggestion = (suggestion: string) => {
+  const toggleSuggestion = (suggestionName: string) => {
     const exists = selectedInterests.some(
-      (item) => item.toLowerCase() === suggestion.toLowerCase()
+      (item) => item.toLowerCase() === suggestionName.toLowerCase()
     );
     if (exists) {
-      handleRemoveInterest(suggestion);
+      handleRemoveInterest(suggestionName);
     } else {
-      handleAddInterest(suggestion);
+      handleAddInterest(suggestionName);
     }
   };
 
   return (
-    <div className={`space-y-8 ${className}`}>
-      {/* Header / Instructions */}
+    <div className={`space-y-10 ${className}`}>
+      {/* Header */}
       <div>
-        <span className="text-xs font-semibold uppercase tracking-wider text-teal-700 dark:text-teal-400">
-          Stage 1 of 2 · Cultural Interests
+        <span className="text-xs font-semibold uppercase tracking-widest text-[#c56f4d]">
+          Stage 01 · Cultural Curiosity
         </span>
-        <h2 className="mt-2 font-serif text-2xl font-semibold text-stone-900 sm:text-3xl dark:text-stone-50">
+        <h2 className="mt-3 font-serif text-3xl font-semibold text-[#252923] sm:text-4xl lg:text-5xl dark:text-[#f4f1ea]">
           What cultural experiences spark your curiosity?
         </h2>
-        <p className="mt-2 text-sm text-stone-600 sm:text-base dark:text-stone-300">
-          Add cultural topics, art forms, or heritage interests you would love to explore in Ahmedabad. Choose 1 to 5 interests.
+        <p className="mt-4 text-base sm:text-lg text-[#62685d] max-w-2xl dark:text-[#9da398]">
+          Type an interest or click our curated Ahmedabad topics below. AccessAtlas uses cultural taste mapping to surface connected spaces across the city.
         </p>
+      </div>
+
+      {/* Prominent Search / Custom Input */}
+      <div className="space-y-3">
+        <label
+          htmlFor="custom-interest-input"
+          className="block text-xs font-semibold uppercase tracking-wider text-[#62685d] dark:text-[#9da398]"
+        >
+          Add custom cultural interest or topic
+        </label>
+        <div className="flex flex-col sm:flex-row gap-3">
+          <div className="relative flex-1">
+            <span className="absolute inset-y-0 left-0 flex items-center pl-4 pointer-events-none text-[#62685d]">
+              <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
+              </svg>
+            </span>
+            <input
+              id="custom-interest-input"
+              type="text"
+              value={customInput}
+              onChange={(e) => {
+                setCustomInput(e.target.value);
+                if (inputError) setInputError(null);
+              }}
+              onKeyDown={handleKeyDown}
+              placeholder="e.g. Woodblock printing, Stepwells, Miniature painting..."
+              disabled={selectedInterests.length >= maxInterests}
+              maxLength={100}
+              className="w-full rounded-2xl border border-[#e6e0d4] bg-white pl-12 pr-4 py-3.5 text-base text-[#252923] placeholder-[#9da398] shadow-xs focus:border-[#193a32] focus:outline-none focus:ring-2 focus:ring-[#193a32]/20 disabled:bg-[#ede8dc] disabled:cursor-not-allowed dark:border-[#323731] dark:bg-[#212520] dark:text-[#f4f1ea] dark:placeholder-[#62685d]"
+            />
+          </div>
+          <Button
+            type="button"
+            variant="primary"
+            onClick={() => handleAddInterest(customInput)}
+            disabled={!customInput.trim() || selectedInterests.length >= maxInterests}
+            className="sm:px-7 py-3.5"
+          >
+            Add topic
+          </Button>
+        </div>
+        {inputError && (
+          <p className="text-sm font-medium text-[#c56f4d]" role="alert">
+            {inputError}
+          </p>
+        )}
       </div>
 
       {/* Selected Interests Chips */}
       <div>
-        <div className="flex items-center justify-between pb-2">
-          <label className="text-xs font-semibold uppercase tracking-wider text-stone-500 dark:text-stone-400">
-            Selected Interests ({selectedInterests.length}/{maxInterests})
-          </label>
+        <div className="flex items-center justify-between pb-3">
+          <span className="text-xs font-semibold uppercase tracking-wider text-[#62685d] dark:text-[#9da398]">
+            Your Chosen Interests ({selectedInterests.length}/{maxInterests})
+          </span>
           {selectedInterests.length > 0 && (
             <button
               type="button"
@@ -114,33 +158,33 @@ export const InterestSelector: React.FC<InterestSelectorProps> = ({
                 onChange([]);
                 setInputError(null);
               }}
-              className="text-xs text-stone-500 hover:text-stone-900 dark:hover:text-stone-200 underline"
+              className="text-xs font-medium text-[#c56f4d] hover:underline"
             >
-              Clear all
+              Reset all
             </button>
           )}
         </div>
 
         {selectedInterests.length === 0 ? (
-          <div className="rounded-lg border border-dashed border-stone-300 p-4 text-center text-sm text-stone-500 dark:border-stone-700 dark:text-stone-400">
-            No interests added yet. Click suggestions below or type your own.
+          <div className="rounded-2xl border border-dashed border-[#dfd8c8] p-6 text-center text-sm text-[#62685d] bg-[#f6f3eb]/60 dark:border-[#323731] dark:bg-[#212520]/40 dark:text-[#9da398]">
+            No interests added yet. Click one or more topics below to begin your discovery.
           </div>
         ) : (
-          <div className="flex flex-wrap gap-2 pt-1" role="list" aria-label="Selected cultural interests">
+          <div className="flex flex-wrap gap-2.5 pt-1" role="list" aria-label="Selected cultural interests">
             {selectedInterests.map((interest) => (
               <span
                 key={interest}
                 role="listitem"
-                className="inline-flex items-center gap-1.5 rounded-full bg-teal-50 px-3.5 py-1.5 text-sm font-medium text-teal-900 border border-teal-200 dark:bg-teal-950/70 dark:text-teal-200 dark:border-teal-800"
+                className="inline-flex items-center gap-2 rounded-full bg-[#193a32] px-4 py-2 text-sm font-medium text-[#f6f3eb] shadow-xs dark:bg-[#2a584d]"
               >
                 <span>{interest}</span>
                 <button
                   type="button"
                   onClick={() => handleRemoveInterest(interest)}
                   aria-label={`Remove interest ${interest}`}
-                  className="ml-1 inline-flex h-4 w-4 items-center justify-center rounded-full text-teal-700 hover:bg-teal-200/60 hover:text-teal-950 dark:text-teal-300 dark:hover:bg-teal-800 dark:hover:text-white"
+                  className="inline-flex h-4 w-4 items-center justify-center rounded-full text-[#d8e2dc] hover:text-white"
                 >
-                  <span aria-hidden="true" className="text-xs leading-none">×</span>
+                  <span aria-hidden="true" className="text-sm font-bold">×</span>
                 </button>
               </span>
             ))}
@@ -148,83 +192,56 @@ export const InterestSelector: React.FC<InterestSelectorProps> = ({
         )}
       </div>
 
-      {/* Free-text input */}
-      <div className="space-y-2">
-        <label
-          htmlFor="custom-interest-input"
-          className="block text-xs font-semibold uppercase tracking-wider text-stone-600 dark:text-stone-300"
-        >
-          Add your own interest
-        </label>
-        <div className="flex gap-2">
-          <input
-            id="custom-interest-input"
-            type="text"
-            value={customInput}
-            onChange={(e) => {
-              setCustomInput(e.target.value);
-              if (inputError) setInputError(null);
-            }}
-            onKeyDown={handleKeyDown}
-            placeholder="e.g. Woodblock printing, Stepwells, Miniature painting..."
-            disabled={selectedInterests.length >= maxInterests}
-            maxLength={100}
-            className="flex-1 rounded-lg border border-stone-300 bg-white px-3.5 py-2 text-sm text-stone-900 placeholder-stone-400 shadow-sm focus:border-teal-500 focus:outline-none focus:ring-1 focus:ring-teal-500 disabled:bg-stone-100 disabled:cursor-not-allowed dark:border-stone-700 dark:bg-stone-900 dark:text-stone-100 dark:placeholder-stone-500 dark:disabled:bg-stone-800"
-          />
-          <Button
-            type="button"
-            variant="outline"
-            onClick={() => handleAddInterest(customInput)}
-            disabled={!customInput.trim() || selectedInterests.length >= maxInterests}
-          >
-            Add
-          </Button>
-        </div>
-        {inputError && (
-          <p className="text-xs text-rose-600 dark:text-rose-400" role="alert">
-            {inputError}
-          </p>
-        )}
-      </div>
-
-      {/* Suggested chips */}
-      <div className="space-y-2 pt-2">
-        <span className="block text-xs font-semibold uppercase tracking-wider text-stone-500 dark:text-stone-400">
-          Suggested for Ahmedabad
+      {/* Curated Suggestion Tiles */}
+      <div className="space-y-4">
+        <span className="block text-xs font-semibold uppercase tracking-wider text-[#62685d] dark:text-[#9da398]">
+          Curated Ahmedabad Themes
         </span>
-        <div className="flex flex-wrap gap-2">
-          {SUGGESTED_INTERESTS.map((suggestion) => {
+        <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-3">
+          {SUGGESTED_INTERESTS.map((item) => {
             const isSelected = selectedInterests.some(
-              (item) => item.toLowerCase() === suggestion.toLowerCase()
+              (sel) => sel.toLowerCase() === item.name.toLowerCase()
             );
             return (
               <button
-                key={suggestion}
+                key={item.name}
                 type="button"
-                onClick={() => toggleSuggestion(suggestion)}
-                className={`inline-flex items-center gap-1.5 rounded-full px-3 py-1.5 text-xs font-medium transition-colors ${
+                onClick={() => toggleSuggestion(item.name)}
+                className={`p-4 rounded-2xl text-left border transition-all duration-150 cursor-pointer ${
                   isSelected
-                    ? "bg-teal-700 text-white border border-teal-700 shadow-sm"
-                    : "bg-stone-100 text-stone-700 hover:bg-stone-200 border border-stone-200 dark:bg-stone-800 dark:text-stone-300 dark:border-stone-700 dark:hover:bg-stone-700"
+                    ? "bg-[#193a32] text-white border-[#193a32] shadow-sm dark:bg-[#2a584d] dark:border-[#2a584d]"
+                    : "bg-white border-[#e6e0d4] text-[#252923] hover:border-[#193a32] hover:bg-[#faf8f5] shadow-xs dark:bg-[#212520] dark:border-[#323731] dark:text-[#f4f1ea] dark:hover:border-[#c56f4d]"
                 }`}
                 aria-pressed={isSelected}
               >
-                <span>{suggestion}</span>
-                <span aria-hidden="true">{isSelected ? "✓" : "+"}</span>
+                <div className="flex items-center justify-between">
+                  <span className="font-serif text-base font-semibold">{item.name}</span>
+                  <span className={`text-xs font-bold rounded-full w-5 h-5 flex items-center justify-center ${
+                    isSelected ? "bg-white text-[#193a32]" : "bg-[#ede8dc] text-[#62685d]"
+                  }`}>
+                    {isSelected ? "✓" : "+"}
+                  </span>
+                </div>
+                <p className={`mt-1.5 text-xs line-clamp-2 ${
+                  isSelected ? "text-[#d8e2dc]" : "text-[#62685d] dark:text-[#9da398]"
+                }`}>
+                  {item.description}
+                </p>
               </button>
             );
           })}
         </div>
       </div>
 
-      {/* Navigation action */}
-      <div className="pt-4 flex justify-end border-t border-stone-200 dark:border-stone-800">
+      {/* Next Step Action */}
+      <div className="pt-6 border-t border-[#e6e0d4] dark:border-[#323731] flex justify-end">
         <Button
           type="button"
-          variant="primary"
+          variant="secondary"
+          size="lg"
           onClick={onNext}
           disabled={selectedInterests.length === 0}
-          className="w-full sm:w-auto"
+          className="w-full sm:w-auto px-8"
         >
           Continue to visit preferences →
         </Button>

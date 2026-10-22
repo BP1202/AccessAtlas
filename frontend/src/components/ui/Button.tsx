@@ -16,23 +16,23 @@ export const Button: React.FC<ButtonProps> = ({
   ...props
 }) => {
   const baseStyles =
-    "inline-flex items-center justify-center font-medium rounded-lg transition-colors focus:outline-none focus:ring-2 focus:ring-offset-2 disabled:opacity-50 disabled:cursor-not-allowed cursor-pointer";
+    "inline-flex items-center justify-center font-medium rounded-xl transition-all duration-150 focus:outline-none focus:ring-2 focus:ring-offset-2 disabled:opacity-50 disabled:cursor-not-allowed cursor-pointer";
 
   const variantStyles = {
     primary:
-      "bg-teal-700 text-white hover:bg-teal-800 focus:ring-teal-500 shadow-sm",
+      "bg-[#193a32] text-[#f6f3eb] hover:bg-[#122b25] focus:ring-[#193a32] shadow-sm hover:shadow dark:bg-[#2a584d] dark:hover:bg-[#366f62]",
     secondary:
-      "bg-slate-800 text-white hover:bg-slate-900 focus:ring-slate-600",
+      "bg-[#c56f4d] text-white hover:bg-[#b05c3c] focus:ring-[#c56f4d] shadow-sm hover:shadow dark:bg-[#d88261] dark:hover:bg-[#e59779]",
     outline:
-      "border border-slate-300 bg-transparent text-slate-800 hover:bg-slate-100 focus:ring-slate-400 dark:border-slate-700 dark:text-slate-200 dark:hover:bg-slate-800",
+      "border border-[#193a32] bg-transparent text-[#193a32] hover:bg-[#193a32]/8 focus:ring-[#193a32] dark:border-[#d88261] dark:text-[#d88261] dark:hover:bg-[#d88261]/10",
     ghost:
-      "bg-transparent text-slate-700 hover:bg-slate-100 focus:ring-slate-300 dark:text-slate-300 dark:hover:bg-slate-800",
+      "bg-transparent text-[#252923] hover:bg-black/5 focus:ring-[#193a32] dark:text-[#f4f1ea] dark:hover:bg-white/10",
   };
 
   const sizeStyles = {
-    sm: "px-3 py-1.5 text-xs",
-    md: "px-4 py-2 text-sm",
-    lg: "px-6 py-3 text-base",
+    sm: "px-3.5 py-1.5 text-xs font-medium",
+    md: "px-5 py-2.5 text-sm font-medium",
+    lg: "px-7 py-3.5 text-base font-semibold",
   };
 
   return (

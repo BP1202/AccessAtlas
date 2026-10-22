@@ -16,7 +16,7 @@ test.describe("AccessAtlas Visitor-First Homepage Smoke Test", () => {
     // 2. Check visitor hero headline
     const h1 = page.locator("h1");
     await expect(h1).toBeVisible();
-    await expect(h1).toContainText("Find your kind of cultural experience.");
+    await expect(h1).toContainText("Follow your curiosity. Plan with confidence.");
 
     // 3. Check navigation links in header
     const mainNav = page.getByRole("navigation", { name: "Main Navigation" });
@@ -25,7 +25,7 @@ test.describe("AccessAtlas Visitor-First Homepage Smoke Test", () => {
     await expect(mainNav.getByRole("link", { name: "About", exact: true })).toBeVisible();
 
     // 4. Check primary CTA links to /explore
-    const primaryCta = page.getByRole("link", { name: "Explore Ahmedabad" }).first();
+    const primaryCta = page.getByRole("link", { name: /discover experiences/i }).first();
     await expect(primaryCta).toBeVisible();
     await expect(primaryCta).toHaveAttribute("href", "/explore");
 
@@ -51,15 +51,15 @@ test.describe("AccessAtlas Visitor-First Homepage Smoke Test", () => {
 
     const h1 = page.locator("h1");
     await expect(h1).toBeVisible();
-    await expect(h1).toContainText("Find your kind of cultural experience.");
+    await expect(h1).toContainText("Follow your curiosity. Plan with confidence.");
 
-    const primaryCta = page.getByRole("link", { name: "Explore Ahmedabad" }).first();
+    const primaryCta = page.getByRole("link", { name: /discover experiences/i }).first();
     await expect(primaryCta).toBeVisible();
   });
 
   test("primary CTA navigates to /explore successfully", async ({ page }) => {
     await page.goto("/");
-    await page.getByRole("link", { name: "Explore Ahmedabad" }).first().click();
+    await page.getByRole("link", { name: /discover experiences/i }).first().click();
 
     await expect(page).toHaveURL(/\/explore$/);
     await expect(

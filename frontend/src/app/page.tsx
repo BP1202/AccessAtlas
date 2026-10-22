@@ -12,267 +12,296 @@ import { Container } from "@/components/ui/Container";
 import { Button } from "@/components/ui/Button";
 import {
   OUTCOME_LABELS,
-  OUTCOME_DESCRIPTIONS,
   DISCLAIMER_NOTE,
 } from "@/lib/constants/labels";
 
 export default function HomePage() {
-  return (
-    <div className="py-12 md:py-20">
-      <Container size="lg">
-        {/* Hero Section */}
-        <div className="max-w-3xl">
-          <span className="text-xs font-semibold uppercase tracking-widest text-stone-500 dark:text-stone-400">
-            Culture, on your terms
-          </span>
+  const suggestedSparks = [
+    "Textiles",
+    "Heritage architecture",
+    "Contemporary art",
+    "Craft traditions",
+    "History",
+    "Photography",
+  ];
 
-          <h1 className="mt-3 font-serif text-4xl font-semibold tracking-tight text-stone-900 sm:text-5xl md:text-6xl dark:text-stone-50">
-            Find your kind of cultural experience.
+  return (
+    <div className="py-12 md:py-20 lg:py-24">
+      <Container size="xl">
+        {/* Hero Section */}
+        <div className="mx-auto max-w-4xl text-center">
+          <div className="inline-flex items-center gap-2 rounded-full bg-[#ede8dc] px-4 py-1.5 text-xs font-semibold uppercase tracking-wider text-[#193a32] border border-[#dfd8c8] dark:bg-[#252f2a] dark:text-[#a8d5c4] dark:border-[#384941]">
+            <span className="h-1.5 w-1.5 rounded-full bg-[#c56f4d]" />
+            <span>Currently exploring Ahmedabad · More cities to come</span>
+          </div>
+
+          <h1 className="mt-6 font-serif text-4xl font-semibold tracking-tight text-[#252923] sm:text-5xl md:text-6xl lg:text-7xl leading-[1.1] dark:text-[#f4f1ea]">
+            Follow your curiosity.<br className="hidden sm:inline" /> Plan with confidence.
           </h1>
 
-          <p className="mt-5 text-lg leading-relaxed text-stone-600 sm:text-xl dark:text-stone-300">
-            Explore art, history and cultural spaces worth discovering—with the
-            practical details that matter to your visit.
+          <p className="mt-6 text-lg leading-relaxed text-[#62685d] sm:text-xl md:text-2xl max-w-2xl mx-auto dark:text-[#9da398]">
+            Discover cultural experiences connected to what you love, with practical details that help you decide what works for your visit.
           </p>
 
-          <p className="mt-2 text-sm font-medium text-stone-500 dark:text-stone-400">
-            Starting with Ahmedabad
-          </p>
-
-          <div className="mt-8 flex flex-wrap items-center gap-4">
+          <div className="mt-10 flex flex-wrap items-center justify-center gap-4">
             <Link href="/explore">
-              <Button size="lg" variant="primary">
-                Explore Ahmedabad
+              <Button size="lg" variant="primary" className="text-base px-8 py-4">
+                Discover experiences →
               </Button>
             </Link>
             <Link href="/how-it-works">
-              <Button size="lg" variant="outline">
-                How it works
+              <Button size="lg" variant="outline" className="text-base px-8 py-4">
+                See how it works
               </Button>
             </Link>
           </div>
+
+          {/* Quick curiosity sparks */}
+          <div className="mt-12 pt-8 border-t border-[#e6e0d4]/80 dark:border-[#323731]">
+            <span className="text-xs font-semibold uppercase tracking-wider text-[#62685d] dark:text-[#9da398]">
+              Start with what sparks your interest
+            </span>
+            <div className="mt-3 flex flex-wrap items-center justify-center gap-2">
+              {suggestedSparks.map((spark) => (
+                <Link
+                  key={spark}
+                  href={`/explore?interest=${encodeURIComponent(spark)}`}
+                  className="rounded-full bg-white/80 px-4 py-2 text-sm font-medium text-[#252923] border border-[#e6e0d4] hover:border-[#193a32] hover:bg-white transition-all shadow-xs dark:bg-[#212520] dark:text-[#f4f1ea] dark:border-[#323731] dark:hover:border-[#c56f4d]"
+                >
+                  {spark} ↗
+                </Link>
+              ))}
+            </div>
+          </div>
         </div>
 
-        {/* Value Proposition: Discover with more confidence */}
-        <section aria-labelledby="confidence-heading" className="mt-20">
-          <div className="border-b border-stone-200 pb-4 dark:border-stone-800">
+        {/* The 3-Stage Discovery Journey (Visual, Concise) */}
+        <section aria-labelledby="how-it-works-heading" className="mt-24 sm:mt-32">
+          <div className="text-center max-w-2xl mx-auto mb-12">
+            <span className="text-xs font-semibold uppercase tracking-widest text-[#c56f4d]">
+              The AccessAtlas Journey
+            </span>
             <h2
-              id="confidence-heading"
-              className="font-serif text-2xl font-semibold text-stone-900 dark:text-stone-100"
+              id="how-it-works-heading"
+              className="mt-2 font-serif text-3xl font-semibold text-[#252923] sm:text-4xl dark:text-[#f4f1ea]"
             >
-              Discover with more confidence
+              How discovery connects to planning
             </h2>
+            <p className="mt-3 text-base text-[#62685d] dark:text-[#9da398]">
+              AccessAtlas bridges cultural affinity with verified venue documentation so you never have to guess before you go.
+            </p>
           </div>
 
-          <div className="mt-8 grid gap-8 md:grid-cols-3">
-            <div>
-              <h3 className="font-serif text-lg font-semibold text-stone-900 dark:text-stone-100">
-                Follow your curiosity
+          <div className="grid gap-8 md:grid-cols-3">
+            <div className="rounded-2xl border border-[#e6e0d4] bg-white p-8 shadow-xs dark:border-[#323731] dark:bg-[#212520]">
+              <span className="font-mono text-xs font-semibold uppercase tracking-wider text-[#c56f4d]">
+                Stage 01
+              </span>
+              <h3 className="mt-2 font-serif text-2xl font-semibold text-[#252923] dark:text-[#f4f1ea]">
+                Cultural curiosity
               </h3>
-              <p className="mt-2 text-sm leading-relaxed text-stone-600 dark:text-stone-400">
-                Discover cultural experiences connected to the interests you
-                choose—from historic textile collections and architectural
-                landmarks to contemporary art spaces.
+              <p className="mt-3 text-sm leading-relaxed text-[#62685d] dark:text-[#9da398]">
+                Share the art forms, heritage topics, or historical periods you love. Discover unexpected cultural connections across Ahmedabad’s museums, stepwells, and galleries.
               </p>
             </div>
 
-            <div>
-              <h3 className="font-serif text-lg font-semibold text-stone-900 dark:text-stone-100">
-                Know before you go
+            <div className="rounded-2xl border border-[#e6e0d4] bg-white p-8 shadow-xs dark:border-[#323731] dark:bg-[#212520]">
+              <span className="font-mono text-xs font-semibold uppercase tracking-wider text-[#193a32] dark:text-[#a8d5c4]">
+                Stage 02
+              </span>
+              <h3 className="mt-2 font-serif text-2xl font-semibold text-[#252923] dark:text-[#f4f1ea]">
+                Your visit preferences
               </h3>
-              <p className="mt-2 text-sm leading-relaxed text-stone-600 dark:text-stone-400">
-                See what is documented and what still needs confirmation before
-                you head out. We highlight verified entry guidelines, tour
-                requirements, and physical layouts.
+              <p className="mt-3 text-sm leading-relaxed text-[#62685d] dark:text-[#9da398]">
+                Choose practical requirements that matter to your day—such as step-free entrance, rest seating, or tour reservations—without disclosing sensitive personal reasons.
               </p>
             </div>
 
-            <div>
-              <h3 className="font-serif text-lg font-semibold text-stone-900 dark:text-stone-100">
-                No personal assumptions
+            <div className="rounded-2xl border border-[#e6e0d4] bg-white p-8 shadow-xs dark:border-[#323731] dark:bg-[#212520]">
+              <span className="font-mono text-xs font-semibold uppercase tracking-wider text-[#c56f4d]">
+                Stage 03
+              </span>
+              <h3 className="mt-2 font-serif text-2xl font-semibold text-[#252923] dark:text-[#f4f1ea]">
+                Your Visit Plan
               </h3>
-              <p className="mt-2 text-sm leading-relaxed text-stone-600 dark:text-stone-400">
-                We never assume your identity, health status, or needs from your
-                cultural interests. You simply choose the practical details that
-                matter to your plans.
+              <p className="mt-3 text-sm leading-relaxed text-[#62685d] dark:text-[#9da398]">
+                Receive an actionable visit plan distinguishing verified facts from missing details, complete with official source citations and copyable questions to ask the venue.
               </p>
             </div>
           </div>
         </section>
 
-        {/* 3-State Visit Details */}
-        <section aria-labelledby="visit-details-heading" className="mt-20">
-          <div className="border-b border-stone-200 pb-4 dark:border-stone-800">
-            <h2
-              id="visit-details-heading"
-              className="font-serif text-2xl font-semibold text-stone-900 dark:text-stone-100"
-            >
-              Understanding visit details
-            </h2>
-            <p className="mt-1 text-sm text-stone-600 dark:text-stone-400">
-              We distinguish what is verified from what remains unconfirmed,
-              without fabricated scores or guesses.
-            </p>
-          </div>
-
-          <div className="mt-8 grid gap-6 md:grid-cols-3">
-            <Card className="border-stone-200 bg-white/70 dark:border-stone-800 dark:bg-stone-900/60">
-              <CardHeader>
-                <div className="mb-2">
-                  <Badge variant="VERIFIED_FIT">
-                    {OUTCOME_LABELS.VERIFIED_FIT}
-                  </Badge>
+        {/* The Value Contrast: Why AccessAtlas Stands Apart */}
+        <section aria-labelledby="contrast-heading" className="mt-24 sm:mt-32 rounded-3xl bg-[#ede8dc]/60 border border-[#dfd8c8] p-8 sm:p-12 lg:p-16 dark:bg-[#212520]/80 dark:border-[#323731]">
+          <div className="grid gap-10 lg:grid-cols-2 lg:items-center">
+            <div>
+              <span className="text-xs font-semibold uppercase tracking-widest text-[#c56f4d]">
+                Interesting does not mean workable
+              </span>
+              <h2
+                id="contrast-heading"
+                className="mt-3 font-serif text-3xl font-semibold text-[#252923] sm:text-4xl dark:text-[#f4f1ea]"
+              >
+                Why ordinary recommendation apps fall short
+              </h2>
+              <p className="mt-4 text-base leading-relaxed text-[#62685d] dark:text-[#9da398]">
+                A generic search engine tells you where a venue is located. But for anyone visiting historic residential havelis or centuries-old estates, location is only the first question.
+              </p>
+              <div className="mt-6 space-y-4 text-sm text-[#252923] dark:text-[#e4ded0]">
+                <div className="flex items-start gap-3">
+                  <span className="flex h-6 w-6 shrink-0 items-center justify-center rounded-full bg-[#193a32] text-xs font-bold text-white">✓</span>
+                  <span><strong>Independently verified facts:</strong> Sourced directly from official venue documents, not scraped user guesses or fabricated star ratings.</span>
                 </div>
-                <CardTitle className="font-serif text-lg">
+                <div className="flex items-start gap-3">
+                  <span className="flex h-6 w-6 shrink-0 items-center justify-center rounded-full bg-[#193a32] text-xs font-bold text-white">✓</span>
+                  <span><strong>Transparent unknowns:</strong> When an elevator or seating policy is unrecorded, we say so plainly and provide specific questions to ask.</span>
+                </div>
+                <div className="flex items-start gap-3">
+                  <span className="flex h-6 w-6 shrink-0 items-center justify-center rounded-full bg-[#193a32] text-xs font-bold text-white">✓</span>
+                  <span><strong>Zero personal assumptions:</strong> We never infer your health, disability, or identity from what art you like.</span>
+                </div>
+              </div>
+            </div>
+
+            {/* Simulated Plan Card preview */}
+            <div className="rounded-2xl border border-[#e6e0d4] bg-white p-6 sm:p-8 shadow-sm dark:border-[#323731] dark:bg-[#191c19]">
+              <div className="flex items-center justify-between pb-4 border-b border-[#ede8dc] dark:border-[#323731]">
+                <div>
+                  <span className="font-mono text-xs uppercase tracking-wider text-[#62685d]">Signature Interaction</span>
+                  <h4 className="font-serif text-lg font-semibold text-[#252923] dark:text-[#f4f1ea]">The Expandable Visit Plan</h4>
+                </div>
+                <Badge variant="VERIFIED_FIT">
                   {OUTCOME_LABELS.VERIFIED_FIT}
-                </CardTitle>
-                <CardDescription>
-                  Published records support your stated requirement.
-                </CardDescription>
-              </CardHeader>
-              <CardContent className="text-sm leading-relaxed text-stone-600 dark:text-stone-300">
-                {OUTCOME_DESCRIPTIONS.VERIFIED_FIT}
-              </CardContent>
-            </Card>
+                </Badge>
+              </div>
 
-            <Card className="border-stone-200 bg-white/70 dark:border-stone-800 dark:bg-stone-900/60">
-              <CardHeader>
-                <div className="mb-2">
-                  <Badge variant="NEEDS_CONFIRMATION">
-                    {OUTCOME_LABELS.NEEDS_CONFIRMATION}
-                  </Badge>
+              <div className="mt-4 space-y-3 text-xs leading-relaxed">
+                <div className="rounded-lg bg-[#f6f3eb] p-3 border border-[#e6e0d4] dark:bg-[#212520] dark:border-[#323731]">
+                  <span className="font-semibold text-[#193a32] dark:text-[#a8d5c4]">Step-free entrance:</span> Ground-floor entry to the main pavilion is level from the visitor courtyard. (Verified from official guidelines).
                 </div>
-                <CardTitle className="font-serif text-lg">
-                  {OUTCOME_LABELS.NEEDS_CONFIRMATION}
-                </CardTitle>
-                <CardDescription>
-                  Information is missing, ambiguous, or incomplete.
-                </CardDescription>
-              </CardHeader>
-              <CardContent className="text-sm leading-relaxed text-stone-600 dark:text-stone-300">
-                {OUTCOME_DESCRIPTIONS.NEEDS_CONFIRMATION}
-              </CardContent>
-            </Card>
-
-            <Card className="border-stone-200 bg-white/70 dark:border-stone-800 dark:bg-stone-900/60">
-              <CardHeader>
-                <div className="mb-2">
-                  <Badge variant="REQUIREMENT_CONFLICT">
-                    {OUTCOME_LABELS.REQUIREMENT_CONFLICT}
-                  </Badge>
+                <div className="rounded-lg bg-[#fcf5e8] p-3 border border-[#eed49c] dark:bg-[#382b17] dark:border-[#544122]">
+                  <span className="font-semibold text-[#8c5914] dark:text-[#f0d496]">Operational Advisory:</span> Advance online booking required 90 days ahead. Upper galleries in historic haveli require stairs.
                 </div>
-                <CardTitle className="font-serif text-lg">
-                  {OUTCOME_LABELS.REQUIREMENT_CONFLICT}
-                </CardTitle>
-                <CardDescription>
-                  Published evidence identifies an explicit barrier.
-                </CardDescription>
-              </CardHeader>
-              <CardContent className="text-sm leading-relaxed text-stone-600 dark:text-stone-300">
-                {OUTCOME_DESCRIPTIONS.REQUIREMENT_CONFLICT}
-              </CardContent>
-            </Card>
-          </div>
+                <div className="rounded-lg bg-[#fdf0ec] p-3 border border-[#f3c2b2] dark:bg-[#3a1d17] dark:border-[#582a20]">
+                  <span className="font-semibold text-[#a84422] dark:text-[#f6b4a1]">Question Kit:</span> One-click copyable questions to email or call the venue before you travel.
+                </div>
+              </div>
 
-          <div className="mt-6 rounded-lg border border-stone-200 bg-stone-50 p-4 text-xs text-stone-600 dark:border-stone-800 dark:bg-stone-900/40 dark:text-stone-400">
-            <strong>Important note:</strong> {DISCLAIMER_NOTE}
+              <div className="mt-5 pt-4 border-t border-[#ede8dc] dark:border-[#323731] flex justify-end">
+                <Link href="/explore">
+                  <Button size="sm" variant="outline">
+                    Try the live discovery flow →
+                  </Button>
+                </Link>
+              </div>
+            </div>
           </div>
         </section>
 
         {/* Reviewed Cultural Spaces in Ahmedabad */}
-        <section aria-labelledby="spaces-heading" className="mt-20">
-          <div className="border-b border-stone-200 pb-4 dark:border-stone-800">
-            <h2
-              id="spaces-heading"
-              className="font-serif text-2xl font-semibold text-stone-900 dark:text-stone-100"
+        <section aria-labelledby="spaces-heading" className="mt-24 sm:mt-32">
+          <div className="flex flex-col sm:flex-row sm:items-end sm:justify-between gap-4 border-b border-[#e6e0d4] pb-4 dark:border-[#323731]">
+            <div>
+              <span className="text-xs font-semibold uppercase tracking-widest text-[#c56f4d]">
+                Ahmedabad Pilot Collection
+              </span>
+              <h2
+                id="spaces-heading"
+                className="mt-1 font-serif text-3xl font-semibold text-[#252923] dark:text-[#f4f1ea]"
+              >
+                Reviewed cultural spaces
+              </h2>
+            </div>
+            <Link
+              href="/explore"
+              className="text-sm font-semibold text-[#193a32] hover:underline dark:text-[#a8d5c4]"
             >
-              Cultural spaces in Ahmedabad
-            </h2>
-            <p className="mt-1 text-sm text-stone-600 dark:text-stone-400">
-              Independently reviewed spaces included in our Ahmedabad pilot:
-            </p>
+              Explore all spaces in Ahmedabad →
+            </Link>
           </div>
 
           <div className="mt-8 grid gap-6 md:grid-cols-3">
-            <Card className="border-stone-200 bg-white/70 dark:border-stone-800 dark:bg-stone-900/60">
+            <Card className="border-[#e6e0d4] bg-white dark:border-[#323731] dark:bg-[#212520]">
               <CardHeader>
-                <span className="text-xs font-semibold uppercase tracking-wider text-stone-500">
-                  Textiles & Heritage
+                <span className="text-xs font-semibold uppercase tracking-wider text-[#c56f4d]">
+                  Textiles & Haveli Architecture
                 </span>
-                <CardTitle className="font-serif text-xl">
+                <CardTitle className="font-serif text-2xl">
                   Calico Museum of Textiles
                 </CardTitle>
                 <CardDescription>The Retreat, Shahibaug</CardDescription>
               </CardHeader>
-              <CardContent className="space-y-3 text-xs leading-relaxed text-stone-600 dark:text-stone-300">
+              <CardContent className="space-y-3 text-xs leading-relaxed text-[#62685d] dark:text-[#9da398]">
                 <p>
-                  A globally renowned collection of Indian fabrics, court
-                  textiles, and regional weaving traditions housed in historic
-                  residential havelis.
+                  A globally celebrated collection of historic Indian court textiles, regional embroideries, and sacred fabrics housed in tranquil residential havelis.
                 </p>
-                <p className="text-stone-500 dark:text-stone-400">
-                  <strong>Visit detail:</strong> Advance online registration
-                  required (opens 90 days ahead). Historic architecture involves
-                  varying floor levels and narrow corridors.
+                <p className="rounded-md bg-[#f6f3eb] p-2.5 border border-[#e6e0d4] text-[#252923] dark:bg-[#191c19] dark:border-[#323731] dark:text-[#e4ded0]">
+                  <strong>Key visit detail:</strong> Advance online registration required. Level courtyards with stepped haveli thresholds.
                 </p>
               </CardContent>
             </Card>
 
-            <Card className="border-stone-200 bg-white/70 dark:border-stone-800 dark:bg-stone-900/60">
+            <Card className="border-[#e6e0d4] bg-white dark:border-[#323731] dark:bg-[#212520]">
               <CardHeader>
-                <span className="text-xs font-semibold uppercase tracking-wider text-stone-500">
-                  Art & Architecture
+                <span className="text-xs font-semibold uppercase tracking-wider text-[#c56f4d]">
+                  Art & Historic Estate
                 </span>
-                <CardTitle className="font-serif text-xl">
+                <CardTitle className="font-serif text-2xl">
                   Kasturbhai Lalbhai Museum
                 </CardTitle>
                 <CardDescription>Lalbaug, Shahibaug</CardDescription>
               </CardHeader>
-              <CardContent className="space-y-3 text-xs leading-relaxed text-stone-600 dark:text-stone-300">
+              <CardContent className="space-y-3 text-xs leading-relaxed text-[#62685d] dark:text-[#9da398]">
                 <p>
-                  A century-old colonial ancestral home set in serene gardens,
-                  exhibiting historic miniatures, modern Indian art, and outdoor
-                  sculptures.
+                  A restored colonial-era ancestral home set in serene tree-shaded grounds, showcasing Persian and Indian miniatures alongside modern outdoor sculptures.
                 </p>
-                <p className="text-stone-500 dark:text-stone-400">
-                  <strong>Visit detail:</strong> Conducted tours with advance
-                  booking. Heritage residential layout; step-free options for
-                  upper galleries remain unrecorded.
+                <p className="rounded-md bg-[#f6f3eb] p-2.5 border border-[#e6e0d4] text-[#252923] dark:bg-[#191c19] dark:border-[#323731] dark:text-[#e4ded0]">
+                  <strong>Key visit detail:</strong> Conducted gallery tours with prior booking. Upper-floor gallery access involves stairs.
                 </p>
               </CardContent>
             </Card>
 
-            <Card className="border-stone-200 bg-white/70 dark:border-stone-800 dark:bg-stone-900/60">
+            <Card className="border-[#e6e0d4] bg-white dark:border-[#323731] dark:bg-[#212520]">
               <CardHeader>
-                <span className="text-xs font-semibold uppercase tracking-wider text-stone-500">
-                  Dialogue & Expression
+                <span className="text-xs font-semibold uppercase tracking-wider text-[#c56f4d]">
+                  Dialogue & Memory
                 </span>
-                <CardTitle className="font-serif text-xl">
+                <CardTitle className="font-serif text-2xl">
                   Conflictorium
                 </CardTitle>
                 <CardDescription>Gool Lodge, Mirzapur</CardDescription>
               </CardHeader>
-              <CardContent className="space-y-3 text-xs leading-relaxed text-stone-600 dark:text-stone-300">
+              <CardContent className="space-y-3 text-xs leading-relaxed text-[#62685d] dark:text-[#9da398]">
                 <p>
-                  A participatory museum housed in a historic bungalow in the
-                  walled city, dedicated to social dialogue, memory, and artistic
-                  reflection.
+                  A participatory museum situated in a historic bungalow in the walled city, dedicated to democratic expression, conflict transformation, and communal memory.
                 </p>
-                <p className="text-stone-500 dark:text-stone-400">
-                  <strong>Visit detail:</strong> Walk-in admission for general
-                  visits. Multi-story heritage structure without recorded elevator
-                  accommodations.
+                <p className="rounded-md bg-[#f6f3eb] p-2.5 border border-[#e6e0d4] text-[#252923] dark:bg-[#191c19] dark:border-[#323731] dark:text-[#e4ded0]">
+                  <strong>Key visit detail:</strong> Walk-in entry welcome. Heritage structure without elevator; ground-floor spaces accessible.
                 </p>
               </CardContent>
             </Card>
           </div>
+        </section>
 
+        {/* Closing CTA */}
+        <div className="mt-24 sm:mt-32 rounded-3xl bg-[#193a32] p-10 sm:p-14 text-center text-[#f6f3eb] dark:bg-[#2a584d]">
+          <h2 className="font-serif text-3xl font-semibold sm:text-4xl text-white">
+            Ready to discover Ahmedabad’s cultural landscape?
+          </h2>
+          <p className="mt-4 text-base sm:text-lg text-[#d8e2dc] max-w-xl mx-auto">
+            Choose what you want to explore and plan your visit with grounded, transparent information.
+          </p>
           <div className="mt-8 flex justify-center">
             <Link href="/explore">
-              <Button variant="outline">Learn more about our pilot spaces →</Button>
+              <Button size="lg" variant="secondary" className="text-base px-8 py-4">
+                Discover experiences →
+              </Button>
             </Link>
           </div>
-        </section>
+          <p className="mt-6 text-xs text-[#a3b8ad] max-w-md mx-auto">
+            {DISCLAIMER_NOTE}
+          </p>
+        </div>
       </Container>
     </div>
   );

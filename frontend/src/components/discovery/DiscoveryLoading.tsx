@@ -13,14 +13,14 @@ export const DiscoveryLoading: React.FC<DiscoveryLoadingProps> = ({
     <div
       role="status"
       aria-live="polite"
-      className={`flex flex-col items-center justify-center rounded-2xl border border-stone-200 bg-white/80 p-12 text-center shadow-sm dark:border-stone-800 dark:bg-stone-900/60 ${className}`}
+      className={`flex flex-col items-center justify-center rounded-3xl border border-[#e6e0d4] bg-white p-12 sm:p-16 text-center shadow-xs dark:border-[#323731] dark:bg-[#212520] ${className}`}
     >
       {/* Calm pulsing spinner */}
       <div className="relative mb-6 flex h-16 w-16 items-center justify-center">
-        <div className="absolute h-16 w-16 animate-ping rounded-full bg-teal-100 opacity-60 dark:bg-teal-950" />
-        <div className="relative flex h-12 w-12 items-center justify-center rounded-full bg-teal-50 border border-teal-200 dark:bg-teal-900/40 dark:border-teal-700">
+        <div className="absolute h-16 w-16 animate-ping rounded-full bg-[#eaf2ee] opacity-75 dark:bg-[#1d352b]" />
+        <div className="relative flex h-12 w-12 items-center justify-center rounded-full bg-[#f6f3eb] border border-[#bcd6cb] dark:bg-[#212520] dark:border-[#2f5545]">
           <svg
-            className="h-6 w-6 animate-spin text-teal-700 dark:text-teal-400"
+            className="h-6 w-6 animate-spin text-[#193a32] dark:text-[#a8d5c4]"
             xmlns="http://www.w3.org/2000/svg"
             fill="none"
             viewBox="0 0 24 24"
@@ -43,16 +43,16 @@ export const DiscoveryLoading: React.FC<DiscoveryLoadingProps> = ({
         </div>
       </div>
 
-      <h3 className="font-serif text-xl font-semibold text-stone-900 sm:text-2xl dark:text-stone-100">
+      <h3 className="font-serif text-2xl font-semibold text-[#252923] sm:text-3xl dark:text-[#f4f1ea]">
         Finding cultural experiences and reviewing available visit information…
       </h3>
 
-      <p className="mt-3 max-w-lg text-sm leading-relaxed text-stone-600 dark:text-stone-300">
+      <p className="mt-4 max-w-xl text-base leading-relaxed text-[#62685d] dark:text-[#9da398]">
         AccessAtlas is discovering cultural spaces in {city} matching your curiosity, then checking independently verified venue records against your visit preferences.
       </p>
 
-      <div className="mt-6 flex items-center gap-2 text-xs font-medium text-stone-400 dark:text-stone-500">
-        <span className="inline-block h-1.5 w-1.5 rounded-full bg-teal-600" />
+      <div className="mt-8 flex items-center gap-2.5 text-xs font-semibold uppercase tracking-wider text-[#193a32] dark:text-[#a8d5c4]">
+        <span className="inline-block h-2 w-2 rounded-full bg-[#c56f4d]" />
         <span>Grounded in published venue documentation</span>
       </div>
     </div>

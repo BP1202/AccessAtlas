@@ -1,55 +1,73 @@
 import React from "react";
-import { describe, it, expect } from "vitest";
+import { describe, it, expect, vi } from "vitest";
 import { render, screen } from "@testing-library/react";
+import userEvent from "@testing-library/user-event";
 import HomePage from "./page";
-import { OUTCOME_LABELS } from "@/lib/constants/labels";
+
+const mockPush = vi.fn();
+vi.mock("next/navigation", () => ({
+  useRouter: () => ({
+    push: mockPush,
+  }),
+}));
 
 describe("Landing Page (HomePage) — Visitor-First Experience", () => {
-  it("renders main visitor-focused headline and lead text", () => {
+  it("renders approved curiosity-first headline and supporting text from UX_VISION.md", () => {
     render(<HomePage />);
     expect(
       screen.getByRole("heading", {
         level: 1,
-        name: /find your kind of cultural experience/i,
+        name: /what if your next favourite place is somewhere you never thought to look/i,
       })
     ).toBeInTheDocument();
-    expect(screen.getByText(/Culture, on your terms/i)).toBeInTheDocument();
-    expect(screen.getByText(/Starting with Ahmedabad/i)).toBeInTheDocument();
+    expect(
+      screen.getByText(/AccessAtlas turns vague cultural curiosity into unexpected discoveries/i)
+    ).toBeInTheDocument();
+    expect(
+      screen.getByText(/Currently exploring Ahmedabad · More cities to come/i)
+    ).toBeInTheDocument();
   });
 
-  it("contains primary CTA linking to /explore and secondary CTA linking to /how-it-works", () => {
+  it("provides a dominant cultural search input with primary and secondary discovery actions", async () => {
+    const user = userEvent.setup();
+    mockPush.mockClear();
+
     render(<HomePage />);
-    const exploreCta = screen.getByRole("link", {
-      name: /explore ahmedabad/i,
-    });
-    expect(exploreCta).toBeInTheDocument();
-    expect(exploreCta).toHaveAttribute("href", "/explore");
 
-    const howItWorksCta = screen.getByRole("link", {
-      name: /how it works/i,
-    });
-    expect(howItWorksCta).toBeInTheDocument();
-    expect(howItWorksCta).toHaveAttribute("href", "/how-it-works");
+    const searchInput = screen.getByLabelText(/what cultural experiences are you curious about/i);
+    expect(searchInput).toBeInTheDocument();
+
+    const submitBtn = screen.getAllByRole("button", { name: /discover experiences/i })[0];
+    expect(submitBtn).toBeInTheDocument();
+
+    // Type query and submit
+    await user.type(searchInput, "Haveli courtyards");
+    await user.click(submitBtn);
+
+    expect(mockPush).toHaveBeenCalledWith("/explore?interest=Haveli%20courtyards");
+
+    const howItWorksLink = screen.getByRole("link", { name: /see how it works/i });
+    expect(howItWorksLink).toBeInTheDocument();
+    expect(howItWorksLink).toHaveAttribute("href", "/how-it-works");
+
+    const surpriseBtn = screen.getByRole("button", { name: /surprise me/i });
+    expect(surpriseBtn).toBeInTheDocument();
+    await user.click(surpriseBtn);
+    expect(mockPush).toHaveBeenCalledTimes(2);
   });
 
-  it("presents the 3 assessment states in visitor-friendly language", () => {
+  it("presents the 3-stage journey in visitor-friendly language without technical jargon", () => {
     render(<HomePage />);
     expect(
       screen.getByRole("heading", {
         level: 2,
-        name: /understanding visit details/i,
+        name: /how discovery connects to planning/i,
       })
     ).toBeInTheDocument();
 
-    expect(
-      screen.getAllByText(OUTCOME_LABELS.VERIFIED_FIT).length
-    ).toBeGreaterThan(0);
-    expect(
-      screen.getAllByText(OUTCOME_LABELS.NEEDS_CONFIRMATION).length
-    ).toBeGreaterThan(0);
-    expect(
-      screen.getAllByText(OUTCOME_LABELS.REQUIREMENT_CONFLICT).length
-    ).toBeGreaterThan(0);
+    expect(screen.getByText("Cultural curiosity")).toBeInTheDocument();
+    expect(screen.getByText("Your visit preferences")).toBeInTheDocument();
+    expect(screen.getByText("Your Visit Plan")).toBeInTheDocument();
   });
 
   it("lists the three reviewed Ahmedabad cultural spaces with authentic descriptions", () => {
@@ -57,7 +75,7 @@ describe("Landing Page (HomePage) — Visitor-First Experience", () => {
     expect(
       screen.getByRole("heading", {
         level: 2,
-        name: /cultural spaces in ahmedabad/i,
+        name: /reviewed cultural spaces/i,
       })
     ).toBeInTheDocument();
 

@@ -35,7 +35,7 @@ Next.js frontend application for **AccessAtlas**, a visitor-first cultural disco
 ## Route Structure
 
 - `/` — Homepage: Editorial introduction, value proposition, visit details explanation, and reviewed Ahmedabad pilot spaces.
-- `/explore` — Explore Ahmedabad: Overview of the upcoming 3-stage discovery flow (Interests $\rightarrow$ Visit preferences $\rightarrow$ Discoveries).
+- `/explore` — Explore Ahmedabad: Functional, visitor-first cultural discovery experience connecting cultural curiosity with verified visit requirements via `POST /api/v1/discover`.
 - `/how-it-works` — How AccessAtlas Works: Methodology, 3-state evaluation explanation, source provenance, and privacy commitment.
 - `/about` — About AccessAtlas: Product mission, Ahmedabad heritage context, and visit verification standards.
 
@@ -47,18 +47,32 @@ Next.js frontend application for **AccessAtlas**, a visitor-first cultural disco
 frontend/
 ├── .env.example              # Safe template for client configuration
 ├── e2e/                      # Playwright end-to-end tests
+│   ├── discovery.spec.ts     # 2-stage discovery flow, visit plan expansion, question kit copy
 │   └── smoke.spec.ts         # Desktop & mobile smoke test, negative jargon assertions
 ├── playwright.config.ts      # Playwright runner and webServer configuration
 ├── src/
 │   ├── app/                  # Next.js App Router pages and layouts
 │   │   ├── about/            # /about page
-│   │   ├── explore/          # /explore destination page
+│   │   ├── explore/          # /explore 2-stage discovery journey & result view
+│   │   │   ├── page.tsx      # Explore page coordinating interests, preferences, and results
+│   │   │   └── page.test.tsx # Explore page integration tests
 │   │   ├── how-it-works/     # /how-it-works methodology page
 │   │   ├── globals.css       # Tailwind CSS v4 entrypoint with warm neutral theme
 │   │   ├── layout.tsx        # Accessible RootLayout with Skip Link, Header, Footer
 │   │   ├── page.tsx          # Visitor-first cultural landing page
 │   │   └── page.test.tsx     # Landing page component unit test & negative jargon checks
 │   ├── components/
+│   │   ├── discovery/        # Interactive discovery experience components
+│   │   │   ├── CandidateCard.tsx         # Cultural candidate card with outcome badges
+│   │   │   ├── CandidateCard.test.tsx
+│   │   │   ├── DiscoveryLoading.tsx      # Transparent, honest progress display
+│   │   │   ├── InterestSelector.tsx      # Stage 1: Free-text input & suggestion chips
+│   │   │   ├── InterestSelector.test.tsx
+│   │   │   ├── PreferenceSelector.tsx    # Stage 2: Tri-state practical requirement controls
+│   │   │   ├── PreferenceSelector.test.tsx
+│   │   │   ├── QuestionKit.tsx           # Copyable question kit with clipboard feedback
+│   │   │   ├── VisitPlanDetail.tsx       # Expandable visit plan & evidence citations
+│   │   │   └── VisitPlanDetail.test.tsx
 │   │   ├── feedback/         # Loading, empty, and error state components
 │   │   │   ├── EmptyState.tsx
 │   │   │   ├── ErrorDisplay.tsx
@@ -84,7 +98,8 @@ frontend/
 │   │   │   ├── contract.test.ts # Schema drift verification against backend contract
 │   │   │   └── types.ts      # TypeScript schemas matching docs/API.md
 │   │   └── constants/
-│   │       └── labels.ts     # Centralized visitor-facing assessment translations
+│   │       ├── labels.ts       # Centralized visitor-facing assessment translations
+│   │       └── requirements.ts # Supported backend practical requirement metadata
 │   └── test/
 │       └── setup.ts          # Vitest setup & @testing-library/jest-dom matchers
 ├── tsconfig.json             # TypeScript configuration with @/* path alias

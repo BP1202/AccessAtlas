@@ -1,7 +1,7 @@
 import { test, expect } from "@playwright/test";
 
 test.describe("AccessAtlas Visitor-First Homepage Smoke Test", () => {
-  test("renders homepage with visitor headline, navigation, and absence of developer jargon", async ({
+  test("renders homepage with approved curiosity-first headline, navigation, and absence of developer jargon", async ({
     page,
   }) => {
     // Desktop viewport
@@ -13,10 +13,10 @@ test.describe("AccessAtlas Visitor-First Homepage Smoke Test", () => {
       /AccessAtlas — Cultural Discovery & Participation Planning/i
     );
 
-    // 2. Check visitor hero headline
+    // 2. Check visitor hero headline from UX_VISION.md
     const h1 = page.locator("h1");
     await expect(h1).toBeVisible();
-    await expect(h1).toContainText("Find your kind of cultural experience.");
+    await expect(h1).toContainText("What if your next favourite place is somewhere you never thought to look?");
 
     // 3. Check navigation links in header
     const mainNav = page.getByRole("navigation", { name: "Main Navigation" });
@@ -24,10 +24,11 @@ test.describe("AccessAtlas Visitor-First Homepage Smoke Test", () => {
     await expect(mainNav.getByRole("link", { name: "How it works", exact: true })).toBeVisible();
     await expect(mainNav.getByRole("link", { name: "About", exact: true })).toBeVisible();
 
-    // 4. Check primary CTA links to /explore
-    const primaryCta = page.getByRole("link", { name: "Explore Ahmedabad" }).first();
+    // 4. Check dominant hero input and primary CTA button
+    const searchInput = page.getByLabel(/what cultural experiences are you curious about/i);
+    await expect(searchInput).toBeVisible();
+    const primaryCta = page.getByRole("button", { name: /discover experiences/i }).first();
     await expect(primaryCta).toBeVisible();
-    await expect(primaryCta).toHaveAttribute("href", "/explore");
 
     // 5. Check reviewed Ahmedabad cultural spaces are displayed
     await expect(page.getByText("Calico Museum of Textiles")).toBeVisible();
@@ -51,20 +52,20 @@ test.describe("AccessAtlas Visitor-First Homepage Smoke Test", () => {
 
     const h1 = page.locator("h1");
     await expect(h1).toBeVisible();
-    await expect(h1).toContainText("Find your kind of cultural experience.");
+    await expect(h1).toContainText("What if your next favourite place is somewhere you never thought to look?");
 
-    const primaryCta = page.getByRole("link", { name: "Explore Ahmedabad" }).first();
+    const primaryCta = page.getByRole("button", { name: /discover experiences/i }).first();
     await expect(primaryCta).toBeVisible();
   });
 
   test("primary CTA navigates to /explore successfully", async ({ page }) => {
     await page.goto("/");
-    await page.getByRole("link", { name: "Explore Ahmedabad" }).first().click();
+    await page.getByRole("button", { name: /discover experiences/i }).first().click();
 
     await expect(page).toHaveURL(/\/explore$/);
     await expect(
       page.getByRole("heading", {
-        name: /explore cultural spaces in ahmedabad/i,
+        name: /what cultural experiences spark your curiosity|explore cultural spaces/i,
       })
     ).toBeVisible();
   });

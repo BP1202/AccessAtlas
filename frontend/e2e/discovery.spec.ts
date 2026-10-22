@@ -66,14 +66,8 @@ const mockApiResponse = {
 };
 
 test.describe("Visitor-First Discovery Experience (/explore)", () => {
-  test("completes two-stage journey, reviews candidate, expands visit plan, and interacts with question kit", async ({
-    page,
-    context,
-  }) => {
-    // Grant clipboard permissions for copying
-    await context.grantPermissions(["clipboard-read", "clipboard-write"]);
-
-    // Intercept API call to discovery endpoint
+  test.beforeEach(async ({ page }) => {
+    // Intercept API call to discovery endpoint with mock data
     await page.route("**/api/v1/discover", async (route) => {
       await route.fulfill({
         status: 200,
@@ -81,6 +75,14 @@ test.describe("Visitor-First Discovery Experience (/explore)", () => {
         body: JSON.stringify(mockApiResponse),
       });
     });
+  });
+
+  test("completes two-stage journey, reviews candidate, expands visit plan, and interacts with question kit", async ({
+    page,
+    context,
+  }) => {
+    // Grant clipboard permissions for copying
+    await context.grantPermissions(["clipboard-read", "clipboard-write"]);
 
     await page.goto("/explore");
     await page.waitForLoadState("networkidle");
@@ -141,7 +143,65 @@ test.describe("Visitor-First Discovery Experience (/explore)", () => {
     ).toBeVisible();
   });
 
-  test("renders gracefully on mobile viewport", async ({ page }) => {
+  test("Flow 1: Homepage -> manual entry -> discovery", async ({ page }) => {
+    await page.goto("/");
+    await page.waitForLoadState("networkidle");
+
+    const searchInput = page.getByLabel(/what cultural experiences are you curious about/i);
+    await searchInput.fill("Haveli courtyards");
+
+    const submitBtn = page.getByRole("button", { name: /discover experiences/i }).first();
+    await submitBtn.click();
+
+    await expect(page).toHaveURL(/interest=Haveli%20courtyards/);
+    await expect(page.getByText("Haveli courtyards")).toBeVisible();
+
+    const continueBtn = page.getByRole("button", { name: /continue to visit preferences/i });
+    await expect(continueBtn).toBeEnabled();
+    await continueBtn.click();
+
+    await expect(page.getByRole("heading", { name: /what matters for your visit\?/i })).toBeVisible();
+  });
+
+  test("Flow 2: Homepage -> Help me discover -> manual-entry alternative", async ({ page }) => {
+    await page.goto("/");
+    await page.waitForLoadState("networkidle");
+
+    const helpLink = page.getByRole("link", { name: /help me discover/i });
+    await helpLink.click();
+
+    await expect(page).toHaveURL(/path=help/);
+    await expect(page.getByText(/Cultural Compass · Preview/i)).toBeVisible();
+
+    // Click "Enter my own interests instead"
+    const manualBtn = page.getByRole("button", { name: /enter my own interests instead/i });
+    await manualBtn.click();
+
+    // Custom input is now visible
+    await expect(page.getByLabel(/add cultural interest or topic/i)).toBeVisible();
+  });
+
+  test("Flow 3: Homepage -> Surprise me -> editable interests -> discovery", async ({ page }) => {
+    await page.goto("/");
+    await page.waitForLoadState("networkidle");
+
+    const surpriseBtn = page.getByRole("button", { name: /surprise me/i });
+    await surpriseBtn.click();
+
+    await expect(page).toHaveURL(/\/explore\?interest=/);
+    await expect(
+      page.getByRole("heading", { name: /what cultural experiences spark your curiosity\?/i })
+    ).toBeVisible();
+
+    // Visitor can continue or add more
+    const continueBtn = page.getByRole("button", { name: /continue to visit preferences/i });
+    await expect(continueBtn).toBeEnabled();
+    await continueBtn.click();
+
+    await expect(page.getByRole("heading", { name: /what matters for your visit\?/i })).toBeVisible();
+  });
+
+  test("Mobile navigation across entry paths and discovery", async ({ page }) => {
     await page.setViewportSize({ width: 375, height: 667 });
     await page.goto("/explore");
     await page.waitForLoadState("networkidle");
@@ -150,10 +210,20 @@ test.describe("Visitor-First Discovery Experience (/explore)", () => {
       page.getByRole("heading", { name: /what cultural experiences spark your curiosity\?/i })
     ).toBeVisible();
 
+    // Switch to "Surprise me" tab on mobile
+    const surpriseTab = page.getByRole("tab", { name: /surprise me/i });
+    await surpriseTab.click();
+    await expect(page.getByText(/Curated starting sparks from Ahmedabad/i)).toBeVisible();
+
+    // Switch back to "I know what I want" tab
+    const manualTab = page.getByRole("tab", { name: /i know what i want/i });
+    await manualTab.click();
+
     const textilesChip = page.getByRole("button", { name: /textiles/i });
     await textilesChip.click();
 
     const continueBtn = page.getByRole("button", { name: /continue to visit preferences/i });
     await expect(continueBtn).toBeVisible();
+    await expect(continueBtn).toBeEnabled();
   });
 });

@@ -36,6 +36,10 @@ const initialPreferences: Record<EvidenceAttribute, PreferenceState> =
 
 function ExploreContent() {
   const searchParams = useSearchParams();
+  const pathParam = searchParams?.get("path");
+  const initialPath =
+    pathParam === "help" ? "help" : pathParam === "surprise" ? "surprise" : "manual";
+
   const [step, setStep] = useState<DiscoveryStep>("interests");
   const [interests, setInterests] = useState<string[]>(() => {
     const interestParam = searchParams?.get("interest");
@@ -237,6 +241,7 @@ function ExploreContent() {
               selectedInterests={interests}
               onChange={setInterests}
               onNext={() => setStep("preferences")}
+              initialPath={initialPath}
             />
           </div>
         )}

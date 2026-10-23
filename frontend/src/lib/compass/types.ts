@@ -136,3 +136,18 @@ export interface ManualInterestMergeResult {
   /** Whether the combined list exceeds the Discovery API limit */
   readonly exceedsDiscoveryLimit: boolean;
 }
+
+/**
+ * Deterministic cultural direction definition derived from explicit visitor choices.
+ * Provisional starting point, never an immutable verdict or Qloo classification.
+ */
+export interface CulturalDirection {
+  /** Stable identifier for the direction archetype */
+  readonly id: string;
+  /** Short, inspiring editorial title (e.g. "Living Craft & Artisan Heritage") */
+  readonly title: string;
+  /** Concise descriptive sentence */
+  readonly description: string;
+  /** Transparent explanation of which choices influenced this provisional title */
+  readonly rationale: string;
+}

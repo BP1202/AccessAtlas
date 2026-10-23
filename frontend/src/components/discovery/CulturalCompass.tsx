@@ -1,5 +1,6 @@
 import React, { useState } from "react";
 import { Button } from "@/components/ui/Button";
+import { CulturalCompassReveal } from "./CulturalCompassReveal";
 import {
   COMPASS_QUESTIONS,
   aggregateCompassSignals,
@@ -18,7 +19,7 @@ export interface CulturalCompassProps {
   /** Callback fired when the visitor completes the compass flow */
   onComplete: (answers: CompassAnswers, derivedInterests: string[]) => void;
   /** Callback fired when the visitor chooses to return to manual entry */
-  onExitToManual: () => void;
+  onExitToManual: (interests?: string[]) => void;
   /** Optional container class name */
   className?: string;
 }
@@ -83,142 +84,30 @@ export const CulturalCompass: React.FC<CulturalCompassProps> = ({
     setIsCompleted(true);
   };
 
-  const handleApplyDirections = () => {
-    if (!summaryResult) {
-      const agg = aggregateCompassSignals(answers);
-      const merged = mergeWithManualInterests(agg.interests, existingInterests);
-      onComplete(answers, merged.interests);
-    } else {
-      const merged = mergeWithManualInterests(summaryResult.interests, existingInterests);
-      onComplete(answers, merged.interests);
-    }
-  };
-
-  const handleRestart = () => {
-    setAnswers({});
-    setCurrentIndex(0);
-    setIsCompleted(false);
-    setSummaryResult(null);
-  };
 
   /* ========================================================================
-     COMPLETION SCREEN: Summary of Discovered Directions
+     COMPLETION SCREEN: Editable Cultural Compass Direction Reveal
   ======================================================================== */
   if (isCompleted && summaryResult) {
     const merged = mergeWithManualInterests(summaryResult.interests, existingInterests);
 
     return (
-      <div
-        className={`rounded-3xl border border-[#dfd8c8] bg-[#fbf9f5] p-6 sm:p-10 shadow-sm animate-fadeIn dark:border-[#323731] dark:bg-[#1a1e1a] ${className}`}
-        data-testid="cultural-compass-summary"
-      >
-        {/* Editorial Journal Header */}
-        <div className="flex flex-wrap items-center justify-between gap-3 border-b border-[#e6e0d4] pb-5 dark:border-[#323731]">
-          <div className="flex items-center gap-2">
-            <span className="rounded-full bg-[#193a32] px-3 py-1 text-xs font-semibold text-white dark:bg-[#2a584d]">
-              🧭 Cultural Compass · Journal Summary
-            </span>
-            <span className="text-xs text-[#62685d] dark:text-[#9da398]">
-              {summaryResult.totalQuestionsAnswered} of {totalQuestions} questions explored
-            </span>
-          </div>
-
-          <button
-            type="button"
-            onClick={onExitToManual}
-            className="text-xs font-semibold text-[#62685d] hover:text-[#193a32] underline underline-offset-4 dark:text-[#9da398] cursor-pointer"
-          >
-            Switch to manual entry
-          </button>
-        </div>
-
-        <div className="mt-6">
-          <h3 className="font-serif text-2xl sm:text-3xl font-semibold text-[#252923] dark:text-[#f4f1ea]">
-            Cultural directions surfaced from your choices
-          </h3>
-          <p className="mt-2 text-sm sm:text-base text-[#62685d] max-w-2xl dark:text-[#9da398] leading-relaxed">
-            These cultural interests were surfaced deterministically from your responses. You can inspect, customize, or remove any topic before discovering venues.
-          </p>
-        </div>
-
-        {/* Advisory if exceeding limit */}
-        {summaryResult.exceedsDiscoveryLimit && (
-          <div
-            role="status"
-            className="mt-5 rounded-2xl border border-[#e6cbb7] bg-[#fdf6f0] p-4 text-xs sm:text-sm text-[#8c3b1e] dark:border-[#523528] dark:bg-[#2e1d16] dark:text-[#e89b7d]"
-          >
-            <p className="font-semibold">Discovery API capacity note:</p>
-            <p className="mt-1">{summaryResult.advisories[0]}</p>
-          </div>
-        )}
-
-        {/* Results pill grid */}
-        <div className="mt-6 space-y-4">
-          <span className="text-xs font-semibold uppercase tracking-wider text-[#62685d] dark:text-[#9da398]">
-            Surfaced Cultural Interests ({merged.interests.length})
-          </span>
-
-          {merged.interests.length === 0 ? (
-            <div className="rounded-2xl border border-dashed border-[#dfd8c8] p-6 text-center text-sm text-[#62685d] dark:border-[#323731] dark:text-[#9da398]">
-              No specific directions were selected. You can enter your own cultural interests directly or re-explore the compass comparisons.
-            </div>
-          ) : (
-            <div className="flex flex-wrap gap-2.5" role="list" aria-label="Surfaced cultural directions">
-              {merged.interests.map((interest) => {
-                const provenanceItem = summaryResult.provenance.find(
-                  (p) => p.interest.toLowerCase() === interest.toLowerCase()
-                );
-                return (
-                  <div
-                    key={interest}
-                    role="listitem"
-                    className="inline-flex flex-col rounded-2xl border border-[#d8d0c2] bg-white px-4 py-2.5 shadow-2xs dark:border-[#323731] dark:bg-[#212520]"
-                  >
-                    <span className="font-serif text-sm font-semibold text-[#193a32] dark:text-[#a8d5c4]">
-                      {interest}
-                    </span>
-                    {provenanceItem && (
-                      <span className="text-[11px] text-[#73796e] dark:text-[#888f83]">
-                        via {provenanceItem.choice === "both" ? "Both" : "Selected choice"}
-                      </span>
-                    )}
-                  </div>
-                );
-              })}
-            </div>
-          )}
-        </div>
-
-        {/* Actions */}
-        <div className="mt-8 pt-6 border-t border-[#e6e0d4] flex flex-wrap items-center justify-between gap-4 dark:border-[#323731]">
-          <button
-            type="button"
-            onClick={handleRestart}
-            className="text-xs sm:text-sm font-medium text-[#62685d] hover:text-[#252923] underline underline-offset-4 dark:text-[#9da398] cursor-pointer"
-          >
-            ↺ Re-explore comparisons
-          </button>
-
-          <div className="flex items-center gap-3">
-            <Button
-              type="button"
-              variant="outline"
-              onClick={onExitToManual}
-              className="text-xs sm:text-sm"
-            >
-              Enter manual topics
-            </Button>
-            <Button
-              type="button"
-              variant="primary"
-              onClick={handleApplyDirections}
-              className="px-6 py-3 font-semibold shadow-xs"
-            >
-              Apply directions to visit →
-            </Button>
-          </div>
-        </div>
-      </div>
+      <CulturalCompassReveal
+        initialInterests={merged.interests}
+        provenance={summaryResult.provenance}
+        answers={answers}
+        manualInterests={existingInterests}
+        onConfirmAndContinue={(confirmedInterests) => {
+          onComplete(answers, confirmedInterests);
+        }}
+        onReviseAnswers={() => {
+          setIsCompleted(false);
+          // Preserve answers, navigate to the first or last question
+          setCurrentIndex(totalQuestions - 1);
+        }}
+        onExitToManual={onExitToManual}
+        className={className}
+      />
     );
   }
 
@@ -246,7 +135,7 @@ export const CulturalCompass: React.FC<CulturalCompassProps> = ({
         {/* Visible way to leave Cultural Compass */}
         <button
           type="button"
-          onClick={onExitToManual}
+          onClick={() => onExitToManual()}
           className="text-xs font-semibold text-[#62685d] hover:text-[#193a32] underline underline-offset-4 dark:text-[#9da398] dark:hover:text-[#f4f1ea] cursor-pointer self-start sm:self-auto"
         >
           Enter my own interests instead →
@@ -472,7 +361,7 @@ export const CulturalCompass: React.FC<CulturalCompassProps> = ({
           ) : (
             <button
               type="button"
-              onClick={onExitToManual}
+              onClick={() => onExitToManual()}
               className="text-xs font-semibold text-[#62685d] hover:text-[#193a32] underline underline-offset-4 dark:text-[#9da398] cursor-pointer"
             >
               Enter my own interests instead

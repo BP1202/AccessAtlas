@@ -307,8 +307,14 @@ export const InterestSelector: React.FC<InterestSelectorProps> = ({
             onComplete={(finalAnswers, derivedInterests) => {
               setCompassAnswers(finalAnswers);
               onChange(derivedInterests);
+              onNext();
             }}
-            onExitToManual={() => setActivePath("manual")}
+            onExitToManual={(updatedInterests) => {
+              if (updatedInterests && updatedInterests.length > 0) {
+                onChange(updatedInterests);
+              }
+              setActivePath("manual");
+            }}
           />
         </div>
       )}
@@ -445,18 +451,20 @@ export const InterestSelector: React.FC<InterestSelectorProps> = ({
       </div>
 
       {/* Next Step Action */}
-      <div className="pt-4 flex justify-end">
-        <Button
-          type="button"
-          variant="secondary"
-          size="lg"
-          onClick={onNext}
-          disabled={selectedInterests.length === 0}
-          className="w-full sm:w-auto px-8 font-semibold shadow-sm"
-        >
-          Continue to visit preferences →
-        </Button>
-      </div>
+      {activePath !== "help" && (
+        <div className="pt-4 flex justify-end">
+          <Button
+            type="button"
+            variant="secondary"
+            size="lg"
+            onClick={onNext}
+            disabled={selectedInterests.length === 0}
+            className="w-full sm:w-auto px-8 font-semibold shadow-sm"
+          >
+            Continue to visit preferences →
+          </Button>
+        </div>
+      )}
     </div>
   );
 };

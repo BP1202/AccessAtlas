@@ -258,22 +258,23 @@ describe("CulturalCompass Component — User Journey & State", () => {
     await user.click(screen.getByRole("button", { name: /quiet contemplative gallery/i }));
     await user.click(screen.getByRole("button", { name: /next question →/i }));
 
-    // Q4: Choose Both (traditional_making_techniques + experimental_visual_art)
-    await user.click(screen.getByRole("button", { name: /both appeal to me/i }));
+    // Q4: Choose Neither / Skip
+    await user.click(screen.getByRole("button", { name: /neither \/ skip comparison/i }));
     await user.click(screen.getByRole("button", { name: /next question →/i }));
 
-    // Q5: Choose Option B (modern_design -> modernist architecture, design)
-    await user.click(screen.getByRole("button", { name: /modern design/i }));
+    // Q5: Choose Neither / Skip
+    await user.click(screen.getByRole("button", { name: /neither \/ skip comparison/i }));
 
     // On final question, button text changes to "Review directions →"
     const reviewBtn = screen.getByRole("button", { name: /review directions →/i });
     await user.click(reviewBtn);
 
-    // Summary screen should now appear
+    // Summary/Reveal screen should now appear
     expect(screen.getByTestId("cultural-compass-summary")).toBeInTheDocument();
     expect(
-      screen.getByText(/Cultural directions surfaced from your choices/i)
+      screen.getByText(/Your Curated Cultural Direction/i)
     ).toBeInTheDocument();
+    expect(screen.getByTestId("cultural-direction-title")).toBeInTheDocument();
 
     // Verify existing manual interest "Heritage architecture" is preserved
     expect(screen.getByText("Heritage architecture")).toBeInTheDocument();
@@ -282,8 +283,10 @@ describe("CulturalCompass Component — User Journey & State", () => {
     expect(screen.getByText("textiles")).toBeInTheDocument();
     expect(screen.getByText("craft traditions")).toBeInTheDocument();
 
-    // Click "Apply directions to visit →"
-    const applyBtn = screen.getByRole("button", { name: /apply directions to visit →/i });
+    // Click "Continue to visit preferences →"
+    const applyBtn = screen.getByRole("button", {
+      name: /continue to visit preferences →/i,
+    });
     await user.click(applyBtn);
 
     expect(handleComplete).toHaveBeenCalledTimes(1);
@@ -293,8 +296,8 @@ describe("CulturalCompass Component — User Journey & State", () => {
     expect(finalAnswers.textiles_vs_contemporary_studio).toBe("option_a");
     expect(finalAnswers.mountain_craft_village_vs_coastal_heritage_town).toBe("neither");
     expect(finalAnswers.quiet_gallery_vs_lively_festival).toBe("option_a");
-    expect(finalAnswers.traditional_techniques_vs_experimental_art).toBe("both");
-    expect(finalAnswers.historic_architecture_vs_modern_design).toBe("option_b");
+    expect(finalAnswers.traditional_techniques_vs_experimental_art).toBe("neither");
+    expect(finalAnswers.historic_architecture_vs_modern_design).toBe("neither");
 
     // Verify manual interest was preserved and prepended
     expect(finalInterests[0]).toBe("Heritage architecture");

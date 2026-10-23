@@ -197,17 +197,47 @@ export function aggregateCompassSignals(
 
 ---
 
-## 6. How Subsequent Issues Will Consume the Catalogue
+## 6. Editable Direction Reveal & Discovery Handoff (Issue 06)
 
-The Cultural Compass catalogue and signals engine provide the foundation for subsequent issues in the Phase 2 roadmap:
+Implemented in [`frontend/src/lib/compass/direction.ts`](../frontend/src/lib/compass/direction.ts) and [`frontend/src/components/discovery/CulturalCompassReveal.tsx`](../frontend/src/components/discovery/CulturalCompassReveal.tsx).
 
-1. **Interactive Compass UI (Next Issue)**:
-   - Will render the 5 questions as engaging, card-based binary/multi-option choices in Entry Path B (`"Help me discover"`).
-   - Allows users to step through, choose Option A / B / Both / Skip, and see real-time updates.
-2. **Transparent Provenance Display**:
-   - When compass interests are added to the shared chip bar, the UI will allow visitors to click an info badge on each chip to see why it was suggested (e.g., *"Suggested from your choice of Historic textile workshop"*).
-3. **Curation Before Discovery**:
-   - If more than 5 interests are generated, the UI will guide the visitor to select up to 5 preferred chips before continuing to Stage 2 (Practical Preferences).
+### 6.1 Deterministic Direction Rule Engine
+Rather than relying on LLM hallucination or pseudo-scientific personality classifications, the Cultural Compass uses a transparent, deterministic rule engine:
+```typescript
+export function deriveCulturalDirection(
+  interests: string[],
+  answers: CompassAnswers
+): CulturalDirection
+```
+- **Provisional Titles**: Editorial direction titles (e.g., *"Living Craft & Artisan Heritage"*, *"Historic Architecture & Urban Memory"*, *"Contemporary Form & Spatial Design"*, *"Textile Heritage & Modern Form"*, *"Open Cultural Curiosity"*).
+- **Starting Point, Not a Verdict**: Every reveal explicitly reminds the visitor:
+  > *"Starting point, not a verdict: This direction is an editable discovery aid based strictly on your explicit responses—not an immutable personality profile or Qloo prediction."*
+- **Transparent Compound Logic**: Evaluates specific domain combinations (e.g., both textiles and contemporary design signals yield *"Textile Heritage & Modern Form"*).
+
+### 6.2 Full Visitor Control & Editable Interests
+- **Add & Remove**: Visitors can remove any suggested topic with a single click or type new custom topics (up to 100 characters).
+- **Retain Manual Interests**: Prior manual entries from Stage 1 are preserved and tagged with `Manual entry` provenance.
+- **Direction Override**: A visitor can remove all suggested topics and type completely unrelated topics (e.g. Contemporary art even if they answered heritage questions).
+- **Revise Earlier Answers**: The "↺ Revise compass comparisons" action preserves answers and returns to question comparison mode.
+- **Exit to Manual**: The "Manual entry tab" and "Exit to manual entry ✕" actions retain active edits and transition seamlessly to the manual entry tab.
+
+### 6.3 Capacity and Limit Enforcement
+- **1–5 Interest Constraint**: In accordance with the backend Discovery API contract (`POST /api/v1/discover`), exactly 1 to 5 cultural interests are permitted.
+- **No Silent Discarding**: If more than 5 interests are aggregated, an advisory alert appears informing the visitor of the excess and disabling progression until pruned to 5 or fewer.
+- **Zero Topics Handling**: If all topics are removed, an inline prompt appears and progression is disabled until at least one topic is provided.
+
+### 6.4 Honest Provenance
+Each interest chip clearly indicates its origin:
+- `Manual entry`: Pre-existing interest from manual typing or sparks.
+- `From: Compass choice`: Derived from selecting Option A or Option B.
+- `From: Both`: Derived from choosing "Both appeal to me".
+- `Custom topic`: Added directly by the visitor on the reveal screen.
+Qloo cultural discovery is strictly attributed to the upstream backend service, never claimed as a frontend personality classification.
+
+### 6.5 Seamless Discovery Handoff
+- Confirmed interests are handed off directly to Stage 2 (Visit Preferences).
+- Practical requirements (`step_free_entrance`, `elevator_access`, etc.) remain completely independent of cultural taste signals.
+- Only supported parameters (`city`, `cultural_interests`, `requirements`, `max_candidates`) are sent to `POST /api/v1/discover`.
 
 ---
 
@@ -217,6 +247,8 @@ The following items are intentionally **out of scope** and deferred to future mi
 
 - **No Psychometric Scoring**: Never assigning compatibility percentages or archetypes.
 - **No LLM Narrative Invention**: Mappings remain strictly deterministic and auditable; no generative LLM hallucination of user tastes.
-- **No Permanent Profile Storage**: Answers are kept in frontend component state during the session; user accounts and persistent taste profiles are deferred to Phase 3.
-- **No Direct Qloo Entity Mappings**: The catalogue does not hardcode Qloo entity IDs (`urn:entity:place:...`); entity resolution remains the responsibility of the backend pipeline.
-- **No Automated Destination Switching**: Even if questions mention coastal or mountain archetypes, discovery remains strictly anchored to the active reviewed pilot city (`Ahmedabad`).
+- **No Persistent Taste Memory**: Answers are kept in component session state; persistent profiles across sessions are deferred.
+- **No Backend Endpoint Changes**: Utilizes the existing, validated `POST /api/v1/discover` endpoint without introducing speculative endpoints.
+- **No Cultural Threads Visualization**: Visual cluster graphs or multidimensional affinity thread diagrams are deferred to future milestones.
+- **No Group Preference Reconciliation**: Multi-visitor consensus reconciliation is deferred.
+- **No Visit Plan Redesign**: The candidate card and visit plan view work directly with the existing tested implementation.

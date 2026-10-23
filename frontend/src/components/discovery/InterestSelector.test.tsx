@@ -98,7 +98,7 @@ describe("InterestSelector — Three Entry Paths & Input Preservation", () => {
     expect(handleChange).not.toHaveBeenCalled();
   });
 
-  it("Path B (Help me discover): renders preview, does not fake results, and provides immediate manual-entry fallback", async () => {
+  it("Path B (Help me discover): renders Cultural Compass questions, does not fake results, and provides immediate manual-entry fallback", async () => {
     const user = userEvent.setup();
     const handleChange = vi.fn();
 
@@ -111,15 +111,21 @@ describe("InterestSelector — Three Entry Paths & Input Preservation", () => {
       />
     );
 
-    // Verifies preview header
-    expect(screen.getByText(/Cultural Compass · Preview/i)).toBeInTheDocument();
-    expect(screen.getByText(/You never have to complete a quiz/i)).toBeInTheDocument();
+    // Verifies Cultural Compass header and question prompt
+    expect(screen.getByText(/Cultural Compass/i)).toBeInTheDocument();
+    expect(
+      screen.getByRole("heading", {
+        name: /historic textile workshop versus contemporary design studio/i,
+      })
+    ).toBeInTheDocument();
 
-    // Verifies preserved chip from manual input
+    // Verifies preserved chip from manual input in shared chip bar
     expect(screen.getByText("Stepwells")).toBeInTheDocument();
 
     // Click "Enter my own interests instead"
-    const manualFallbackBtn = screen.getByRole("button", { name: /enter my own interests instead/i });
+    const manualFallbackBtn = screen.getAllByRole("button", {
+      name: /enter my own interests instead/i,
+    })[0];
     await user.click(manualFallbackBtn);
 
     // Now on manual tab: custom interest input is visible

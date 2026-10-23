@@ -161,6 +161,16 @@ test.describe("Visitor-First Discovery Experience (/explore)", () => {
     await continueBtn.click();
 
     await expect(page.getByRole("heading", { name: /what matters for your visit\?/i })).toBeVisible();
+
+    // Verify discovery without Cultural Compass
+    const stepFreeGroup = page.getByRole("radiogroup", { name: /step-free entrance/i });
+    await stepFreeGroup.getByRole("radio", { name: "Essential" }).click();
+
+    const findBtn = page.getByRole("button", { name: /find cultural experiences/i });
+    await findBtn.click();
+
+    await expect(page.getByRole("heading", { name: "Calico Museum of Textiles" }).first()).toBeVisible();
+    await expect(page.getByText("Meets your stated requirements").first()).toBeVisible();
   });
 
   test("Flow 2: Homepage -> Help me discover -> manual-entry alternative", async ({ page }) => {
@@ -186,12 +196,18 @@ test.describe("Visitor-First Discovery Experience (/explore)", () => {
     await expect(page.getByLabel(/add cultural interest or topic/i)).toBeVisible();
   });
 
-  test("Flow 2b: Complete Cultural Compass question flow -> summary -> apply directions", async ({
+  test("Flow 2b: Homepage -> Help me discover -> Cultural Compass -> Editable reveal -> Explore -> Discovery", async ({
     page,
   }) => {
-    await page.goto("/explore?path=help");
+    await page.goto("/");
     await page.waitForLoadState("networkidle");
 
+    // 1. Homepage: click "Help me discover"
+    const helpLink = page.getByRole("link", { name: /help me discover/i });
+    await helpLink.click();
+    await expect(page).toHaveURL(/path=help/);
+
+    // 2. Cultural Compass Questions
     // Question 1: Select Option A
     const q1OptionA = page.getByRole("button", { name: /historic textile workshop/i });
     await expect(q1OptionA).toBeVisible();
@@ -221,21 +237,49 @@ test.describe("Visitor-First Discovery Experience (/explore)", () => {
     await expect(reviewBtn).toBeVisible();
     await reviewBtn.click();
 
-    // Summary screen is shown
+    // 3. Direction Reveal Screen
+    await expect(page.getByTestId("cultural-compass-reveal")).toBeVisible();
+    await expect(page.getByTestId("cultural-direction-title")).toBeVisible();
+    await expect(page.getByText(/Starting point, not a verdict/i)).toBeVisible();
+
+    // Verify limit enforcement when > 5 interests are generated
+    const continueBtn = page.getByRole("button", { name: /continue to visit preferences →/i });
+    await expect(page.getByText(/Discovery capacity limit reached/i)).toBeVisible();
+    await expect(continueBtn).toBeDisabled();
+
+    // 4. Edit Interests: Prune excess topics down to 4
+    await page.getByRole("button", { name: /remove interest visual arts/i }).click();
+    await page.getByRole("button", { name: /remove interest fine art/i }).click();
+    await page.getByRole("button", { name: /remove interest performing arts/i }).click();
+    await page.getByRole("button", { name: /remove interest cultural festivals/i }).click();
+
+    // Add a custom topic: "Contemporary art" (brings total to 5)
+    const customInput = page.getByPlaceholder(/Type any cultural topic/i);
+    await customInput.fill("Contemporary art");
+    await page.getByRole("button", { name: /\+ add topic/i }).click();
     await expect(
-      page.getByText(/Cultural directions surfaced from your choices/i)
-    ).toBeVisible();
-    await expect(
-      page.getByTestId("cultural-compass-summary").getByText("textiles")
+      page.getByRole("list", { name: /editable cultural interests/i }).getByText("Contemporary art", { exact: true })
     ).toBeVisible();
 
-    // Click "Apply directions to visit →"
-    await page.getByRole("button", { name: /apply directions to visit →/i }).click();
-
-    // Interests are now placed in the shared chip bar
-    await expect(page.getByText(/Your Chosen Interests/i)).toBeVisible();
-    const continueBtn = page.getByRole("button", { name: /continue to visit preferences/i });
+    // 5. Continue to Visit Preferences (now enabled with 5 interests)
     await expect(continueBtn).toBeEnabled();
+    await continueBtn.click();
+
+    // 6. Stage 2: Preferences
+    await expect(
+      page.getByRole("heading", { name: /what matters for your visit\?/i })
+    ).toBeVisible();
+
+    // Set "Step-free entrance" to "Essential"
+    const stepFreeGroup = page.getByRole("radiogroup", { name: /step-free entrance/i });
+    await stepFreeGroup.getByRole("radio", { name: "Essential" }).click();
+
+    // 7. Find cultural experiences -> Stage 3: Results
+    const findBtn = page.getByRole("button", { name: /find cultural experiences/i });
+    await findBtn.click();
+
+    await expect(page.getByRole("heading", { name: "Calico Museum of Textiles" }).first()).toBeVisible();
+    await expect(page.getByText("Meets your stated requirements").first()).toBeVisible();
   });
 
   test("Flow 3: Homepage -> Surprise me -> editable interests -> discovery", async ({ page }) => {

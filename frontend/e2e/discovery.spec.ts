@@ -171,14 +171,71 @@ test.describe("Visitor-First Discovery Experience (/explore)", () => {
     await helpLink.click();
 
     await expect(page).toHaveURL(/path=help/);
-    await expect(page.getByText(/Cultural Compass · Preview/i)).toBeVisible();
+    await expect(page.getByText(/Cultural Compass/i).first()).toBeVisible();
+    await expect(
+      page.getByRole("heading", {
+        name: /historic textile workshop versus contemporary design studio/i,
+      })
+    ).toBeVisible();
 
-    // Click "Enter my own interests instead"
-    const manualBtn = page.getByRole("button", { name: /enter my own interests instead/i });
+    // Click "Enter my own interests instead" (first available exit button)
+    const manualBtn = page.getByRole("button", { name: /enter my own interests instead/i }).first();
     await manualBtn.click();
 
     // Custom input is now visible
     await expect(page.getByLabel(/add cultural interest or topic/i)).toBeVisible();
+  });
+
+  test("Flow 2b: Complete Cultural Compass question flow -> summary -> apply directions", async ({
+    page,
+  }) => {
+    await page.goto("/explore?path=help");
+    await page.waitForLoadState("networkidle");
+
+    // Question 1: Select Option A
+    const q1OptionA = page.getByRole("button", { name: /historic textile workshop/i });
+    await expect(q1OptionA).toBeVisible();
+    await q1OptionA.click();
+    await page.getByRole("button", { name: /next question →/i }).click();
+
+    // Question 2: Select Neither / Skip
+    await expect(page.getByText(/Question 2 of 5/i)).toBeVisible();
+    await page.getByRole("button", { name: /neither \/ skip comparison/i }).click();
+    await page.getByRole("button", { name: /next question →/i }).click();
+
+    // Question 3: Select Both
+    await expect(page.getByText(/Question 3 of 5/i)).toBeVisible();
+    await page.getByRole("button", { name: /both appeal to me/i }).click();
+    await page.getByRole("button", { name: /next question →/i }).click();
+
+    // Question 4: Skip directly
+    await expect(page.getByText(/Question 4 of 5/i)).toBeVisible();
+    await page.getByRole("button", { name: /skip this question →/i }).click();
+
+    // Question 5: Select Option B
+    await expect(page.getByText(/Question 5 of 5/i)).toBeVisible();
+    await page.getByRole("button", { name: /modern design/i }).click();
+
+    // Click "Review directions →"
+    const reviewBtn = page.getByRole("button", { name: /review directions →/i });
+    await expect(reviewBtn).toBeVisible();
+    await reviewBtn.click();
+
+    // Summary screen is shown
+    await expect(
+      page.getByText(/Cultural directions surfaced from your choices/i)
+    ).toBeVisible();
+    await expect(
+      page.getByTestId("cultural-compass-summary").getByText("textiles")
+    ).toBeVisible();
+
+    // Click "Apply directions to visit →"
+    await page.getByRole("button", { name: /apply directions to visit →/i }).click();
+
+    // Interests are now placed in the shared chip bar
+    await expect(page.getByText(/Your Chosen Interests/i)).toBeVisible();
+    const continueBtn = page.getByRole("button", { name: /continue to visit preferences/i });
+    await expect(continueBtn).toBeEnabled();
   });
 
   test("Flow 3: Homepage -> Surprise me -> editable interests -> discovery", async ({ page }) => {

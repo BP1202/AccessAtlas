@@ -1,5 +1,7 @@
 import React, { useState } from "react";
 import { Button } from "@/components/ui/Button";
+import { CulturalCompass } from "./CulturalCompass";
+import type { CompassAnswers } from "@/lib/compass";
 
 export type EntryPath = "manual" | "help" | "surprise";
 
@@ -59,6 +61,7 @@ export const InterestSelector: React.FC<InterestSelectorProps> = ({
   const [customInput, setCustomInput] = useState("");
   const [inputError, setInputError] = useState<string | null>(null);
   const [surpriseOffset, setSurpriseOffset] = useState(0);
+  const [compassAnswers, setCompassAnswers] = useState<CompassAnswers>({});
 
   const maxInterests = 5;
 
@@ -294,61 +297,19 @@ export const InterestSelector: React.FC<InterestSelectorProps> = ({
       )}
 
       {/* ====================================================================
-          ENTRY PATH B: "HELP ME DISCOVER" (Cultural Compass Preview)
+          ENTRY PATH B: "HELP ME DISCOVER" (Cultural Compass Experience)
       ==================================================================== */}
       {activePath === "help" && (
         <div className="space-y-6 animate-fadeIn" role="tabpanel" aria-label="Help me discover">
-          <div className="rounded-3xl border border-[#dfd8c8] bg-[#ede8dc]/50 p-6 sm:p-10 dark:border-[#323731] dark:bg-[#212520]/70">
-            <div className="flex flex-wrap items-center gap-2 mb-3">
-              <span className="rounded-full bg-[#193a32] px-3 py-1 text-xs font-semibold text-white dark:bg-[#2a584d]">
-                Cultural Compass · Preview
-              </span>
-              <span className="text-xs text-[#62685d] dark:text-[#9da398]">
-                Optional Taste Explorer (Phase 2)
-              </span>
-            </div>
-
-            <h3 className="font-serif text-2xl sm:text-3xl font-semibold text-[#252923] dark:text-[#f4f1ea]">
-              A taste-led guide to finding your cultural direction
-            </h3>
-
-            <p className="mt-4 text-sm sm:text-base leading-relaxed text-[#62685d] max-w-2xl dark:text-[#9da398]">
-              Cultural Compass is designed to investigate unexpected affinities across artistic disciplines—such as connecting your love for geometric textile weaves to modernist brick architecture.
-            </p>
-
-            <div className="mt-6 rounded-2xl bg-white p-5 border border-[#e6e0d4] dark:bg-[#191c19] dark:border-[#323731] space-y-2.5 text-xs sm:text-sm text-[#252923] dark:text-[#e4ded0]">
-              <div className="font-semibold text-[#193a32] dark:text-[#a8d5c4] flex items-center gap-2">
-                <span>💡</span>
-                <span>How this will help you:</span>
-              </div>
-              <p className="leading-relaxed">
-                Rather than asking diagnostic questions, Cultural Compass will explore cross-domain connections to suggest curated cultural directions. You never have to complete a quiz or personality questionnaire to use AccessAtlas.
-              </p>
-            </div>
-
-            <div className="mt-8 flex flex-wrap items-center gap-4">
-              <Button
-                type="button"
-                variant="primary"
-                onClick={() => setActivePath("manual")}
-                className="px-6 py-3"
-              >
-                Enter my own interests instead →
-              </Button>
-
-              <button
-                type="button"
-                onClick={() => {
-                  handleAddInterest("Textiles");
-                  handleAddInterest("Heritage architecture");
-                  setActivePath("manual");
-                }}
-                className="text-xs sm:text-sm font-semibold text-[#193a32] hover:text-[#c56f4d] underline underline-offset-4 dark:text-[#a8d5c4] cursor-pointer"
-              >
-                Try sample direction: Textiles + Heritage architecture
-              </button>
-            </div>
-          </div>
+          <CulturalCompass
+            initialAnswers={compassAnswers}
+            existingInterests={selectedInterests}
+            onComplete={(finalAnswers, derivedInterests) => {
+              setCompassAnswers(finalAnswers);
+              onChange(derivedInterests);
+            }}
+            onExitToManual={() => setActivePath("manual")}
+          />
         </div>
       )}
 

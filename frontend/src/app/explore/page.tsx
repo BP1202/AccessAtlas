@@ -36,6 +36,7 @@ import {
 } from "@/lib/taste";
 import { aggregateCompassSignals, type CompassAnswers } from "@/lib/compass";
 import { TasteMemoryPanel } from "@/components/discovery/TasteMemoryPanel";
+import { CurrentOutingControls } from "@/components/discovery/CurrentOutingControls";
 
 export type DiscoveryStep = "interests" | "preferences" | "results";
 
@@ -78,8 +79,10 @@ function ExploreContent() {
     setInterests(newInterests);
     setTasteMemory((prev) => {
       let updated = setCurrentOutingInterests(prev, newInterests);
-      for (const item of newInterests) {
-        updated = addExplicitInterest(updated, item);
+      if (!prev.isOutingOverridden) {
+        for (const item of newInterests) {
+          updated = addExplicitInterest(updated, item);
+        }
       }
       return updated;
     });
@@ -172,6 +175,14 @@ function ExploreContent() {
 
           {step === "results" && (
             <div className="flex items-center gap-3">
+              <Button
+                type="button"
+                variant="outline"
+                size="sm"
+                onClick={() => setStep("interests")}
+              >
+                Adjust outing
+              </Button>
               <Button
                 type="button"
                 variant="outline"
@@ -285,14 +296,21 @@ function ExploreContent() {
 
         {/* View Switcher: Spacious Containers */}
         {step === "interests" && (
-          <div className="rounded-3xl border border-[#e6e0d4] bg-white p-8 sm:p-12 lg:p-14 shadow-xs dark:border-[#323731] dark:bg-[#212520] max-w-5xl">
-            <InterestSelector
-              selectedInterests={interests}
-              onChange={handleInterestsChange}
-              onNext={() => setStep("preferences")}
-              onCompassComplete={handleCompassComplete}
-              initialPath={initialPath}
+          <div className="space-y-8 max-w-5xl">
+            <CurrentOutingControls
+              memory={tasteMemory}
+              onUpdateMemory={handleTasteMemoryUpdate}
             />
+
+            <div className="rounded-3xl border border-[#e6e0d4] bg-white p-8 sm:p-12 lg:p-14 shadow-xs dark:border-[#323731] dark:bg-[#212520]">
+              <InterestSelector
+                selectedInterests={interests}
+                onChange={handleInterestsChange}
+                onNext={() => setStep("preferences")}
+                onCompassComplete={handleCompassComplete}
+                initialPath={initialPath}
+              />
+            </div>
           </div>
         )}
 

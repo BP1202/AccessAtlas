@@ -11,6 +11,7 @@ import {
   moveInterestToOuting,
   moveInterestToFuture,
   resetTasteMemory,
+  clearOutingOverride,
 } from "@/lib/taste";
 
 export interface TasteMemoryPanelProps {
@@ -116,13 +117,31 @@ export const TasteMemoryPanel: React.FC<TasteMemoryPanelProps> = ({
         <div className="border-t border-[#e6e0d4] p-4 sm:p-6 space-y-6 animate-fadeIn dark:border-[#323731]">
           {/* Section 1: Interests for THIS Outing */}
           <div className="space-y-3">
-            <div className="flex items-center justify-between">
-              <span className="text-xs font-semibold uppercase tracking-wider text-[#193a32] dark:text-[#a8d5c4]">
-                1. Focus for This Outing ({memory.currentOutingInterests.length}/5)
-              </span>
-              <span className="text-[11px] text-[#62685d] dark:text-[#9da398]">
-                Used for this visit&apos;s recommendations
-              </span>
+            <div className="flex flex-wrap items-center justify-between gap-2">
+              <div className="flex items-center gap-2">
+                <span className="text-xs font-semibold uppercase tracking-wider text-[#193a32] dark:text-[#a8d5c4]">
+                  1. Focus for This Outing ({memory.currentOutingInterests.length}/5)
+                </span>
+                {memory.isOutingOverridden && (
+                  <span className="rounded-full bg-[#c56f4d]/15 px-2 py-0.5 text-[10px] font-semibold text-[#c56f4d]">
+                    Today&apos;s choice (Override)
+                  </span>
+                )}
+              </div>
+              <div className="flex items-center gap-2">
+                {memory.isOutingOverridden && (
+                  <button
+                    type="button"
+                    onClick={() => onUpdateMemory(clearOutingOverride(memory))}
+                    className="text-[11px] font-medium text-[#c56f4d] hover:underline cursor-pointer"
+                  >
+                    ↺ Switch back to usual interests
+                  </button>
+                )}
+                <span className="text-[11px] text-[#62685d] dark:text-[#9da398]">
+                  Used for this visit&apos;s recommendations
+                </span>
+              </div>
             </div>
 
             {memory.currentOutingInterests.length === 0 ? (

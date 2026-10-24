@@ -12,7 +12,7 @@ import type { EvidenceAttribute, DiscoverRequest, ParticipationRequirement } fro
 import type { PreferenceState } from "@/components/discovery/PreferenceSelector";
 import type { CompassAnswers, CompassAggregationResult } from "@/lib/compass";
 import { SUPPORTED_REQUIREMENTS } from "@/lib/constants/requirements";
-import { CURRENT_TASTE_MEMORY_VERSION, type TasteMemory } from "./types";
+import { CURRENT_TASTE_MEMORY_VERSION, type TasteMemory, type OutingMode } from "./types";
 
 /**
  * Normalizes an interest string for consistent deduplication and comparison.
@@ -42,6 +42,8 @@ export function createInitialTasteMemory(): TasteMemory {
     compassProvenance: [],
     compassAnswers: {},
     currentOutingInterests: [],
+    outingMode: "usual",
+    isOutingOverridden: false,
     practicalRequirements: createDefaultPracticalRequirements(),
     futureTripInterests: [],
   };
@@ -257,6 +259,112 @@ export function moveInterestToFuture(
 }
 
 /**
+ * Applies the visitor's established usual interests to the current outing.
+ * Clears any active override and marks mode as 'usual'.
+ * General Taste Memory remains completely intact.
+ */
+export function applyUsualInterestsToOuting(memory: TasteMemory): TasteMemory {
+  const source =
+    memory.explicitInterests.length > 0
+      ? memory.explicitInterests
+      : memory.compassInterests;
+  const constrained = source.slice(0, 5);
+
+  return {
+    ...memory,
+    currentOutingInterests: [...constrained],
+    outingMode: "usual",
+    isOutingOverridden: false,
+  };
+}
+
+/**
+ * Sets an explicit 'Explore something different today' selection for the current outing.
+ * Overrides the active outing interests while leaving general Taste Memory untouched.
+ */
+export function setDifferentTodayOuting(
+  memory: TasteMemory,
+  differentInterests: readonly string[]
+): TasteMemory {
+  const seen = new Set<string>();
+  const deduplicated: string[] = [];
+
+  for (const item of differentInterests) {
+    const trimmed = item.trim();
+    if (!trimmed) continue;
+    const normalized = normalizeInterest(trimmed);
+    if (!seen.has(normalized)) {
+      seen.add(normalized);
+      deduplicated.push(trimmed);
+    }
+  }
+
+  return {
+    ...memory,
+    currentOutingInterests: deduplicated.slice(0, 5),
+    outingMode: "different",
+    isOutingOverridden: true,
+  };
+}
+
+/**
+ * Sets a specific target interest specifically for today's outing.
+ * Overrides the active outing without altering the general Taste Memory.
+ */
+export function setCustomOutingInterest(
+  memory: TasteMemory,
+  customInterest: string
+): TasteMemory {
+  const trimmed = customInterest.trim();
+  if (!trimmed || trimmed.length > 100) {
+    return memory;
+  }
+
+  return {
+    ...memory,
+    currentOutingInterests: [trimmed],
+    outingMode: "custom",
+    isOutingOverridden: true,
+  };
+}
+
+/**
+ * Clears the current outing override and restores the visitor's established usual interests.
+ * Leaves general Taste Memory and practical requirements completely intact.
+ */
+export function clearOutingOverride(memory: TasteMemory): TasteMemory {
+  return applyUsualInterestsToOuting(memory);
+}
+
+/**
+ * Prioritizes a specific subset of interests when more than 5 are chosen for this outing.
+ * Respects the 1–5 Discovery API limit without silent data loss.
+ * Leaves general Taste Memory completely intact.
+ */
+export function prioritizeOutingInterests(
+  memory: TasteMemory,
+  prioritized: readonly string[]
+): TasteMemory {
+  const seen = new Set<string>();
+  const deduplicated: string[] = [];
+
+  for (const item of prioritized) {
+    const trimmed = item.trim();
+    if (!trimmed) continue;
+    const normalized = normalizeInterest(trimmed);
+    if (!seen.has(normalized)) {
+      seen.add(normalized);
+      deduplicated.push(trimmed);
+    }
+  }
+
+  return {
+    ...memory,
+    currentOutingInterests: deduplicated.slice(0, 5),
+  };
+}
+
+/**
  * Resets Taste Memory back to a clean initial state.
  */
 export function resetTasteMemory(): TasteMemory {
@@ -300,6 +408,16 @@ export function validateAndMigrateTasteMemory(raw: unknown): TasteMemory {
       .map((s) => s.trim());
   };
 
+  const rawMode = candidate.outingMode;
+  const outingMode: OutingMode =
+    rawMode === "different" || rawMode === "custom" || rawMode === "usual"
+      ? rawMode
+      : "usual";
+
+  const isOutingOverridden = typeof candidate.isOutingOverridden === "boolean"
+    ? candidate.isOutingOverridden
+    : (outingMode === "different" || outingMode === "custom");
+
   return {
     schemaVersion: CURRENT_TASTE_MEMORY_VERSION,
     explicitInterests: sanitizeStringArray(candidate.explicitInterests),
@@ -311,6 +429,8 @@ export function validateAndMigrateTasteMemory(raw: unknown): TasteMemory {
       ? (candidate.compassAnswers as CompassAnswers)
       : {},
     currentOutingInterests: sanitizeStringArray(candidate.currentOutingInterests).slice(0, 5),
+    outingMode,
+    isOutingOverridden,
     practicalRequirements: validatedReqs,
     futureTripInterests: sanitizeStringArray(candidate.futureTripInterests),
   };

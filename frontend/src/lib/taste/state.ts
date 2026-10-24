@@ -46,6 +46,7 @@ export function createInitialTasteMemory(): TasteMemory {
     isOutingOverridden: false,
     practicalRequirements: createDefaultPracticalRequirements(),
     futureTripInterests: [],
+    excludedInterests: [],
   };
 }
 
@@ -365,6 +366,111 @@ export function prioritizeOutingInterests(
 }
 
 /**
+ * Adds an interest to the visitor's excluded interests list.
+ * Removes it from explicit interests, current outing, and future trip lists.
+ */
+export function addExcludedInterest(
+  memory: TasteMemory,
+  interest: string
+): TasteMemory {
+  const trimmed = interest.trim();
+  if (!trimmed || trimmed.length > 100) return memory;
+  const normalized = normalizeInterest(trimmed);
+  if (memory.excludedInterests.some((i) => normalizeInterest(i) === normalized)) {
+    return memory;
+  }
+
+  const withoutExplicit = removeExplicitInterest(memory, trimmed);
+  const withoutOuting = removeCurrentOutingInterest(withoutExplicit, trimmed);
+  const withoutFuture = removeFutureTripInterest(withoutOuting, trimmed);
+
+  return {
+    ...withoutFuture,
+    excludedInterests: [...withoutFuture.excludedInterests, trimmed],
+  };
+}
+
+/**
+ * Removes an interest from excluded interests, allowing it to be used or chosen again.
+ */
+export function removeExcludedInterest(
+  memory: TasteMemory,
+  interest: string
+): TasteMemory {
+  const normalized = normalizeInterest(interest);
+  return {
+    ...memory,
+    excludedInterests: memory.excludedInterests.filter(
+      (item) => normalizeInterest(item) !== normalized
+    ),
+  };
+}
+
+/**
+ * "More like this": Updates only an explicitly confirmed cultural taste signal.
+ * Adds confirmed interest to general taste memory and, if capacity permits, to current outing.
+ * Practical requirements and existing evidence remain completely intact.
+ */
+export function applyMoreLikeThis(
+  memory: TasteMemory,
+  confirmedInterest: string
+): TasteMemory {
+  const withExplicit = addExplicitInterest(memory, confirmedInterest);
+  const unExcluded = removeExcludedInterest(withExplicit, confirmedInterest);
+  if (unExcluded.currentOutingInterests.length < 5) {
+    return addCurrentOutingInterest(unExcluded, confirmedInterest);
+  }
+  return unExcluded;
+}
+
+/**
+ * "Not this trip": Removes or deprioritizes the selected direction for the active outing.
+ * Crucially preserves the visitor's general cultural interests in Taste Memory.
+ * Does not treat this as a permanent dislike or exclude it globally.
+ */
+export function applyNotThisTrip(
+  memory: TasteMemory,
+  confirmedInterest: string
+): TasteMemory {
+  return removeCurrentOutingInterest(memory, confirmedInterest);
+}
+
+/**
+ * "Not for me": Explicitly dismisses a specific confirmed cultural topic.
+ * Removes the topic from active outing and general interests without downranking
+ * unrelated categories or modifying practical requirements.
+ */
+export function applyNotForMe(
+  memory: TasteMemory,
+  confirmedInterest: string
+): TasteMemory {
+  return addExcludedInterest(memory, confirmedInterest);
+}
+
+/**
+ * "Save for another outing": Adds an explicit cultural direction to future interests.
+ * Leaves active outing and practical requirements unchanged.
+ * Does not schedule or book any trip.
+ */
+export function applySaveForLater(
+  memory: TasteMemory,
+  confirmedInterest: string
+): TasteMemory {
+  return addFutureTripInterest(memory, confirmedInterest);
+}
+
+/**
+ * "Show a different direction": Replaces active outing interests with new direction sparks,
+ * activating an outing override while strictly preserving all practical requirements.
+ */
+export function applyDifferentDirection(
+  memory: TasteMemory,
+  newInterests: readonly string[]
+): TasteMemory {
+  return setDifferentTodayOuting(memory, newInterests);
+}
+
+/**
  * Resets Taste Memory back to a clean initial state.
  */
 export function resetTasteMemory(): TasteMemory {
@@ -433,6 +539,7 @@ export function validateAndMigrateTasteMemory(raw: unknown): TasteMemory {
     isOutingOverridden,
     practicalRequirements: validatedReqs,
     futureTripInterests: sanitizeStringArray(candidate.futureTripInterests),
+    excludedInterests: sanitizeStringArray(candidate.excludedInterests),
   };
 }
 

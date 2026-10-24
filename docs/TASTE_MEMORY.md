@@ -155,9 +155,44 @@ The Current-Outing Intent Layer enforces the following guarantees:
 
 ---
 
-## 7. Out of Scope & Deferred Items
+---
+
+## 7. Teach My Compass Feedback & Next-Time Discoveries
+
+Implemented in:
+- [`frontend/src/components/discovery/CandidateFeedbackMenu.tsx`](../frontend/src/components/discovery/CandidateFeedbackMenu.tsx)
+- [`frontend/src/components/discovery/NextTimeDiscoveries.tsx`](../frontend/src/components/discovery/NextTimeDiscoveries.tsx)
+
+### 7.1 Explicit Feedback Semantics
+Rather than relying on opaque clickstream scoring, dwell-time tracking, or hidden preference decay, AccessAtlas offers 5 explicit, transparent, and reversible actions via progressive disclosure on each candidate card:
+
+| Action | Meaning & Execution | Scope & Guarantees |
+| :--- | :--- | :--- |
+| **✨ More like this** | Visitor explicitly confirms which displayed cultural interest or direction they want more of. | Adds the confirmed topic to general taste notes and active outing (up to 5). Never infers accessibility traits. |
+| **⏸ Not this trip** | Pauses a specific cultural direction for today's active outing. | Removes topic from `currentOutingInterests`. General interests in `explicitInterests` remain **100% untouched**. Not a permanent dislike. |
+| **✕ Not for me** | Explicitly dismisses a specific confirmed cultural topic. | Removes topic from active outing and adds it to `excludedInterests`. Does **not** downrank unrelated categories or modify practical requirements. Reversible at any time in Taste Memory. |
+| **📌 Save for another outing** | Adds a cultural topic to future-trip interests. | Updates `futureTripInterests`. Explicitly confirms no booking or commercial trip scheduling has occurred. |
+| **🔀 Show a different direction** | Replaces current outing focus with a contrasting cultural direction. | Switches `currentOutingInterests` using supported Ahmedabad directions while **strictly preserving all mandatory practical requirements**. Triggers fresh discovery. |
+
+### 7.2 Next-Time Discoveries ("Another day, another direction.")
+A dedicated lightweight section on the discovery results page showcasing saved future interests:
+- View saved future interests with cultural icons.
+- **+ Move to today's outing**: Instantly promotes a saved future interest into today's active outing (if outing has capacity).
+- **× Remove**: Removes a future interest while keeping other saved directions untouched.
+- Completely free of commercial booking calendars or nationwide travel planning.
+
+### 7.3 Feedback Transparency & Reversibility
+- **Transparency**: Every confirmed feedback action displays an explicit post-action explanation banner (e.g. *"Removed 'contemporary art' from today's interests. Your general interests are unchanged."*).
+- **Undo Action**: Every action provides an immediate `Undo change` control that restores the previous Taste Memory snapshot.
+- **Integrity**: Feedback actions NEVER rewrite venue evidence, modify Possibility Engine deterministic outcomes (`VERIFIED_FIT`, `NEEDS_CONFIRMATION`, `REQUIREMENT_CONFLICT`), or compromise mandatory accessibility requirements.
+
+---
+
+## 8. Out of Scope & Deferred Items
 
 The following capabilities are explicitly deferred:
-- **Issue 09**: Recommendation feedback and tuning controls.
 - **Phase 3**: Cross-device account persistence, database synchronization, and multi-user profile sharing.
+- Permanent recommendation training or implicit behavioral learning across anonymous sessions.
+- Automated trip scheduling and commercial booking integrations.
+
 

@@ -57,6 +57,7 @@ const mockDiscoverResponse: DiscoverResponse = {
 describe("ExplorePage Integration Flow", () => {
   beforeEach(() => {
     vi.restoreAllMocks();
+    window.sessionStorage.clear();
   });
 
   it("completes the 2-stage discovery journey and renders results", async () => {

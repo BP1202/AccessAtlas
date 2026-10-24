@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useState, Suspense } from "react";
+import React, { useState, useEffect, Suspense } from "react";
 import Link from "next/link";
 import { useSearchParams } from "next/navigation";
 import { Container } from "@/components/ui/Container";
@@ -11,9 +11,7 @@ import { defaultApiClient, ApiClientError } from "@/lib/api/client";
 import type {
   DiscoverResponse,
   EvidenceAttribute,
-  ParticipationRequirement,
 } from "@/lib/api/types";
-import { SUPPORTED_REQUIREMENTS } from "@/lib/constants/requirements";
 import { DISCLAIMER_NOTE } from "@/lib/constants/labels";
 import { InterestSelector } from "@/components/discovery/InterestSelector";
 import {
@@ -22,17 +20,24 @@ import {
 } from "@/components/discovery/PreferenceSelector";
 import { CandidateCard } from "@/components/discovery/CandidateCard";
 import { DiscoveryLoading } from "@/components/discovery/DiscoveryLoading";
+import {
+  type TasteMemory,
+  createInitialTasteMemory,
+  createDefaultPracticalRequirements,
+  loadTasteMemoryFromSession,
+  saveTasteMemoryToSession,
+  clearTasteMemoryFromSession,
+  addExplicitInterest,
+  addCurrentOutingInterest,
+  setCurrentOutingInterests,
+  updatePracticalRequirement,
+  setCompassState,
+  tasteMemoryToDiscoverRequest,
+} from "@/lib/taste";
+import { aggregateCompassSignals, type CompassAnswers } from "@/lib/compass";
+import { TasteMemoryPanel } from "@/components/discovery/TasteMemoryPanel";
 
 export type DiscoveryStep = "interests" | "preferences" | "results";
-
-const initialPreferences: Record<EvidenceAttribute, PreferenceState> =
-  SUPPORTED_REQUIREMENTS.reduce(
-    (acc, req) => {
-      acc[req.attribute] = "not_specified";
-      return acc;
-    },
-    {} as Record<EvidenceAttribute, PreferenceState>
-  );
 
 function ExploreContent() {
   const searchParams = useSearchParams();
@@ -40,17 +45,45 @@ function ExploreContent() {
   const initialPath =
     pathParam === "help" ? "help" : pathParam === "surprise" ? "surprise" : "manual";
 
+  // Session Taste Memory: initialized from sessionStorage with URL query parameter support
+  const [tasteMemory, setTasteMemory] = useState<TasteMemory>(() => {
+    const fromSession = loadTasteMemoryFromSession();
+    const interestParam = searchParams?.get("interest");
+    if (interestParam && interestParam.trim()) {
+      const trimmed = interestParam.trim();
+      const withExplicit = addExplicitInterest(fromSession, trimmed);
+      return addCurrentOutingInterest(withExplicit, trimmed);
+    }
+    return fromSession;
+  });
+
   const [step, setStep] = useState<DiscoveryStep>("interests");
   const [interests, setInterests] = useState<string[]>(() => {
-    const interestParam = searchParams?.get("interest");
-    return interestParam && interestParam.trim() ? [interestParam.trim()] : [];
+    return [...tasteMemory.currentOutingInterests];
   });
-  const [preferences, setPreferences] =
-    useState<Record<EvidenceAttribute, PreferenceState>>(initialPreferences);
+  const [preferences, setPreferences] = useState<Record<EvidenceAttribute, PreferenceState>>(() => {
+    return { ...tasteMemory.practicalRequirements };
+  });
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [statusCode, setStatusCode] = useState<number | undefined>(undefined);
   const [result, setResult] = useState<DiscoverResponse | null>(null);
+
+  // Synchronize Taste Memory to session storage
+  useEffect(() => {
+    saveTasteMemoryToSession(tasteMemory);
+  }, [tasteMemory]);
+
+  const handleInterestsChange = (newInterests: string[]) => {
+    setInterests(newInterests);
+    setTasteMemory((prev) => {
+      let updated = setCurrentOutingInterests(prev, newInterests);
+      for (const item of newInterests) {
+        updated = addExplicitInterest(updated, item);
+      }
+      return updated;
+    });
+  };
 
   const handlePreferenceChange = (
     attribute: EvidenceAttribute,
@@ -60,6 +93,26 @@ function ExploreContent() {
       ...prev,
       [attribute]: state,
     }));
+    setTasteMemory((prev) => updatePracticalRequirement(prev, attribute, state));
+  };
+
+  const handleCompassComplete = (answers: CompassAnswers, derivedInterests: string[]) => {
+    setInterests(derivedInterests);
+    const agg = aggregateCompassSignals(answers);
+    setTasteMemory((prev) => {
+      const withCompass = setCompassState(prev, answers, agg);
+      let updated = setCurrentOutingInterests(withCompass, derivedInterests);
+      for (const item of derivedInterests) {
+        updated = addExplicitInterest(updated, item);
+      }
+      return updated;
+    });
+  };
+
+  const handleTasteMemoryUpdate = (newMemory: TasteMemory) => {
+    setTasteMemory(newMemory);
+    setInterests([...newMemory.currentOutingInterests]);
+    setPreferences({ ...newMemory.practicalRequirements });
   };
 
   const handleSearch = async () => {
@@ -74,25 +127,10 @@ function ExploreContent() {
     setStatusCode(undefined);
     setStep("results");
 
-    // Convert active preferences to ParticipationRequirement[]
-    const activeRequirements: ParticipationRequirement[] = Object.entries(
-      preferences
-    )
-      .filter(([, state]) => state !== "not_specified")
-      .map(([attr, state]) => ({
-        requirement_id: `req-${attr}`,
-        attribute: attr as EvidenceAttribute,
-        priority: state as "optional" | "mandatory",
-        expected_value: true,
-      }));
+    const request = tasteMemoryToDiscoverRequest(tasteMemory, "Ahmedabad", 5);
 
     try {
-      const response = await defaultApiClient.discover({
-        city: "Ahmedabad",
-        cultural_interests: interests,
-        requirements: activeRequirements,
-        max_candidates: 5,
-      });
+      const response = await defaultApiClient.discover(request);
       setResult(response);
     } catch (err) {
       if (err instanceof ApiClientError) {
@@ -109,8 +147,11 @@ function ExploreContent() {
   };
 
   const handleStartFresh = () => {
+    clearTasteMemoryFromSession();
+    const fresh = createInitialTasteMemory();
+    setTasteMemory(fresh);
     setInterests([]);
-    setPreferences(initialPreferences);
+    setPreferences(createDefaultPracticalRequirements());
     setResult(null);
     setError(null);
     setStatusCode(undefined);
@@ -234,13 +275,22 @@ function ExploreContent() {
           </span>
         </div>
 
+        {/* Session Taste Memory Compact Panel */}
+        <div className="mb-10 max-w-5xl">
+          <TasteMemoryPanel
+            memory={tasteMemory}
+            onUpdateMemory={handleTasteMemoryUpdate}
+          />
+        </div>
+
         {/* View Switcher: Spacious Containers */}
         {step === "interests" && (
           <div className="rounded-3xl border border-[#e6e0d4] bg-white p-8 sm:p-12 lg:p-14 shadow-xs dark:border-[#323731] dark:bg-[#212520] max-w-5xl">
             <InterestSelector
               selectedInterests={interests}
-              onChange={setInterests}
+              onChange={handleInterestsChange}
               onNext={() => setStep("preferences")}
+              onCompassComplete={handleCompassComplete}
               initialPath={initialPath}
             />
           </div>

@@ -46,6 +46,7 @@ export interface InterestSelectorProps {
   selectedInterests: string[];
   onChange: (interests: string[]) => void;
   onNext: () => void;
+  onCompassComplete?: (answers: CompassAnswers, derivedInterests: string[]) => void;
   initialPath?: EntryPath;
   className?: string;
 }
@@ -54,6 +55,7 @@ export const InterestSelector: React.FC<InterestSelectorProps> = ({
   selectedInterests,
   onChange,
   onNext,
+  onCompassComplete,
   initialPath = "manual",
   className = "",
 }) => {
@@ -306,7 +308,11 @@ export const InterestSelector: React.FC<InterestSelectorProps> = ({
             existingInterests={selectedInterests}
             onComplete={(finalAnswers, derivedInterests) => {
               setCompassAnswers(finalAnswers);
-              onChange(derivedInterests);
+              if (onCompassComplete) {
+                onCompassComplete(finalAnswers, derivedInterests);
+              } else {
+                onChange(derivedInterests);
+              }
               onNext();
             }}
             onExitToManual={(updatedInterests) => {

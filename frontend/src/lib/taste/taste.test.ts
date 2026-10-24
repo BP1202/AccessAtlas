@@ -21,6 +21,13 @@ import {
   setCustomOutingInterest,
   clearOutingOverride,
   prioritizeOutingInterests,
+  applyMoreLikeThis,
+  applyNotThisTrip,
+  applyNotForMe,
+  applySaveForLater,
+  applyDifferentDirection,
+  addExcludedInterest,
+  removeExcludedInterest,
   loadTasteMemoryFromSession,
   saveTasteMemoryToSession,
   clearTasteMemoryFromSession,
@@ -439,6 +446,119 @@ describe("Current-Outing Intent Layer (Issue 08)", () => {
         expected_value: true,
       },
     ]);
+  });
+});
+
+describe("Teach My Compass Feedback & Next-Time Discoveries (Issue 09)", () => {
+  it("More like this: updates only explicitly confirmed taste signal and preserves practical requirements", () => {
+    let memory = createInitialTasteMemory();
+    memory = addExplicitInterest(memory, "Textiles");
+    memory = updatePracticalRequirement(memory, "step_free_entrance", "mandatory");
+
+    const updated = applyMoreLikeThis(memory, "Woodblock printing");
+
+    expect(updated.explicitInterests).toContain("Woodblock printing");
+    expect(updated.currentOutingInterests).toContain("Woodblock printing");
+    // Practical requirement remains untouched
+    expect(updated.practicalRequirements.step_free_entrance).toBe("mandatory");
+  });
+
+  it("Not this trip: removes from active outing while preserving general cultural interests", () => {
+    let memory = createInitialTasteMemory();
+    memory = addExplicitInterest(memory, "Textiles");
+    memory = addExplicitInterest(memory, "Heritage havelis");
+    memory = applyUsualInterestsToOuting(memory);
+
+    // Visitor pauses "Textiles" for this trip
+    const updated = applyNotThisTrip(memory, "Textiles");
+
+    // Removed from active outing
+    expect(updated.currentOutingInterests).not.toContain("Textiles");
+    expect(updated.currentOutingInterests).toContain("Heritage havelis");
+
+    // General interests MUST remain 100% intact!
+    expect(updated.explicitInterests).toContain("Textiles");
+    expect(updated.explicitInterests).toContain("Heritage havelis");
+  });
+
+  it("Not for me: explicitly dismisses confirmed topic without broad downranking of other topics", () => {
+    let memory = createInitialTasteMemory();
+    memory = addExplicitInterest(memory, "Modern design");
+    memory = addExplicitInterest(memory, "Heritage architecture");
+    memory = applyUsualInterestsToOuting(memory);
+
+    // Visitor dismisses "Modern design"
+    const updated = applyNotForMe(memory, "Modern design");
+
+    expect(updated.excludedInterests).toContain("Modern design");
+    expect(updated.explicitInterests).not.toContain("Modern design");
+    expect(updated.currentOutingInterests).not.toContain("Modern design");
+
+    // Unrelated categories remain completely intact!
+    expect(updated.explicitInterests).toContain("Heritage architecture");
+    expect(updated.currentOutingInterests).toContain("Heritage architecture");
+  });
+
+  it("Save for another outing: updates futureTripInterests without altering active outing or requirements", () => {
+    let memory = createInitialTasteMemory();
+    memory = addCurrentOutingInterest(memory, "Stepwells");
+    memory = updatePracticalRequirement(memory, "quiet_space", "optional");
+
+    const updated = applySaveForLater(memory, "Court textiles");
+
+    expect(updated.futureTripInterests).toContain("Court textiles");
+    // Active outing and requirements unchanged
+    expect(updated.currentOutingInterests).toEqual(["Stepwells"]);
+    expect(updated.practicalRequirements.quiet_space).toBe("optional");
+  });
+
+  it("Show a different direction: sets new direction while strictly preserving mandatory practical requirements", () => {
+    let memory = createInitialTasteMemory();
+    memory = addCurrentOutingInterest(memory, "Textiles");
+    memory = updatePracticalRequirement(memory, "step_free_entrance", "mandatory");
+
+    const updated = applyDifferentDirection(memory, ["Modernist brick architecture"]);
+
+    expect(updated.currentOutingInterests).toEqual(["Modernist brick architecture"]);
+    expect(updated.isOutingOverridden).toBe(true);
+    expect(updated.practicalRequirements.step_free_entrance).toBe("mandatory");
+  });
+
+  it("Reversibility: removing excluded interest restores ability to re-add", () => {
+    let memory = createInitialTasteMemory();
+    memory = addExcludedInterest(memory, "Contemporary art");
+    expect(memory.excludedInterests).toContain("Contemporary art");
+
+    const unDismissed = removeExcludedInterest(memory, "Contemporary art");
+    expect(unDismissed.excludedInterests).not.toContain("Contemporary art");
+
+    const reAdded = addExplicitInterest(unDismissed, "Contemporary art");
+    expect(reAdded.explicitInterests).toContain("Contemporary art");
+  });
+
+  it("Moving future interest into current outing leaves other future interests unchanged", () => {
+    let memory = createInitialTasteMemory();
+    memory = addFutureTripInterest(memory, "Topic A");
+    memory = addFutureTripInterest(memory, "Topic B");
+
+    const moved = moveInterestToOuting(memory, "Topic A");
+
+    expect(moved.currentOutingInterests).toContain("Topic A");
+    expect(moved.futureTripInterests).not.toContain("Topic A");
+    // Other future interests intact
+    expect(moved.futureTripInterests).toEqual(["Topic B"]);
+  });
+
+  it("Repeated feedback actions: handles multiple feedback actions deterministically without corruption", () => {
+    let memory = createInitialTasteMemory();
+    memory = applyMoreLikeThis(memory, "Topic 1");
+    memory = applyMoreLikeThis(memory, "Topic 2");
+    memory = applySaveForLater(memory, "Topic 3");
+    memory = applyNotThisTrip(memory, "Topic 1");
+
+    expect(memory.currentOutingInterests).toEqual(["Topic 2"]);
+    expect(memory.explicitInterests).toEqual(["Topic 1", "Topic 2"]);
+    expect(memory.futureTripInterests).toEqual(["Topic 3"]);
   });
 });
 

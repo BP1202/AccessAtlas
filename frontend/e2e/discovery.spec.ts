@@ -435,4 +435,109 @@ test.describe("Visitor-First Discovery Experience (/explore)", () => {
     // Restores usual mode
     await expect(page.getByTestId("mode-usual")).toHaveAttribute("aria-selected", "true");
   });
+
+  test("Flow 5: Discovery -> Candidate feedback -> Taste Memory update -> Refined discovery", async ({
+    page,
+  }) => {
+    let lastRequestBody: Record<string, unknown> = {};
+
+    await page.route("**/api/v1/discover", async (route) => {
+      lastRequestBody = JSON.parse(route.request().postData() || "{}");
+      await route.fulfill({
+        status: 200,
+        contentType: "application/json",
+        body: JSON.stringify(mockApiResponse),
+      });
+    });
+
+    await page.goto("/explore");
+    await page.waitForLoadState("networkidle");
+
+    // 1. Stage 1: Select "Textiles"
+    const textilesChip = page.getByRole("button", { name: /textiles/i });
+    await textilesChip.click();
+
+    // 2. Stage 2: Preferences
+    const continueBtn = page.getByRole("button", { name: /continue to visit preferences/i });
+    await continueBtn.click();
+
+    const stepFreeGroup = page.getByRole("radiogroup", { name: /step-free entrance/i });
+    await stepFreeGroup.getByRole("radio", { name: "Essential" }).click();
+
+    // 3. Stage 3: Initial Discovery
+    const findBtn = page.getByRole("button", { name: /find cultural experiences/i });
+    await findBtn.click();
+
+    await expect(page.getByRole("heading", { name: "Calico Museum of Textiles" }).first()).toBeVisible();
+    await page.screenshot({
+      path: "C:/Users/bhoom/.gemini/antigravity-ide/brain/299b5963-0cde-4153-bc40-f438c2b02466/candidate_card_teach_compass.png",
+    });
+
+    // 4. Candidate feedback: Click "Teach my compass"
+    const teachCompassBtn = page.getByTestId("feedback-trigger-btn").first();
+    await expect(teachCompassBtn).toBeVisible();
+    await teachCompassBtn.click();
+
+    // Feedback menu is displayed
+    await expect(page.getByTestId("candidate-feedback-menu")).toBeVisible();
+    await page.screenshot({
+      path: "C:/Users/bhoom/.gemini/antigravity-ide/brain/299b5963-0cde-4153-bc40-f438c2b02466/expanded_feedback_menu.png",
+    });
+
+    // Action A: "Save for another outing"
+    await page.getByTestId("feedback-save-later").click();
+    await page.getByTestId("confirm-save-later-textiles").click();
+
+    // Transparency banner appears
+    const transparencyBanner = page.getByTestId("feedback-transparency-banner");
+    await expect(transparencyBanner).toBeVisible();
+    await expect(transparencyBanner).toContainText(/Saved "Textiles" for another outing/i);
+
+    // Next-Time Discoveries section shows saved item
+    const nextTimeSection = page.getByTestId("next-time-discoveries");
+    await expect(nextTimeSection).toBeVisible();
+    await expect(nextTimeSection.getByText("Textiles", { exact: true })).toBeVisible();
+    await page.screenshot({
+      path: "C:/Users/bhoom/.gemini/antigravity-ide/brain/299b5963-0cde-4153-bc40-f438c2b02466/next_time_discoveries_and_banner.png",
+    });
+
+    // Capture mobile responsive view
+    await page.setViewportSize({ width: 375, height: 667 });
+    await page.screenshot({
+      path: "C:/Users/bhoom/.gemini/antigravity-ide/brain/299b5963-0cde-4153-bc40-f438c2b02466/feedback_mobile_view.png",
+    });
+    await page.setViewportSize({ width: 1280, height: 720 });
+
+    // Action B: Undo the change
+    const undoBtn = page.getByTestId("feedback-undo-btn");
+    await expect(undoBtn).toBeVisible();
+    await undoBtn.click();
+
+    // Banner clears and saved item is undone
+    await expect(transparencyBanner).not.toBeVisible();
+
+    // Action C: "Show a different direction" -> Refined Discovery
+    await teachCompassBtn.click();
+    await page.getByTestId("feedback-different-direction").click();
+    await page.getByTestId("confirm-direction-modernist-architecture").click();
+
+    // Transparency banner confirms switch and requirement preservation
+    await expect(transparencyBanner).toBeVisible();
+    await expect(transparencyBanner).toContainText(
+      /Switched outing focus to "Modernist brick architecture". Practical requirements preserved./i
+    );
+
+    // Verify refined request payload sent to existing pipeline
+    const refinedInterests = (lastRequestBody["cultural_interests"] as string[]) || [];
+    expect(refinedInterests).toContain("Modernist brick architecture");
+
+    const refinedReqs =
+      (lastRequestBody["requirements"] as Array<{ attribute: string; priority: string }>) || [];
+    expect(refinedReqs).toContainEqual(
+      expect.objectContaining({
+        attribute: "step_free_entrance",
+        priority: "mandatory",
+      })
+    );
+  });
 });

@@ -95,4 +95,18 @@ export interface TasteMemory {
    * Cultural interests saved for a FUTURE outing, distinct from the active plan.
    */
   readonly futureTripInterests: readonly string[];
+
+  /**
+   * Explicitly dismissed or rejected interests from "Not for me" feedback.
+   * Stored transparently so the visitor can inspect or reverse them at any time.
+   */
+  readonly excludedInterests: readonly string[];
 }
+
+export type CandidateFeedbackAction =
+  | "more_like_this"
+  | "not_this_trip"
+  | "not_for_me"
+  | "save_for_later"
+  | "different_direction";
+

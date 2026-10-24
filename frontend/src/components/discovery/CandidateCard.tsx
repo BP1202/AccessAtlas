@@ -1,5 +1,6 @@
 import React, { useState } from "react";
 import type { CandidateParticipationPlan } from "@/lib/api/types";
+import type { TasteMemory } from "@/lib/taste";
 import { Badge } from "@/components/ui/Badge";
 import { Button } from "@/components/ui/Button";
 import {
@@ -7,15 +8,20 @@ import {
   RESOLUTION_LABELS,
 } from "@/lib/constants/labels";
 import { VisitPlanDetail } from "./VisitPlanDetail";
+import { CandidateFeedbackMenu } from "./CandidateFeedbackMenu";
 
 export interface CandidateCardProps {
   plan: CandidateParticipationPlan;
+  memory?: TasteMemory;
+  onApplyFeedback?: (newMemory: TasteMemory, explanation: string, triggerRefresh?: boolean) => void;
   className?: string;
   defaultExpanded?: boolean;
 }
 
 export const CandidateCard: React.FC<CandidateCardProps> = ({
   plan,
+  memory,
+  onApplyFeedback,
   className = "",
   defaultExpanded = false,
 }) => {
@@ -117,8 +123,8 @@ export const CandidateCard: React.FC<CandidateCardProps> = ({
         </div>
       )}
 
-      {/* Expand/Collapse Action */}
-      <div className="mt-6 flex items-center justify-between pt-4 border-t border-[#ede8dc] dark:border-[#323731]">
+      {/* Expand/Collapse and Refine Actions */}
+      <div className="mt-6 flex flex-wrap items-center justify-between gap-3 pt-4 border-t border-[#ede8dc] dark:border-[#323731]">
         <Button
           type="button"
           variant={isExpanded ? "outline" : "primary"}
@@ -128,6 +134,14 @@ export const CandidateCard: React.FC<CandidateCardProps> = ({
         >
           {isExpanded ? "Hide visit plan ↑" : "View visit plan →"}
         </Button>
+
+        {memory && onApplyFeedback && (
+          <CandidateFeedbackMenu
+            plan={plan}
+            memory={memory}
+            onApplyFeedback={onApplyFeedback}
+          />
+        )}
       </div>
 
       {/* Expandable Visit Plan Component */}

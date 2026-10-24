@@ -37,6 +37,7 @@ import {
 import { aggregateCompassSignals, type CompassAnswers } from "@/lib/compass";
 import { TasteMemoryPanel } from "@/components/discovery/TasteMemoryPanel";
 import { CurrentOutingControls } from "@/components/discovery/CurrentOutingControls";
+import { NextTimeDiscoveries } from "@/components/discovery/NextTimeDiscoveries";
 
 export type DiscoveryStep = "interests" | "preferences" | "results";
 
@@ -69,6 +70,10 @@ function ExploreContent() {
   const [error, setError] = useState<string | null>(null);
   const [statusCode, setStatusCode] = useState<number | undefined>(undefined);
   const [result, setResult] = useState<DiscoverResponse | null>(null);
+  const [feedbackNotice, setFeedbackNotice] = useState<{
+    text: string;
+    undoMemory: TasteMemory;
+  } | null>(null);
 
   // Synchronize Taste Memory to session storage
   useEffect(() => {
@@ -116,6 +121,61 @@ function ExploreContent() {
     setTasteMemory(newMemory);
     setInterests([...newMemory.currentOutingInterests]);
     setPreferences({ ...newMemory.practicalRequirements });
+  };
+
+  const handleApplyCandidateFeedback = async (
+    newMemory: TasteMemory,
+    explanation: string,
+    triggerRefresh?: boolean
+  ) => {
+    const previousSnapshot = tasteMemory;
+    setTasteMemory(newMemory);
+    setInterests([...newMemory.currentOutingInterests]);
+    setPreferences({ ...newMemory.practicalRequirements });
+    setFeedbackNotice({ text: explanation, undoMemory: previousSnapshot });
+
+    if (triggerRefresh) {
+      setIsLoading(true);
+      setError(null);
+      setStatusCode(undefined);
+
+      const request = tasteMemoryToDiscoverRequest(newMemory, "Ahmedabad", 5);
+      try {
+        const response = await defaultApiClient.discover(request);
+        setResult(response);
+      } catch (err) {
+        if (err instanceof ApiClientError) {
+          setError(err.detail);
+          setStatusCode(err.statusCode || undefined);
+        } else if (err instanceof Error) {
+          setError(err.message);
+        } else {
+          setError("An unexpected error occurred while communicating with the discovery service.");
+        }
+      } finally {
+        setIsLoading(false);
+      }
+    }
+  };
+
+  const handleUndoFeedback = () => {
+    if (feedbackNotice?.undoMemory) {
+      const restored = feedbackNotice.undoMemory;
+      setTasteMemory(restored);
+      setInterests([...restored.currentOutingInterests]);
+      setPreferences({ ...restored.practicalRequirements });
+      setFeedbackNotice(null);
+    }
+  };
+
+  const handleNextTimeUpdate = (newMemory: TasteMemory, explanation?: string) => {
+    const previous = tasteMemory;
+    setTasteMemory(newMemory);
+    setInterests([...newMemory.currentOutingInterests]);
+    setPreferences({ ...newMemory.practicalRequirements });
+    if (explanation) {
+      setFeedbackNotice({ text: explanation, undoMemory: previous });
+    }
   };
 
   const handleSearch = async () => {
@@ -353,6 +413,31 @@ function ExploreContent() {
 
             {!isLoading && !error && result && (
               <div className="space-y-8">
+                {/* Feedback Transparency & Undo Banner */}
+                {feedbackNotice && (
+                  <aside
+                    role="status"
+                    aria-live="polite"
+                    data-testid="feedback-transparency-banner"
+                    className="rounded-2xl border border-[#bcd6cb] bg-[#eaf2ee] p-4 text-xs text-[#193a32] flex flex-wrap items-center justify-between gap-3 shadow-2xs dark:border-[#2f5545] dark:bg-[#1d352b] dark:text-[#b8ded0]"
+                  >
+                    <div className="flex items-center gap-2">
+                      <span className="text-base select-none" aria-hidden="true">🧭</span>
+                      <span>{feedbackNotice.text}</span>
+                    </div>
+                    {feedbackNotice.undoMemory && (
+                      <button
+                        type="button"
+                        onClick={handleUndoFeedback}
+                        data-testid="feedback-undo-btn"
+                        className="font-semibold underline underline-offset-2 hover:text-[#252923] dark:hover:text-[#f4f1ea] cursor-pointer"
+                      >
+                        Undo change
+                      </button>
+                    )}
+                  </aside>
+                )}
+
                 {/* Search Summary Banner */}
                 <div className="rounded-3xl border border-[#e6e0d4] bg-[#f6f3eb] p-8 dark:border-[#323731] dark:bg-[#191c19]">
                   <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-6">
@@ -380,7 +465,7 @@ function ExploreContent() {
                   </div>
                 </div>
 
-                {/* Candidate List */}
+                {/* Candidate List with Feedback Controls */}
                 {result.plans.length === 0 ? (
                   <EmptyState
                     title="No cultural matches found"
@@ -394,10 +479,18 @@ function ExploreContent() {
                       <CandidateCard
                         key={plan.candidate.entity_id || index}
                         plan={plan}
+                        memory={tasteMemory}
+                        onApplyFeedback={handleApplyCandidateFeedback}
                       />
                     ))}
                   </div>
                 )}
+
+                {/* Next-Time Discoveries: "Another day, another direction." */}
+                <NextTimeDiscoveries
+                  memory={tasteMemory}
+                  onUpdateMemory={handleNextTimeUpdate}
+                />
 
                 {/* Grounding & Integrity Disclaimer */}
                 <div className="rounded-2xl border border-[#dfd8c8] bg-[#ede8dc]/50 p-6 text-xs text-[#62685d] dark:border-[#323731] dark:bg-[#212520]/40 dark:text-[#9da398]">

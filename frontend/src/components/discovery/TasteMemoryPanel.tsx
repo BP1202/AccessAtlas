@@ -12,6 +12,7 @@ import {
   moveInterestToFuture,
   resetTasteMemory,
   clearOutingOverride,
+  removeExcludedInterest,
 } from "@/lib/taste";
 
 export interface TasteMemoryPanelProps {
@@ -369,6 +370,39 @@ export const TasteMemoryPanel: React.FC<TasteMemoryPanelProps> = ({
               </div>
             )}
           </div>
+
+          {/* Section 5: Dismissed Topics (Not for me) */}
+          {memory.excludedInterests.length > 0 && (
+            <div className="space-y-3 pt-2 border-t border-[#e6e0d4]/60 dark:border-[#323731]/60">
+              <div className="flex items-center justify-between">
+                <span className="text-xs font-semibold uppercase tracking-wider text-[#8e3c1f] dark:text-[#f4a585]">
+                  5. Dismissed Topics ({memory.excludedInterests.length})
+                </span>
+                <span className="text-[11px] text-[#62685d] dark:text-[#9da398]">
+                  Dismissed via &quot;Not for me&quot;
+                </span>
+              </div>
+              <div className="flex flex-wrap gap-2" role="list" aria-label="Dismissed topics">
+                {memory.excludedInterests.map((interest) => (
+                  <div
+                    key={interest}
+                    role="listitem"
+                    className="inline-flex items-center gap-1.5 rounded-xl border border-[#c56f4d]/30 bg-[#fbf2ed] px-3 py-1.5 text-xs text-[#8e3c1f] shadow-2xs dark:border-[#c56f4d]/40 dark:bg-[#2e1d17] dark:text-[#f4a585]"
+                  >
+                    <span>{interest}</span>
+                    <button
+                      type="button"
+                      aria-label={`Restore ${interest}`}
+                      onClick={() => onUpdateMemory(removeExcludedInterest(memory, interest))}
+                      className="text-[11px] font-semibold text-[#8e3c1f] hover:underline dark:text-[#f4a585] cursor-pointer ml-1"
+                    >
+                      Restore ↺
+                    </button>
+                  </div>
+                ))}
+              </div>
+            </div>
+          )}
 
           {/* Privacy & Transparency Footnote */}
           <div className="rounded-xl bg-white p-3 border border-[#e6e0d4] text-[11px] leading-relaxed text-[#62685d] dark:bg-[#212520] dark:border-[#323731] dark:text-[#9da398] flex items-start gap-2">

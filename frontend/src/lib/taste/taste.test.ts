@@ -16,6 +16,11 @@ import {
   resetTasteMemory,
   validateAndMigrateTasteMemory,
   tasteMemoryToDiscoverRequest,
+  applyUsualInterestsToOuting,
+  setDifferentTodayOuting,
+  setCustomOutingInterest,
+  clearOutingOverride,
+  prioritizeOutingInterests,
   loadTasteMemoryFromSession,
   saveTasteMemoryToSession,
   clearTasteMemoryFromSession,
@@ -300,3 +305,140 @@ describe("Session Taste Memory — SessionStorage Lifecycle", () => {
     expect(safe.explicitInterests).toEqual([]);
   });
 });
+
+describe("Current-Outing Intent Layer (Issue 08)", () => {
+  it("general interests only: applies established usual interests without override flag", () => {
+    let memory = createInitialTasteMemory();
+    memory = addExplicitInterest(memory, "Textiles");
+    memory = addExplicitInterest(memory, "Heritage architecture");
+
+    const applied = applyUsualInterestsToOuting(memory);
+    expect(applied.outingMode).toBe("usual");
+    expect(applied.isOutingOverridden).toBe(false);
+    expect(applied.currentOutingInterests).toEqual(["Textiles", "Heritage architecture"]);
+    expect(applied.explicitInterests).toEqual(["Textiles", "Heritage architecture"]);
+  });
+
+  it("current-outing override: sets different outing interests while keeping general memory intact", () => {
+    let memory = createInitialTasteMemory();
+    memory = addExplicitInterest(memory, "Textiles");
+    memory = addExplicitInterest(memory, "Heritage architecture");
+    memory = applyUsualInterestsToOuting(memory);
+
+    // Visitor chooses 'Contemporary art' for today's outing
+    const overridden = setDifferentTodayOuting(memory, ["Contemporary art"]);
+
+    expect(overridden.outingMode).toBe("different");
+    expect(overridden.isOutingOverridden).toBe(true);
+    expect(overridden.currentOutingInterests).toEqual(["Contemporary art"]);
+
+    // General interests MUST remain unchanged
+    expect(overridden.explicitInterests).toEqual(["Textiles", "Heritage architecture"]);
+  });
+
+  it("custom outing interest: sets a specific interest for today without polluting general taste memory", () => {
+    let memory = createInitialTasteMemory();
+    memory = addExplicitInterest(memory, "Stepwells");
+    memory = applyUsualInterestsToOuting(memory);
+
+    const customMemory = setCustomOutingInterest(memory, "Puppetry traditions");
+
+    expect(customMemory.outingMode).toBe("custom");
+    expect(customMemory.isOutingOverridden).toBe(true);
+    expect(customMemory.currentOutingInterests).toEqual(["Puppetry traditions"]);
+    expect(customMemory.explicitInterests).toEqual(["Stepwells"]);
+  });
+
+  it("switching between modes and clearing an override restores the usual interests", () => {
+    let memory = createInitialTasteMemory();
+    memory = addExplicitInterest(memory, "Textiles");
+    memory = addExplicitInterest(memory, "Heritage architecture");
+    memory = applyUsualInterestsToOuting(memory);
+
+    // Override with something different
+    const overridden = setDifferentTodayOuting(memory, ["Sound archives"]);
+    expect(overridden.isOutingOverridden).toBe(true);
+    expect(overridden.currentOutingInterests).toEqual(["Sound archives"]);
+
+    // Clear override and return to usual interests
+    const restored = clearOutingOverride(overridden);
+    expect(restored.outingMode).toBe("usual");
+    expect(restored.isOutingOverridden).toBe(false);
+    expect(restored.currentOutingInterests).toEqual(["Textiles", "Heritage architecture"]);
+    expect(restored.explicitInterests).toEqual(["Textiles", "Heritage architecture"]);
+  });
+
+  it("interest limits: prioritizeOutingInterests constrains outing focus to max 5 without silent drop", () => {
+    const memory = createInitialTasteMemory();
+    const candidateInterests = [
+      "Textiles",
+      "Woodblock",
+      "Contemporary art",
+      "Stepwells",
+      "Sound archives",
+      "Haveli architecture",
+    ];
+
+    const prioritized = prioritizeOutingInterests(
+      memory,
+      candidateInterests.slice(0, 3)
+    );
+
+    expect(prioritized.currentOutingInterests).toEqual([
+      "Textiles",
+      "Woodblock",
+      "Contemporary art",
+    ]);
+    expect(prioritized.currentOutingInterests.length).toBeLessThanOrEqual(5);
+  });
+
+  it("practical requirement preservation: mandatory accessibility needs remain intact across mode switches", () => {
+    let memory = createInitialTasteMemory();
+    memory = addExplicitInterest(memory, "Textiles");
+    memory = updatePracticalRequirement(memory, "step_free_entrance", "mandatory");
+    memory = updatePracticalRequirement(memory, "seating_available", "optional");
+
+    // Switch to different today
+    const overridden = setDifferentTodayOuting(memory, ["Modern architecture"]);
+    expect(overridden.practicalRequirements.step_free_entrance).toBe("mandatory");
+    expect(overridden.practicalRequirements.seating_available).toBe("optional");
+
+    // Switch to custom
+    const custom = setCustomOutingInterest(overridden, "Sculpture parks");
+    expect(custom.practicalRequirements.step_free_entrance).toBe("mandatory");
+    expect(custom.practicalRequirements.seating_available).toBe("optional");
+
+    // Clear override
+    const restored = clearOutingOverride(custom);
+    expect(restored.practicalRequirements.step_free_entrance).toBe("mandatory");
+    expect(restored.practicalRequirements.seating_available).toBe("optional");
+  });
+
+  it("API payload construction: DiscoverRequest receives confirmed current-outing selection and not general memory", () => {
+    let memory = createInitialTasteMemory();
+    memory = addExplicitInterest(memory, "Textiles");
+    memory = addExplicitInterest(memory, "Heritage architecture");
+    memory = updatePracticalRequirement(memory, "step_free_entrance", "mandatory");
+
+    // Override today's outing with Contemporary art
+    const overridden = setDifferentTodayOuting(memory, ["Contemporary art"]);
+
+    const request = tasteMemoryToDiscoverRequest(overridden, "Ahmedabad", 5);
+
+    // DiscoverRequest must only contain the confirmed current-outing interest
+    expect(request.cultural_interests).toEqual(["Contemporary art"]);
+    expect(request.cultural_interests).not.toContain("Textiles");
+    expect(request.cultural_interests).not.toContain("Heritage architecture");
+
+    // Practical requirements must remain present
+    expect(request.requirements).toEqual([
+      {
+        requirement_id: "req-step_free_entrance",
+        attribute: "step_free_entrance",
+        priority: "mandatory",
+        expected_value: true,
+      },
+    ]);
+  });
+});
+

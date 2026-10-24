@@ -39,6 +39,8 @@ export interface TasteInterestItem {
   readonly provenance?: SignalProvenance;
 }
 
+export type OutingMode = "usual" | "different" | "custom";
+
 /**
  * Structured Session Taste Memory model.
  */
@@ -72,6 +74,16 @@ export interface TasteMemory {
    * Constrained between 1 and 5 items to satisfy the Discovery API contract.
    */
   readonly currentOutingInterests: readonly string[];
+
+  /**
+   * The active intent mode for the current outing (usual, different, custom).
+   */
+  readonly outingMode: OutingMode;
+
+  /**
+   * Whether the current outing is actively overriding general taste memory.
+   */
+  readonly isOutingOverridden: boolean;
 
   /**
    * Explicit practical requirements (e.g. step_free_entrance: 'mandatory').

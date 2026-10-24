@@ -98,6 +98,11 @@ Implemented in [`frontend/src/lib/taste/state.ts`](../frontend/src/lib/taste/sta
 | `moveInterestToOuting(memory, interest)` | Transitions from later to outing | Atomically removes from future trips and adds to current outing. |
 | `moveInterestToFuture(memory, interest)` | Transitions from outing to later | Atomically removes from outing and adds to future trips. |
 | `resetTasteMemory()` | Complete session reset | Returns a clean initial state. |
+| `applyUsualInterestsToOuting(memory)` | Restores usual interests | Applies saved general interests (up to 5) to the active outing and clears override. |
+| `setDifferentTodayOuting(memory, sparks)` | Sets different outing intent | Overrides active outing with 1–5 contrasting sparks while preserving general memory. |
+| `setCustomOutingInterest(memory, interest)` | Sets specific outing topic | Sets a dedicated custom interest for today's visit while leaving general memory intact. |
+| `clearOutingOverride(memory)` | Clears override | Reverts to usual interests and resets `isOutingOverridden` to `false`. |
+| `prioritizeOutingInterests(memory, list)` | Interactive capacity curation | Curates outing focus down to <= 5 items without silent data loss. |
 | `validateAndMigrateTasteMemory(raw)` | Resilient state recovery | Gracefully sanitizes corrupt or mismatched schema data without throwing runtime exceptions. |
 | `tasteMemoryToDiscoverRequest(memory, city)` | Discovery API handoff | Converts only supported, confirmed fields into the existing `DiscoverRequest` contract. |
 
@@ -119,20 +124,40 @@ Implemented in [`frontend/src/lib/taste/session.ts`](../frontend/src/lib/taste/s
 
 Implemented in [`frontend/src/components/discovery/TasteMemoryPanel.tsx`](../frontend/src/components/discovery/TasteMemoryPanel.tsx):
 
-- **Compact Header**: Shows saved count pill (`X saved`) and toggle button (`Inspect taste memory ↓` / `Hide memory ↑`).
+- **Compact Header**: Shows saved count pill (`X saved`) and toggle button (`Review your cultural notes ↓` / `Hide journal ↑`).
 - **Four Categorized Sections**:
-  1. **Focus for This Outing (X/5)**: Active interests with remove (`×`) and `Save for later ↗` actions.
+  1. **Focus for This Outing (X/5)**: Active interests with override badge, `↺ Switch back to usual interests` control, remove (`×`), and `Save for later ↗` actions.
   2. **My Stated Interests**: General explicit interests with `+ This outing`, `Later`, and remove (`×`) actions, plus an inline quick-add form.
   3. **Suggested from Cultural Compass**: Shows compass signals with provenance badges (`From: Compass` / `From: Both`) and `+ This outing` actions.
   4. **Saved for Another Outing**: Future ideas with `↑ Move to outing` and remove (`×`) actions.
 - **Reset Memory Control**: Interactive reset button that prompts the visitor and clears both memory and session storage.
-- **No Deceptive Signals**: Strictly avoids personality scores, compatibility meters, or psychological labels.
+- **Warm Editorial Language**: Exclusively visitor-first terms; zero technical or developer jargon.
 
 ---
 
-## 6. Out of Scope & Deferred Items
+## 6. Current-Outing Intent Layer (`CurrentOutingControls`)
+
+Implemented in [`frontend/src/components/discovery/CurrentOutingControls.tsx`](../frontend/src/components/discovery/CurrentOutingControls.tsx):
+
+### 6.1 Purpose & Separation
+Visitors frequently have a broad cultural appetite (e.g. textiles and heritage havelis) but desire something focused or different for a specific afternoon (e.g. contemporary art or sound design).
+
+The Current-Outing Intent Layer enforces the following guarantees:
+1. **Priority Over History**: When an override is selected, only today's choice is sent to the existing Discovery API (`DiscoverRequest.cultural_interests`).
+2. **Preservation of General Memory**: General interests (`explicitInterests`, `compassInterests`) remain completely unmodified.
+3. **Instant Restorability**: Visitors can switch back to their usual interests at any moment via `↺ Switch back to usual interests`.
+4. **Three Intuitive Modes**:
+   - `usual`: Explore my usual interests (uses saved journal notes).
+   - `different`: Explore something different today (curated contrasting sparks like Contemporary art, Modern architecture, Sound archives).
+   - `custom`: Enter a specific interest for this outing (targeted single topic).
+5. **Interactive Limit Prioritization**: When selections exceed the Discovery API limit (1–5 cultural interests), an interactive prioritization alert allows visitors to confirm their 1–5 focal topics without silent truncation.
+6. **Independence of Practical Requirements**: Essential and optional practical requirements (step-free entrance, quiet spaces, etc.) are strictly separated from cultural tastes and remain intact across all outing mode transitions.
+
+---
+
+## 7. Out of Scope & Deferred Items
 
 The following capabilities are explicitly deferred:
-- **Issue 08**: Current-outing ranking and prioritization logic.
 - **Issue 09**: Recommendation feedback and tuning controls.
 - **Phase 3**: Cross-device account persistence, database synchronization, and multi-user profile sharing.
+

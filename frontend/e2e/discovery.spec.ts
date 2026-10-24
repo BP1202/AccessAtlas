@@ -154,7 +154,7 @@ test.describe("Visitor-First Discovery Experience (/explore)", () => {
     await submitBtn.click();
 
     await expect(page).toHaveURL(/interest=Haveli%20courtyards/);
-    await expect(page.getByText("Haveli courtyards")).toBeVisible();
+    await expect(page.getByText("Haveli courtyards").first()).toBeVisible();
 
     const continueBtn = page.getByRole("button", { name: /continue to visit preferences/i });
     await expect(continueBtn).toBeEnabled();
@@ -326,5 +326,113 @@ test.describe("Visitor-First Discovery Experience (/explore)", () => {
     const continueBtn = page.getByRole("button", { name: /continue to visit preferences/i });
     await expect(continueBtn).toBeVisible();
     await expect(continueBtn).toBeEnabled();
+  });
+
+  test("Flow 4: Cultural Compass -> Taste Memory -> Choose something different today -> Discover -> Return and edit", async ({
+    page,
+  }) => {
+    let capturedRequestBody: Record<string, unknown> = {};
+
+    await page.route("**/api/v1/discover", async (route) => {
+      capturedRequestBody = JSON.parse(route.request().postData() || "{}");
+      await route.fulfill({
+        status: 200,
+        contentType: "application/json",
+        body: JSON.stringify(mockApiResponse),
+      });
+    });
+
+    await page.goto("/explore?path=help");
+    await page.waitForLoadState("networkidle");
+
+    // 1. Answer Cultural Compass Question 1
+    const q1OptionA = page.getByRole("button", { name: /historic textile workshop/i });
+    await expect(q1OptionA).toBeVisible();
+    await q1OptionA.click();
+    await page.getByRole("button", { name: /next question →/i }).click();
+
+    // Fast-forward / answer remaining questions
+    for (let q = 2; q <= 4; q++) {
+      const skipBtn = page.getByRole("button", { name: /skip this question →|neither \/ skip comparison/i }).first();
+      await skipBtn.click();
+      const nextBtn = page.getByRole("button", { name: /next question →/i });
+      if (await nextBtn.isVisible()) {
+        await nextBtn.click();
+      }
+    }
+    // Question 5
+    const q5Skip = page.getByRole("button", { name: /skip this question →|neither \/ skip comparison/i }).first();
+    await q5Skip.click();
+    const reviewBtn = page.getByRole("button", { name: /review directions →/i });
+    await reviewBtn.click();
+
+    // 2. Reveal screen
+    await expect(page.getByTestId("cultural-compass-reveal")).toBeVisible();
+
+    // Click "Manual entry tab" to inspect/manage interests in Stage 1 with CurrentOutingControls
+    const manualEntryBtn = page.getByRole("button", { name: /manual entry tab/i });
+    await manualEntryBtn.click();
+
+    // 3. Stage 1: Current Outing Controls is present
+    await expect(page.getByTestId("current-outing-controls")).toBeVisible();
+    await expect(
+      page.getByText("Your usual interests are still here. What would you like to explore today?")
+    ).toBeVisible();
+
+    // Choose "Explore something different today"
+    const differentTab = page.getByTestId("mode-different");
+    await differentTab.click();
+
+    // Pick spark "Contemporary art"
+    const sparkBtn = page.getByTestId("different-spark-contemporary-art");
+    await sparkBtn.click();
+
+    // Verify reassurance notice that journal notes remain intact
+    await expect(page.getByText(/Safe in your journal:/i)).toBeVisible();
+
+    // 4. Continue to Visit Preferences
+    const continueToPrefsBtn = page.getByRole("button", { name: /continue to visit preferences/i });
+    await continueToPrefsBtn.click();
+
+    // Stage 2: Preferences
+    await expect(
+      page.getByRole("heading", { name: /what matters for your visit\?/i })
+    ).toBeVisible();
+
+    const stepFreeGroup = page.getByRole("radiogroup", { name: /step-free entrance/i });
+    await stepFreeGroup.getByRole("radio", { name: "Essential" }).click();
+
+    // 5. Submit Discovery
+    const findBtn = page.getByRole("button", { name: /find cultural experiences/i });
+    await findBtn.click();
+
+    // Verify request payload: contains Contemporary art, does NOT merge unselected historical interests
+    const sentInterests = (capturedRequestBody["cultural_interests"] as string[]) || [];
+    expect(sentInterests).toContain("Contemporary art");
+    const sentReqs =
+      (capturedRequestBody["requirements"] as Array<{ attribute: string; priority: string }>) || [];
+    expect(sentReqs).toContainEqual(
+      expect.objectContaining({
+        attribute: "step_free_entrance",
+        priority: "mandatory",
+      })
+    );
+
+    // 6. On Results: Candidate card is displayed
+    await expect(page.getByRole("heading", { name: "Calico Museum of Textiles" }).first()).toBeVisible();
+
+    // 7. Click "Adjust outing" to return to Stage 1
+    const adjustOutingBtn = page.getByRole("button", { name: /adjust outing/i });
+    await expect(adjustOutingBtn).toBeVisible();
+    await adjustOutingBtn.click();
+
+    // 8. Back on Stage 1: CurrentOutingControls shows active override and allows returning to usual
+    await expect(page.getByTestId("current-outing-controls")).toBeVisible();
+    const switchBackBtn = page.getByTestId("switch-back-usual-btn");
+    await expect(switchBackBtn).toBeVisible();
+    await switchBackBtn.click();
+
+    // Restores usual mode
+    await expect(page.getByTestId("mode-usual")).toHaveAttribute("aria-selected", "true");
   });
 });

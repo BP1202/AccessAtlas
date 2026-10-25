@@ -14,10 +14,13 @@ import {
   OUTCOME_LABELS,
   OUTCOME_DESCRIPTIONS,
   RESOLUTION_LABELS,
+  ATTRIBUTE_LABELS,
+  REQUIREMENT_OUTCOME_LABELS,
+  SCOPE_LABELS,
 } from "@/lib/constants/labels";
 
 describe("API Contract and Schema Drift Verification", () => {
-  it("verifies all 15 backend evidence attributes are accounted for", () => {
+  it("verifies all 15 backend evidence attributes are accounted for and labeled", () => {
     const expectedAttributes: EvidenceAttribute[] = [
       "step_free_entrance",
       "internal_elevator",
@@ -37,6 +40,9 @@ describe("API Contract and Schema Drift Verification", () => {
     ];
 
     expect(expectedAttributes).toHaveLength(15);
+    for (const attr of expectedAttributes) {
+      expect(ATTRIBUTE_LABELS[attr]).toBeDefined();
+    }
   });
 
   it("verifies 3-state PossibilityOutcome enum values and visitor mappings", () => {
@@ -100,6 +106,13 @@ describe("API Contract and Schema Drift Verification", () => {
     expect(operators).toHaveLength(5);
     expect(scopes).toHaveLength(2);
     expect(reqOutcomes).toHaveLength(7);
+
+    for (const scope of scopes) {
+      expect(SCOPE_LABELS[scope]).toBeDefined();
+    }
+    for (const outcome of reqOutcomes) {
+      expect(REQUIREMENT_OUTCOME_LABELS[outcome]).toBeDefined();
+    }
   });
 
   it("verifies DiscoverRequest shape conforms to backend contract", () => {

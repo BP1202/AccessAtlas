@@ -652,16 +652,31 @@ test.describe("Visitor-First Discovery Experience (/explore)", () => {
       candidateCard.getByText("Requirement-by-Requirement Assessment")
     ).toBeVisible();
 
+    // Verify redesigned evidence-aware Visit Plan sections
+    const visitPlan = candidateCard.getByTestId("visit-plan-detail-qloo_calico_01");
+    await expect(visitPlan.getByTestId("visit-plan-identity")).toBeVisible();
+    await expect(visitPlan.getByTestId("visit-plan-cultural-relevance")).toBeVisible();
+    await expect(visitPlan.getByTestId("visit-plan-overall-assessment")).toBeVisible();
+    await expect(visitPlan.getByTestId("visit-plan-assessments")).toBeVisible();
+    await expect(visitPlan.getByTestId("visit-plan-documented-highlights")).toBeVisible();
+    await expect(visitPlan.getByTestId("visit-plan-provenance-sources")).toBeVisible();
+    await expect(visitPlan.getByTestId("visit-plan-transparency-panel")).toBeVisible();
+
+    // Verify scope notice: not a universal accessibility certification
+    await expect(
+      visitPlan.getByText(/Not an accessibility certification or guarantee of universal accommodation/i)
+    ).toBeVisible();
+
     // Desktop Screenshot
     await page.screenshot({
-      path: "C:/Users/bhoom/.gemini/antigravity-ide/brain/299b5963-0cde-4153-bc40-f438c2b02466/cultural_threads_desktop.png",
+      path: "C:/Users/bhoom/.gemini/antigravity-ide/brain/299b5963-0cde-4153-bc40-f438c2b02466/evidence_aware_visit_plan_desktop.png",
       fullPage: true,
     });
 
     // Mobile Screenshot
     await page.setViewportSize({ width: 375, height: 812 });
     await page.screenshot({
-      path: "C:/Users/bhoom/.gemini/antigravity-ide/brain/299b5963-0cde-4153-bc40-f438c2b02466/cultural_threads_mobile.png",
+      path: "C:/Users/bhoom/.gemini/antigravity-ide/brain/299b5963-0cde-4153-bc40-f438c2b02466/evidence_aware_visit_plan_mobile.png",
       fullPage: true,
     });
     await page.setViewportSize({ width: 1280, height: 720 });

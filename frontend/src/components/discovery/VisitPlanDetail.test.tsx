@@ -332,5 +332,109 @@ describe("VisitPlanDetail", () => {
       screen.getByText(/Independent venue documentation has not yet been reviewed for this space in the Ahmedabad pilot./i)
     ).toBeInTheDocument();
   });
+
+  it("renders categorized next actions with badges and icons", () => {
+    const planWithCategorizedActions: CandidateParticipationPlan = {
+      ...mockPlanWithQuestions,
+      suggested_next_actions: [
+        "Review official venue schedule and booking requirements prior to visit.",
+        "Contact venue accessibility coordinator to resolve the confirmation questions above.",
+        "Consider alternative cultural experiences that satisfy your stated requirements.",
+        "Venue advisory (operational policy): Photography is restricted in the prayer hall.",
+      ],
+    };
+
+    render(<VisitPlanDetail plan={planWithCategorizedActions} />);
+
+    expect(screen.getByText("Suggested Next Actions")).toBeInTheDocument();
+    expect(screen.getByText("Review Booking Guidance")).toBeInTheDocument();
+    expect(screen.getByText("Confirm Directly with Venue")).toBeInTheDocument();
+    expect(screen.getByText("Explore Another Supported Candidate")).toBeInTheDocument();
+    expect(screen.getByText("Operational Advisory")).toBeInTheDocument();
+  });
+
+  it("renders prominent essential conflict banner when mandatory requirement is contradicted", () => {
+    const mandatoryConflictPlan: CandidateParticipationPlan = {
+      candidate: {
+        entity_id: "qloo_stepwell_01",
+        name: "Adalaj Stepwell",
+        entity_type: "heritage_site",
+      },
+      resolution_status: "resolved",
+      venue_id: "adalaj_stepwell",
+      possibility_assessment: {
+        venue_id: "adalaj_stepwell",
+        aggregate_outcome: "REQUIREMENT_CONFLICT",
+        evaluation_time: "2026-10-21T10:00:00Z",
+        summary: "Mandatory step-free requirement is contradicted.",
+        assessments: [
+          {
+            requirement_id: "req_step_free",
+            attribute: "step_free_entrance",
+            priority: "mandatory",
+            scope: "venue",
+            outcome: "contradicted",
+            explanation: "Multi-tiered stone steps prevent step-free access.",
+          },
+        ],
+      },
+      supported_findings: [],
+      unresolved_gaps: [],
+      confirmation_questions: [],
+      suggested_next_actions: [
+        "Identified conflict: mandatory requirements are contradicted for 'Adalaj Stepwell'.",
+      ],
+      provenance_sources: [],
+    };
+
+    render(<VisitPlanDetail plan={mandatoryConflictPlan} />);
+
+    expect(screen.getByTestId("essential-conflict-banner")).toBeInTheDocument();
+    expect(screen.getByText("Essential Requirement Conflict")).toBeInTheDocument();
+    expect(
+      screen.getByText(/AccessAtlas does not offer unverified workarounds or silently downgrade essential requirements/i)
+    ).toBeInTheDocument();
+  });
+
+  it("renders verified booking portal link and honest contact notice without fabricating phone or email", () => {
+    const planWithBooking: CandidateParticipationPlan = {
+      candidate: {
+        entity_id: "qloo_calico_01",
+        name: "Calico Museum of Textiles",
+        entity_type: "museum",
+      },
+      resolution_status: "resolved",
+      venue_id: "calico_museum",
+      possibility_assessment: null,
+      supported_findings: [],
+      unresolved_gaps: [],
+      confirmation_questions: [],
+      suggested_next_actions: [],
+      provenance_sources: [
+        {
+          source_type: "official_website",
+          title: "Calico Museum Tour Guidelines & Registration",
+          url: "https://www.calicomuseum.org/tour-guidelines/",
+          verified_at: "2026-09-01T00:00:00Z",
+        },
+      ],
+    };
+
+    render(<VisitPlanDetail plan={planWithBooking} />);
+
+    expect(screen.getByText("Booking & Guidelines Portal")).toBeInTheDocument();
+    expect(screen.getByRole("link", { name: /open booking & guidelines/i })).toHaveAttribute(
+      "href",
+      "https://www.calicomuseum.org/tour-guidelines/"
+    );
+    expect(screen.getByTestId("contact-booking-honesty")).toBeInTheDocument();
+    expect(
+      screen.getByText(/No direct phone numbers, personal email addresses, or automated booking forms are cataloged in repository records/i)
+    ).toBeInTheDocument();
+    expect(
+      screen.getByText(/AccessAtlas does not claim to have contacted the venue or conduct autonomous booking or outreach/i)
+    ).toBeInTheDocument();
+  });
 });
+
 

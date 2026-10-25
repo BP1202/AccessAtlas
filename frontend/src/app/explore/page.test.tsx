@@ -175,4 +175,78 @@ describe("ExplorePage Integration Flow", () => {
     await user.click(adjustPrefsBtn);
     expect(screen.getByText("What matters for your visit?")).toBeInTheDocument();
   });
+
+  it("renders Cultural Threads section and connects to visit plan expansion", async () => {
+    const user = userEvent.setup();
+    const responseWithThreads: DiscoverResponse = {
+      ...mockDiscoverResponse,
+      cultural_threads: [
+        {
+          thread_id: "thread_calico_textiles",
+          starting_interest: "Textiles",
+          anchor: {
+            interest: "Textiles",
+            source_type: "explicit_visitor_selection",
+            resolved_entity_id: "qloo_calico_01",
+            resolved_entity_name: "Calico Museum of Textiles",
+            matched_tag: "Textiles",
+          },
+          candidate: {
+            entity_id: "qloo_calico_01",
+            name: "Calico Museum of Textiles",
+            entity_type: "museum",
+            mapping_status: "resolved",
+            has_reviewed_evidence: true,
+            is_evaluation_eligible: true,
+            venue_id: "calico_museum",
+          },
+          connection: {
+            connection_type: "shared_tag",
+            source_type: "deterministic_application_mapping",
+            shared_descriptors: ["Textiles"],
+            rationale: "Shares cultural tag 'Textiles' with your selected interest.",
+          },
+          provenance: "Deterministic tag overlap.",
+        },
+      ],
+    };
+
+    vi.spyOn(defaultApiClient, "discover").mockResolvedValue(responseWithThreads);
+
+    render(<ExplorePage />);
+
+    // Stage 1
+    await user.click(screen.getByRole("button", { name: /textiles/i }));
+    await user.click(screen.getByRole("button", { name: /continue to visit preferences/i }));
+
+    // Stage 2
+    await user.click(screen.getByRole("button", { name: /find cultural experiences/i }));
+
+    // Stage 3 Results
+    await waitFor(() => {
+      expect(screen.getByTestId("cultural-threads-section")).toBeInTheDocument();
+    });
+
+    expect(screen.getByText("How your interests connect to these spaces")).toBeInTheDocument();
+    expect(screen.getByText("Cultural Tag Overlap")).toBeInTheDocument();
+
+    // The candidate card is initially collapsed
+    expect(
+      screen.queryByText("Requirement-by-Requirement Assessment")
+    ).not.toBeInTheDocument();
+
+    // Click "View visit plan ↓" inside the Cultural Thread
+    const viewPlanActionBtn = screen.getByRole("button", {
+      name: /view verified visit plan for Calico Museum of Textiles/i,
+    });
+    await user.click(viewPlanActionBtn);
+
+    // The CandidateCard visit plan should now be expanded
+    await waitFor(() => {
+      expect(
+        screen.getByText("Requirement-by-Requirement Assessment")
+      ).toBeInTheDocument();
+    });
+  });
 });
+

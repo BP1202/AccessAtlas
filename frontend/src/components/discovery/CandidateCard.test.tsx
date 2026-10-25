@@ -1,5 +1,5 @@
 import React from "react";
-import { describe, it, expect } from "vitest";
+import { describe, it, expect, vi } from "vitest";
 import { render, screen } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
 import { CandidateCard } from "./CandidateCard";
@@ -114,4 +114,78 @@ describe("CandidateCard", () => {
       screen.queryByText("Requirement-by-Requirement Assessment")
     ).not.toBeInTheDocument();
   });
+
+  it("renders cultural thread callout when present on the plan", () => {
+    const planWithThread: CandidateParticipationPlan = {
+      ...mockResolvedPlan,
+      cultural_thread: {
+        thread_id: "thread_calico_textiles",
+        starting_interest: "Textiles",
+        anchor: {
+          interest: "Textiles",
+          source_type: "explicit_visitor_selection",
+        },
+        candidate: {
+          entity_id: "qloo_calico_01",
+          name: "Calico Museum of Textiles",
+          entity_type: "museum",
+          mapping_status: "resolved",
+          has_reviewed_evidence: true,
+          is_evaluation_eligible: true,
+        },
+        connection: {
+          connection_type: "shared_tag",
+          source_type: "deterministic_application_mapping",
+          shared_descriptors: ["Textiles"],
+          rationale: "Shares cultural tag 'Textiles' with your selected interest.",
+        },
+        provenance: "Deterministic tag overlap.",
+      },
+    };
+
+    render(<CandidateCard plan={planWithThread} />);
+
+    expect(
+      screen.getByTestId("candidate-cultural-thread-qloo_calico_01")
+    ).toBeInTheDocument();
+    expect(screen.getByText(/Cultural Thread:/i)).toBeInTheDocument();
+    expect(
+      screen.getByText(/Shares cultural tag 'Textiles' with your selected interest/i)
+    ).toBeInTheDocument();
+  });
+
+  it("honors external isExpanded and onToggleExpand props", async () => {
+    const user = userEvent.setup();
+    const toggleSpy = vi.fn();
+
+    const { rerender } = render(
+      <CandidateCard
+        plan={mockResolvedPlan}
+        isExpanded={false}
+        onToggleExpand={toggleSpy}
+      />
+    );
+
+    expect(
+      screen.queryByText("Requirement-by-Requirement Assessment")
+    ).not.toBeInTheDocument();
+
+    const viewPlanBtn = screen.getByRole("button", { name: /view visit plan/i });
+    await user.click(viewPlanBtn);
+    expect(toggleSpy).toHaveBeenCalledTimes(1);
+
+    // Rerender as expanded
+    rerender(
+      <CandidateCard
+        plan={mockResolvedPlan}
+        isExpanded={true}
+        onToggleExpand={toggleSpy}
+      />
+    );
+
+    expect(
+      screen.getByText("Requirement-by-Requirement Assessment")
+    ).toBeInTheDocument();
+  });
 });
+

@@ -60,6 +60,66 @@ const mockApiResponse = {
           verified_at: "2026-10-15T00:00:00Z",
         },
       ],
+      cultural_thread: {
+        thread_id: "thread_calico_textiles",
+        starting_interest: "Textiles",
+        anchor: {
+          interest: "Textiles",
+          source_type: "explicit_visitor_selection",
+          resolved_entity_id: "qloo_calico_01",
+          resolved_entity_name: "Calico Museum of Textiles",
+          matched_tag: "Textiles",
+        },
+        candidate: {
+          entity_id: "qloo_calico_01",
+          name: "Calico Museum of Textiles",
+          entity_type: "museum",
+          subtype: "Textile Museum",
+          popularity: 0.88,
+          mapping_status: "resolved",
+          has_reviewed_evidence: true,
+          is_evaluation_eligible: true,
+          venue_id: "calico_museum",
+        },
+        connection: {
+          connection_type: "shared_tag",
+          source_type: "deterministic_application_mapping",
+          shared_descriptors: ["Textiles"],
+          rationale: "Shares cultural tag 'Textiles' with your selected interest 'Textiles'.",
+        },
+        provenance: "Deterministic match on entity tag 'Textiles' from Qloo entity response for starting interest 'Textiles'.",
+      },
+    },
+  ],
+  cultural_threads: [
+    {
+      thread_id: "thread_calico_textiles",
+      starting_interest: "Textiles",
+      anchor: {
+        interest: "Textiles",
+        source_type: "explicit_visitor_selection",
+        resolved_entity_id: "qloo_calico_01",
+        resolved_entity_name: "Calico Museum of Textiles",
+        matched_tag: "Textiles",
+      },
+      candidate: {
+        entity_id: "qloo_calico_01",
+        name: "Calico Museum of Textiles",
+        entity_type: "museum",
+        subtype: "Textile Museum",
+        popularity: 0.88,
+        mapping_status: "resolved",
+        has_reviewed_evidence: true,
+        is_evaluation_eligible: true,
+        venue_id: "calico_museum",
+      },
+      connection: {
+        connection_type: "shared_tag",
+        source_type: "deterministic_application_mapping",
+        shared_descriptors: ["Textiles"],
+        rationale: "Shares cultural tag 'Textiles' with your selected interest 'Textiles'.",
+      },
+      provenance: "Deterministic match on entity tag 'Textiles' from Qloo entity response for starting interest 'Textiles'.",
     },
   ],
   workflow_summary: "Evaluated 1 candidate against verified records.",
@@ -115,7 +175,7 @@ test.describe("Visitor-First Discovery Experience (/explore)", () => {
     await findBtn.click();
 
     // 3. Stage 3: Results
-    await expect(page.getByText("Calico Museum of Textiles")).toBeVisible();
+    await expect(page.getByRole("heading", { name: "Calico Museum of Textiles" }).first()).toBeVisible();
     await expect(page.getByText("Meets your stated requirements")).toBeVisible();
     await expect(page.getByText("Visit information reviewed")).toBeVisible();
 
@@ -539,5 +599,71 @@ test.describe("Visitor-First Discovery Experience (/explore)", () => {
         priority: "mandatory",
       })
     );
+  });
+
+  test("visualizes real Qloo cultural threads and navigates to expanded visit plan", async ({
+    page,
+  }) => {
+    await page.goto("/explore");
+    await page.waitForLoadState("networkidle");
+
+    // Stage 1: Select "Textiles"
+    const textilesChip = page.getByRole("button", { name: /textiles/i });
+    await textilesChip.click();
+    await page.getByRole("button", { name: /continue to visit preferences/i }).click();
+
+    // Stage 2: Submit to search
+    await page.getByRole("button", { name: /find cultural experiences/i }).click();
+
+    // Stage 3: Cultural Threads section rendering
+    const threadsSection = page.getByTestId("cultural-threads-section");
+    await expect(threadsSection).toBeVisible();
+
+    await expect(
+      threadsSection.getByRole("heading", { name: /how your interests connect to these spaces/i })
+    ).toBeVisible();
+
+    // Check 3-node connected pathway
+    await expect(threadsSection.getByText("You selected this starting interest")).toBeVisible();
+    await expect(threadsSection.getByText("Cultural Tag Overlap")).toBeVisible();
+    await expect(threadsSection.getByText("Reviewed Pilot Venue")).toBeVisible();
+    await expect(threadsSection.getByText(/Global Qloo salience: 88%/i)).toBeVisible();
+
+    // Candidate card should display cultural thread callout
+    const candidateCard = page.getByTestId("candidate-card-qloo_calico_01");
+    await expect(candidateCard).toBeVisible();
+    await expect(
+      candidateCard.getByTestId("candidate-cultural-thread-qloo_calico_01")
+    ).toBeVisible();
+
+    // Candidate visit plan is initially collapsed
+    await expect(
+      candidateCard.getByText("Requirement-by-Requirement Assessment")
+    ).not.toBeVisible();
+
+    // Click "View visit plan ↓" on Cultural Thread card
+    const viewVisitPlanBtn = threadsSection.getByRole("button", {
+      name: /view verified visit plan for Calico Museum of Textiles/i,
+    });
+    await viewVisitPlanBtn.click();
+
+    // Candidate visit plan expands
+    await expect(
+      candidateCard.getByText("Requirement-by-Requirement Assessment")
+    ).toBeVisible();
+
+    // Desktop Screenshot
+    await page.screenshot({
+      path: "C:/Users/bhoom/.gemini/antigravity-ide/brain/299b5963-0cde-4153-bc40-f438c2b02466/cultural_threads_desktop.png",
+      fullPage: true,
+    });
+
+    // Mobile Screenshot
+    await page.setViewportSize({ width: 375, height: 812 });
+    await page.screenshot({
+      path: "C:/Users/bhoom/.gemini/antigravity-ide/brain/299b5963-0cde-4153-bc40-f438c2b02466/cultural_threads_mobile.png",
+      fullPage: true,
+    });
+    await page.setViewportSize({ width: 1280, height: 720 });
   });
 });

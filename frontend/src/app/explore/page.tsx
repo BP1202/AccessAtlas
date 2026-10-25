@@ -38,6 +38,7 @@ import { aggregateCompassSignals, type CompassAnswers } from "@/lib/compass";
 import { TasteMemoryPanel } from "@/components/discovery/TasteMemoryPanel";
 import { CurrentOutingControls } from "@/components/discovery/CurrentOutingControls";
 import { NextTimeDiscoveries } from "@/components/discovery/NextTimeDiscoveries";
+import { CulturalThreadsSection } from "@/components/discovery/CulturalThreadsSection";
 
 export type DiscoveryStep = "interests" | "preferences" | "results";
 
@@ -70,10 +71,33 @@ function ExploreContent() {
   const [error, setError] = useState<string | null>(null);
   const [statusCode, setStatusCode] = useState<number | undefined>(undefined);
   const [result, setResult] = useState<DiscoverResponse | null>(null);
+  const [expandedCandidateIds, setExpandedCandidateIds] = useState<Record<string, boolean>>({});
   const [feedbackNotice, setFeedbackNotice] = useState<{
     text: string;
     undoMemory: TasteMemory;
   } | null>(null);
+
+  const handleSelectCandidate = (candidateEntityId: string) => {
+    setExpandedCandidateIds((prev) => ({
+      ...prev,
+      [candidateEntityId]: true,
+    }));
+    if (typeof window !== "undefined") {
+      setTimeout(() => {
+        const el = document.getElementById(`candidate-card-${candidateEntityId}`);
+        if (el && typeof el.scrollIntoView === "function") {
+          el.scrollIntoView({ behavior: "smooth", block: "start" });
+        }
+      }, 50);
+    }
+  };
+
+  const handleToggleCandidateExpand = (candidateEntityId: string) => {
+    setExpandedCandidateIds((prev) => ({
+      ...prev,
+      [candidateEntityId]: !prev[candidateEntityId],
+    }));
+  };
 
   // Synchronize Taste Memory to session storage
   useEffect(() => {
@@ -465,6 +489,15 @@ function ExploreContent() {
                   </div>
                 </div>
 
+                {/* Cultural Threads Section: Visualizing real Qloo pathways */}
+                {result.plans.length > 0 && (
+                  <CulturalThreadsSection
+                    threads={result.cultural_threads || []}
+                    plans={result.plans}
+                    onSelectCandidate={handleSelectCandidate}
+                  />
+                )}
+
                 {/* Candidate List with Feedback Controls */}
                 {result.plans.length === 0 ? (
                   <EmptyState
@@ -481,6 +514,8 @@ function ExploreContent() {
                         plan={plan}
                         memory={tasteMemory}
                         onApplyFeedback={handleApplyCandidateFeedback}
+                        isExpanded={expandedCandidateIds[plan.candidate.entity_id]}
+                        onToggleExpand={() => handleToggleCandidateExpand(plan.candidate.entity_id)}
                       />
                     ))}
                   </div>

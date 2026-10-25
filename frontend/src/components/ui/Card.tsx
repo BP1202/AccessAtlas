@@ -1,18 +1,35 @@
 import React from "react";
 
+export type CardVariant = "default" | "paper" | "editorial" | "accent" | "quiet";
+
 export interface CardProps extends React.HTMLAttributes<HTMLDivElement> {
   as?: React.ElementType;
+  variant?: CardVariant;
 }
 
 export const Card: React.FC<CardProps> = ({
   children,
   className = "",
   as: Component = "div",
+  variant = "default",
   ...props
 }) => {
+  const variantStyles: Record<CardVariant, string> = {
+    default:
+      "bg-white border-[#e7e0d3] dark:border-[#323731] dark:bg-[#212520]",
+    paper:
+      "bg-[#f6f3eb] border-[#e7e0d3] dark:border-[#323731] dark:bg-[#191c19]",
+    editorial:
+      "bg-white border-[#e7e0d3] border-l-4 border-l-[#193a32] dark:border-[#323731] dark:border-l-[#2a584d] dark:bg-[#212520]",
+    accent:
+      "bg-white border-[#e7e0d3] border-l-4 border-l-[#c56f4d] dark:border-[#323731] dark:border-l-[#d88261] dark:bg-[#212520]",
+    quiet:
+      "bg-[#ede8dc] border-[#d5cbba] dark:border-[#323731] dark:bg-[#262a25]",
+  };
+
   return (
     <Component
-      className={`rounded-2xl border border-[#e6e0d4] bg-white p-6 sm:p-7 shadow-xs transition-all duration-200 dark:border-[#323731] dark:bg-[#212520] ${className}`}
+      className={`rounded-2xl border p-6 sm:p-7 shadow-xs transition-colors duration-150 ${variantStyles[variant]} ${className}`}
       {...props}
     >
       {children}

@@ -24,10 +24,10 @@ export const LoadingSpinner: React.FC<LoadingSpinnerProps> = ({
       className={`flex flex-col items-center justify-center gap-3 p-6 text-center ${className}`}
     >
       <div
-        className={`animate-spin rounded-full border-teal-700 border-t-transparent dark:border-teal-400 dark:border-t-transparent ${sizeClasses[size]}`}
+        className={`animate-spin rounded-full border-[#193a32] border-t-transparent dark:border-[#a8d5c4] dark:border-t-transparent ${sizeClasses[size]}`}
         aria-hidden="true"
       />
-      <span className="text-sm font-medium text-slate-600 dark:text-slate-400">
+      <span className="text-sm font-medium text-[#53594e] dark:text-[#a3aba0]">
         {label}
       </span>
     </div>

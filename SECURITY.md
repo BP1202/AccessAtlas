@@ -59,6 +59,8 @@ Privileged credentials must remain server-side.
 
 Never expose Qloo credentials or other privileged tokens through browser-accessible variables, client components or public API responses.
 
+All cultural discovery requests originate from the browser to the AccessAtlas backend (`/api/v1/discover`), never to Qloo directly. Automated boundary tests (`backend/tests/test_security_boundary.py` and `frontend/src/lib/api/securityBoundary.test.ts`) enforce that sentinel credentials never appear in API responses or errors, upstream exceptions are sanitized, and frontend source code contains no provider API key references or header construction logic.
+
 ## 3. Repository protection
 
 The `.gitignore` must exclude local environment files, private credentials, caches, logs and private experimental outputs.

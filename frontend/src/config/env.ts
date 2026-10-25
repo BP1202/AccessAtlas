@@ -3,7 +3,7 @@
  *
  * All cultural intelligence and evidence assessments are mediated
  * through the AccessAtlas FastAPI backend. Privileged credentials (such as
- * QLOO_API_KEY) must NEVER be exposed, bundled, or referenced here.
+ * provider API keys) must NEVER be exposed, bundled, or referenced here.
  */
 
 export const BACKEND_URL =

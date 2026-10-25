@@ -3,23 +3,48 @@ import React from "react";
 export interface AlertProps extends React.HTMLAttributes<HTMLDivElement> {
   variant?: "info" | "warning" | "danger" | "success";
   title?: string;
+  icon?: React.ReactNode;
 }
 
 export const Alert: React.FC<AlertProps> = ({
   children,
   variant = "info",
   title,
+  icon,
   className = "",
   ...props
 }) => {
   const variantStyles = {
-    info: "border-blue-200 bg-blue-50 text-blue-900 dark:border-blue-900 dark:bg-blue-950/50 dark:text-blue-200",
+    info: "border-[#bcd6cb] bg-[#e7f0e9] text-[#134e3f] dark:border-[#2a4c3f] dark:bg-[#1c2e27] dark:text-[#b8ded0]",
     warning:
-      "border-amber-200 bg-amber-50 text-amber-900 dark:border-amber-900 dark:bg-amber-950/50 dark:text-amber-200",
+      "border-[#eed49c] bg-[#fcf5e8] text-[#784408] dark:border-[#544122] dark:bg-[#382b17] dark:text-[#f0d496]",
     danger:
-      "border-rose-200 bg-rose-50 text-rose-900 dark:border-rose-900 dark:bg-rose-950/50 dark:text-rose-200",
+      "border-[#f3c2b2] bg-[#fdf0ec] text-[#8b2612] dark:border-[#582a20] dark:bg-[#3a1d17] dark:text-[#f6b4a1]",
     success:
-      "border-emerald-200 bg-emerald-50 text-emerald-900 dark:border-emerald-900 dark:bg-emerald-950/50 dark:text-emerald-200",
+      "border-[#bcd6cb] bg-[#e7f0e9] text-[#134e3f] dark:border-[#2a4c3f] dark:bg-[#1c2e27] dark:text-[#b8ded0]",
+  };
+
+  const defaultIcons = {
+    info: (
+      <span className="font-bold select-none text-base leading-none" aria-hidden="true">
+        ℹ
+      </span>
+    ),
+    warning: (
+      <span className="font-bold select-none text-base leading-none" aria-hidden="true">
+        ?
+      </span>
+    ),
+    danger: (
+      <span className="font-bold select-none text-base leading-none" aria-hidden="true">
+        ✕
+      </span>
+    ),
+    success: (
+      <span className="font-bold select-none text-base leading-none" aria-hidden="true">
+        ✓
+      </span>
+    ),
   };
 
   const role = variant === "danger" ? "alert" : "status";
@@ -27,11 +52,16 @@ export const Alert: React.FC<AlertProps> = ({
   return (
     <div
       role={role}
-      className={`rounded-lg border p-4 text-sm ${variantStyles[variant]} ${className}`}
+      className={`rounded-2xl border p-4.5 text-sm shadow-xs ${variantStyles[variant]} ${className}`}
       {...props}
     >
-      {title && <h4 className="mb-1 font-semibold">{title}</h4>}
-      <div className="leading-relaxed">{children}</div>
+      <div className="flex items-start gap-3">
+        <div className="shrink-0 mt-0.5">{icon !== undefined ? icon : defaultIcons[variant]}</div>
+        <div className="flex-1">
+          {title && <h4 className="mb-1 font-serif text-base font-semibold">{title}</h4>}
+          <div className="leading-relaxed">{children}</div>
+        </div>
+      </div>
     </div>
   );
 };

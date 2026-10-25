@@ -20,14 +20,14 @@ export const EmptyState: React.FC<EmptyStateProps> = ({
     <div
       role="region"
       aria-label="Empty state"
-      className={`flex flex-col items-center justify-center rounded-xl border border-dashed border-slate-300 p-10 text-center dark:border-slate-700 ${className}`}
+      className={`flex flex-col items-center justify-center rounded-2xl border border-dashed border-[#e7e0d3] bg-[#f6f3eb]/60 p-8 sm:p-10 text-center dark:border-[#323731] dark:bg-[#191c19]/40 ${className}`}
     >
       <div
-        className="mb-4 rounded-full bg-slate-100 p-3 text-slate-500 dark:bg-slate-800 dark:text-slate-400"
+        className="mb-4 rounded-full bg-[#ede8dc] p-3.5 text-[#193a32] dark:bg-[#262a25] dark:text-[#a8d5c4]"
         aria-hidden="true"
       >
         <svg
-          className="h-8 w-8"
+          className="h-7 w-7"
           fill="none"
           viewBox="0 0 24 24"
           strokeWidth="1.5"
@@ -40,10 +40,10 @@ export const EmptyState: React.FC<EmptyStateProps> = ({
           />
         </svg>
       </div>
-      <h3 className="mb-2 text-base font-semibold text-slate-900 dark:text-slate-100">
+      <h3 className="mb-2 font-serif text-lg font-semibold text-[#252923] dark:text-[#f4f1ea]">
         {title}
       </h3>
-      <p className="max-w-md text-sm text-slate-600 dark:text-slate-400">
+      <p className="max-w-md text-sm leading-relaxed text-[#53594e] dark:text-[#a3aba0]">
         {description}
       </p>
       {actionLabel && onAction && (

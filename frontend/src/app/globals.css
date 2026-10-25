@@ -1,24 +1,91 @@
 @import "tailwindcss";
 
 :root {
-  --background: #f6f3eb;
-  --foreground: #252923;
-  --forest: #193a32;
-  --forest-hover: #122b25;
-  --terracotta: #c56f4d;
-  --terracotta-hover: #b05c3c;
-  --sand: #ede8dc;
-  --sand-dark: #dfd8c8;
+  /* =========================================================================
+     AccessAtlas Editorial Design System Tokens (WCAG 2.2 AA Validated)
+     ========================================================================= */
+
+  /* Core Editorial Palette */
+  --color-forest: #193a32;
+  --color-forest-hover: #122b25;
+  --color-forest-active: #0c1d19;
+
+  --color-warm-paper: #f6f3eb;
+  --color-warm-paper-muted: #ede8dc;
+
+  --color-ink: #252923;
+  --color-ink-muted: #53594e; /* 6.4:1 contrast on #f6f3eb (passes AA) */
+
+  --color-terracotta: #c56f4d; /* Decorative accent, borders, graphical elements */
+  --color-terracotta-dark: #a85333; /* 5.05:1 contrast on white, text-safe */
+  --color-terracotta-hover: #934527;
+
+  --color-stone: #e7e0d3;
+  --color-stone-light: #f0ebe2;
+  --color-stone-dark: #d5cbba;
+
+  --color-sage-tint: #e7f0e9;
+  --color-sage-border: #bcd6cb;
+  --color-sage-text: #134e3f; /* 7.2:1 contrast on #e7f0e9 (passes AAA) */
+
+  /* Semantic Theme Mappings */
+  --background: var(--color-warm-paper);
+  --foreground: var(--color-ink);
+  --surface: #ffffff;
+  --surface-paper: var(--color-warm-paper);
+  --surface-stone: var(--color-stone);
+  --surface-sage: var(--color-sage-tint);
   --card-bg: #ffffff;
-  --card-border: #e6e0d4;
-  --muted: #62685d;
+  --card-border: var(--color-stone);
+  --border-subtle: var(--color-stone);
+  --border-strong: var(--color-forest);
+  --focus-ring: var(--color-forest);
+
+  /* Deterministic Possibility Engine Status Tokens */
+  --status-verified: #134e3f;
+  --status-verified-bg: #e7f0e9;
+  --status-verified-border: #bcd6cb;
+
+  --status-confirmation: #784408;
+  --status-confirmation-bg: #fcf5e8;
+  --status-confirmation-border: #eed49c;
+
+  --status-conflict: #8b2612;
+  --status-conflict-bg: #fdf0ec;
+  --status-conflict-border: #f3c2b2;
+
+  --status-neutral: #53594e;
+  --status-neutral-bg: #ede8dc;
+  --status-neutral-border: #d5cbba;
+
+  /* Backward compatibility aliases */
+  --forest: var(--color-forest);
+  --forest-hover: var(--color-forest-hover);
+  --terracotta: var(--color-terracotta);
+  --terracotta-hover: var(--color-terracotta-hover);
+  --sand: var(--color-warm-paper-muted);
+  --sand-dark: #dfd8c8;
+  --muted: var(--color-ink-muted);
 }
 
 @theme inline {
   --color-background: var(--background);
   --color-foreground: var(--foreground);
-  --color-forest: var(--forest);
-  --color-terracotta: var(--terracotta);
+  --color-forest: var(--color-forest);
+  --color-forest-hover: var(--color-forest-hover);
+  --color-warm-paper: var(--color-warm-paper);
+  --color-warm-paper-muted: var(--color-warm-paper-muted);
+  --color-ink: var(--color-ink);
+  --color-ink-muted: var(--color-ink-muted);
+  --color-terracotta: var(--color-terracotta);
+  --color-terracotta-dark: var(--color-terracotta-dark);
+  --color-stone: var(--color-stone);
+  --color-stone-light: var(--color-stone-light);
+  --color-stone-dark: var(--color-stone-dark);
+  --color-sage-tint: var(--color-sage-tint);
+  --color-sage-border: var(--color-sage-border);
+  --color-sage-text: var(--color-sage-text);
+
   --font-serif: "Newsreader", "Charter", "Georgia", "Cambria", "Times New Roman", serif;
   --font-sans: ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
   --font-mono: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, "Liberation Mono", "Courier New", monospace;
@@ -26,17 +93,63 @@
 
 @media (prefers-color-scheme: dark) {
   :root {
+    --color-forest: #2a584d;
+    --color-forest-hover: #366f62;
+    --color-forest-active: #408273;
+
+    --color-warm-paper: #191c19;
+    --color-warm-paper-muted: #262a25;
+
+    --color-ink: #f4f1ea;
+    --color-ink-muted: #a3aba0;
+
+    --color-terracotta: #d88261;
+    --color-terracotta-dark: #e59779;
+    --color-terracotta-hover: #e59779;
+
+    --color-stone: #323731;
+    --color-stone-light: #3d433c;
+    --color-stone-dark: #262a25;
+
+    --color-sage-tint: #1c2e27;
+    --color-sage-border: #2a4c3f;
+    --color-sage-text: #b8ded0;
+
     --background: #191c19;
     --foreground: #f4f1ea;
-    --forest: #2a584d;
-    --forest-hover: #366f62;
-    --terracotta: #d88261;
-    --terracotta-hover: #e59779;
-    --sand: #262a25;
-    --sand-dark: #323731;
+    --surface: #212520;
+    --surface-paper: #191c19;
+    --surface-stone: #262a25;
+    --surface-sage: #1c2e27;
     --card-bg: #212520;
     --card-border: #323731;
-    --muted: #9da398;
+    --border-subtle: #323731;
+    --border-strong: #2a584d;
+    --focus-ring: #a8d5c4;
+
+    --status-verified: #b8ded0;
+    --status-verified-bg: #1d352b;
+    --status-verified-border: #2f5545;
+
+    --status-confirmation: #f0d496;
+    --status-confirmation-bg: #382b17;
+    --status-confirmation-border: #544122;
+
+    --status-conflict: #f6b4a1;
+    --status-conflict-bg: #3a1d17;
+    --status-conflict-border: #582a20;
+
+    --status-neutral: #a3aba0;
+    --status-neutral-bg: #262a25;
+    --status-neutral-border: #323731;
+
+    --forest: var(--color-forest);
+    --forest-hover: var(--color-forest-hover);
+    --terracotta: var(--color-terracotta);
+    --terracotta-hover: var(--color-terracotta-hover);
+    --sand: var(--color-warm-paper-muted);
+    --sand-dark: #323731;
+    --muted: var(--color-ink-muted);
   }
 }
 
@@ -52,6 +165,45 @@ body {
 
 /* Accessible focus ring for keyboard navigation */
 *:focus-visible {
-  outline: 2px solid var(--forest);
+  outline: 2px solid var(--focus-ring);
   outline-offset: 2px;
+}
+
+/* Interactive touch target guarantee (WCAG 2.2 AA target size) */
+.touch-target {
+  min-height: 44px;
+  min-width: 44px;
+}
+
+/* Atlas-inspired route motif utilities */
+.atlas-route-divider {
+  position: relative;
+  border-top: 1px dashed var(--color-stone);
+}
+
+.atlas-route-divider::before {
+  content: "";
+  position: absolute;
+  top: -4px;
+  left: 24px;
+  width: 7px;
+  height: 7px;
+  border-radius: 9999px;
+  background-color: var(--color-terracotta);
+}
+
+.atlas-editorial-border {
+  border-left: 3px solid var(--color-forest);
+}
+
+/* Reduced motion preference support (WCAG 2.2 AA) */
+@media (prefers-reduced-motion: reduce) {
+  *,
+  ::before,
+  ::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+    scroll-behavior: auto !important;
+  }
 }

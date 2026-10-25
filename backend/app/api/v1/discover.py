@@ -45,6 +45,7 @@ def discover_cultural_experiences(
     cultural_query = ", ".join(request.cultural_interests)
     workflow_input = AgentWorkflowInput(
         cultural_query=cultural_query,
+        cultural_interests=request.cultural_interests,
         target_type="urn:entity:place",
         requirements=request.requirements,
         max_candidates=request.max_candidates,
@@ -97,6 +98,7 @@ def discover_cultural_experiences(
         total_candidates_found=output.total_candidates_found,
         candidates_evaluated=output.candidates_evaluated,
         plans=output.plans,
+        cultural_threads=output.cultural_threads,
         discovery_error=None,
         workflow_summary=output.workflow_summary,
     )

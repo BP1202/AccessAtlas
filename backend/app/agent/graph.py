@@ -91,6 +91,7 @@ class AccessAtlasAgent:
 
         initial_state: AgentState = {
             "cultural_query": input_data.cultural_query,
+            "cultural_interests": input_data.cultural_interests,
             "target_type": input_data.target_type,
             "requirements": input_data.requirements,
             "max_candidates": input_data.max_candidates,
@@ -98,6 +99,7 @@ class AccessAtlasAgent:
             "discovered_entities": [],
             "resolved_candidates": [],
             "plans": [],
+            "cultural_threads": [],
             "discovery_error": None,
             "workflow_summary": "",
             "raw_context": {},
@@ -108,12 +110,14 @@ class AccessAtlasAgent:
         discovered = final_state.get("discovered_entities", [])
         resolved = final_state.get("resolved_candidates", [])
         plans = final_state.get("plans", [])
+        threads = final_state.get("cultural_threads", [])
 
         return AgentWorkflowOutput(
             cultural_query=input_data.cultural_query,
             total_candidates_found=len(discovered),
             candidates_evaluated=len(resolved),
             plans=plans,
+            cultural_threads=threads,
             discovery_error=final_state.get("discovery_error"),
             workflow_summary=final_state.get("workflow_summary", "Workflow completed."),
         )

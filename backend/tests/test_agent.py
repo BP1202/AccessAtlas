@@ -145,7 +145,10 @@ def test_successful_fully_mocked_end_to_end_workflow():
     assert len(plan.supported_findings) == 1
     assert "Step free entrance: supported" in plan.supported_findings[0]
     assert len(plan.unresolved_gaps) == 0
-    assert len(plan.provenance_sources) == 1
+    assert len(output.cultural_threads) == 1
+    assert output.cultural_threads[0].candidate.entity_id == "qloo_heritage_hall"
+    assert plan.cultural_thread is not None
+    assert plan.cultural_thread.thread_id == output.cultural_threads[0].thread_id
     assert "https://synthetic.heritagehall.test" in (
         plan.provenance_sources[0].url or ""
     )

@@ -11,7 +11,7 @@ from datetime import datetime
 
 from pydantic import BaseModel, ConfigDict, Field, field_validator
 
-from app.agent.models import CandidateParticipationPlan
+from app.agent.models import CandidateParticipationPlan, CulturalThread
 from app.possibility.models import ParticipationRequirement
 
 
@@ -106,6 +106,13 @@ class DiscoverResponse(BaseModel):
     plans: list[CandidateParticipationPlan] = Field(
         default_factory=list,
         description="Deterministic participation plans for evaluated candidates.",
+    )
+    cultural_threads: list[CulturalThread] = Field(
+        default_factory=list,
+        description=(
+            "Structured cultural discovery threads connecting visitor-expressed "
+            "interests to discovered candidates with explicit source provenance."
+        ),
     )
     discovery_error: str | None = Field(
         default=None,

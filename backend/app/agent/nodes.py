@@ -14,6 +14,7 @@ from app.agent.models import (
 )
 from app.agent.planning import build_candidate_participation_plan
 from app.agent.resolution import CandidateResolver, resolve_candidate
+from app.agent.threads import build_cultural_threads
 from app.evidence.repository import VenueEvidenceRepository
 from app.possibility.engine import PossibilityEngine
 from app.qloo.client import QlooClient
@@ -124,9 +125,23 @@ class WorkflowNodes:
         requirements = state.get("requirements", [])
         discovery_error = state.get("discovery_error")
 
+        # Resolve expressed cultural interests
+        raw_interests = state.get("cultural_interests")
+        if not raw_interests:
+            raw_query = state.get("cultural_query", "")
+            raw_interests = [q.strip() for q in raw_query.split(",") if q.strip()]
+
+        # Deterministically synthesize Cultural Threads
+        threads = build_cultural_threads(raw_interests, candidates)
+        threads_by_entity_id = {t.candidate.entity_id: t for t in threads}
+
         plans: list[CandidateParticipationPlan] = []
         for c in candidates:
-            plan = build_candidate_participation_plan(c, requirements)
+            plan = build_candidate_participation_plan(
+                c,
+                requirements,
+                cultural_thread=threads_by_entity_id.get(c.qloo_entity.entity_id),
+            )
             plans.append(plan)
 
         # Formulate deterministic workflow summary
@@ -156,5 +171,6 @@ class WorkflowNodes:
 
         return {
             "plans": plans,
+            "cultural_threads": threads,
             "workflow_summary": summary,
         }

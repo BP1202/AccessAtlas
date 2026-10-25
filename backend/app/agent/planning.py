@@ -7,6 +7,7 @@ Possibility Engine assessments into grounded, actionable participation plans.
 from app.agent.models import (
     CandidateParticipationPlan,
     CandidateResolutionStatus,
+    CulturalThread,
     ResolvedCandidate,
 )
 from app.evidence.models import EvidenceAttribute, EvidenceSource, EvidenceStatus
@@ -21,6 +22,7 @@ from app.possibility.models import (
 def build_candidate_participation_plan(
     resolved_candidate: ResolvedCandidate,
     requirements: list[ParticipationRequirement],
+    cultural_thread: CulturalThread | None = None,
 ) -> CandidateParticipationPlan:
     """Build a deterministic participation plan for a single candidate.
 
@@ -65,6 +67,7 @@ def build_candidate_participation_plan(
             confirmation_questions=confirmation_questions,
             suggested_next_actions=suggested_next_actions,
             provenance_sources=[],
+            cultural_thread=cultural_thread,
         )
 
     if status == CandidateResolutionStatus.MISSING_EVIDENCE:
@@ -91,6 +94,7 @@ def build_candidate_participation_plan(
             confirmation_questions=confirmation_questions,
             suggested_next_actions=suggested_next_actions,
             provenance_sources=[],
+            cultural_thread=cultural_thread,
         )
 
     # Candidate is RESOLVED and evaluated
@@ -194,4 +198,5 @@ def build_candidate_participation_plan(
         confirmation_questions=confirmation_questions,
         suggested_next_actions=suggested_next_actions,
         provenance_sources=provenance_sources,
+        cultural_thread=cultural_thread,
     )

@@ -183,10 +183,16 @@ The endpoint returns `HTTP 200 OK` with a [`DiscoverResponse`](../backend/app/ap
         "entity_id": "783C0235-681D-4235-BA4D-A57992F7C97A",
         "name": "Calico Museum of Textiles",
         "entity_type": "urn:entity:place",
-        "subtype": null,
+        "subtype": "museum",
         "popularity": 0.85,
         "disambiguation": "Textile museum in Ahmedabad, Gujarat",
-        "tags": [],
+        "tags": [
+          {
+            "id": "urn:tag:concept:textiles",
+            "name": "Indian Textiles",
+            "tag_type": "concept"
+          }
+        ],
         "properties": {}
       },
       "resolution_status": "resolved",
@@ -243,7 +249,67 @@ The endpoint returns `HTTP 200 OK` with a [`DiscoverResponse`](../backend/app/ap
           "title": "Sarabhai Foundation — Calico Museum Tour Guidelines",
           "verified_at": "2026-10-18T10:55:00Z"
         }
-      ]
+      ],
+      "cultural_thread": {
+        "thread_id": "thread_calico_museum_of_textiles_textiles",
+        "starting_interest": "textiles",
+        "anchor": {
+          "interest": "textiles",
+          "source_type": "explicit_visitor_selection",
+          "resolved_entity_id": null,
+          "resolved_entity_name": null,
+          "matched_tag": "Indian Textiles"
+        },
+        "candidate": {
+          "entity_id": "783C0235-681D-4235-BA4D-A57992F7C97A",
+          "name": "Calico Museum of Textiles",
+          "entity_type": "urn:entity:place",
+          "subtype": "museum",
+          "popularity": 0.85,
+          "mapping_status": "resolved",
+          "has_reviewed_evidence": true,
+          "is_evaluation_eligible": true,
+          "venue_id": "ven_in_ahm_calico"
+        },
+        "connection": {
+          "connection_type": "shared_tag",
+          "source_type": "deterministic_application_mapping",
+          "shared_descriptors": ["Indian Textiles"],
+          "rationale": "Matched expressed interest 'textiles' via Qloo cultural tag 'Indian Textiles'."
+        },
+        "provenance": "qloo_search_discovery"
+      }
+    }
+  ],
+  "cultural_threads": [
+    {
+      "thread_id": "thread_calico_museum_of_textiles_textiles",
+      "starting_interest": "textiles",
+      "anchor": {
+        "interest": "textiles",
+        "source_type": "explicit_visitor_selection",
+        "resolved_entity_id": null,
+        "resolved_entity_name": null,
+        "matched_tag": "Indian Textiles"
+      },
+      "candidate": {
+        "entity_id": "783C0235-681D-4235-BA4D-A57992F7C97A",
+        "name": "Calico Museum of Textiles",
+        "entity_type": "urn:entity:place",
+        "subtype": "museum",
+        "popularity": 0.85,
+        "mapping_status": "resolved",
+        "has_reviewed_evidence": true,
+        "is_evaluation_eligible": true,
+        "venue_id": "ven_in_ahm_calico"
+      },
+      "connection": {
+        "connection_type": "shared_tag",
+        "source_type": "deterministic_application_mapping",
+        "shared_descriptors": ["Indian Textiles"],
+        "rationale": "Matched expressed interest 'textiles' via Qloo cultural tag 'Indian Textiles'."
+      },
+      "provenance": "qloo_search_discovery"
     }
   ],
   "discovery_error": null,
@@ -252,6 +318,23 @@ The endpoint returns `HTTP 200 OK` with a [`DiscoverResponse`](../backend/app/ap
 ```
 
 > **Note on Example Data**: The sample response above is an illustrative demonstration fixture produced against reviewed pilot evidence. It does not represent an unverified live Qloo response.
+
+### Cultural Threads Specifications & Source Classification
+
+The `cultural_threads` list establishes provenance-aware connections linking visitor-expressed cultural interests to discovered candidates:
+
+1. **Source Classifications (`ThreadSourceType`)**:
+   - `explicit_visitor_selection`: Directly provided by visitor input (e.g., `"textiles"`).
+   - `actual_qloo_response`: Genuinely returned by Qloo Cultural AI (e.g., place entity discovery, tags, popularity).
+   - `deterministic_application_mapping`: Computed deterministically by AccessAtlas logic (e.g. tag overlap or human-reviewed venue mapping). Application logic is **never** presented as Qloo-generated insights.
+2. **Candidate Status & Evidence Boundaries**:
+   - `mapping_status`: `"resolved"` (mapped to reviewed pilot venue), `"unmapped"` (discovered culturally, no reviewed venue mapping), or `"missing_evidence"` (mapped venue ID missing from repository).
+   - `has_reviewed_evidence`: Strictly `true` only if verified facts exist in `VenueEvidenceRepository`.
+   - `is_evaluation_eligible`: Strictly `true` only if both mapped and backed by reviewed evidence. Unmapped candidates have `has_reviewed_evidence: false` and `is_evaluation_eligible: false`.
+3. **Safe Frontend Display Guidelines**:
+   - **Allowed**: Displaying connection rationales (e.g. *"Matched expressed interest 'textiles' via Qloo tag 'Indian Textiles'"*).
+   - **Allowed**: Highlighting whether a place has reviewed visit information or is an unreviewed cultural discovery.
+   - **Prohibited**: Fabricating percentage confidence scores (e.g. *"94% match"*), relationship-strength meters, or claiming cultural affinity represents accessibility.
 
 ### Response Guarantees
 

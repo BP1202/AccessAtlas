@@ -158,6 +158,13 @@ def test_2_valid_ahmedabad_discovery_request() -> None:
     assert plan["resolution_status"] == "resolved"
     assert plan["venue_id"] == VENUE_ID_CALICO
     assert plan["possibility_assessment"] is not None
+    assert "cultural_threads" in data
+    assert len(data["cultural_threads"]) == 1
+    assert data["cultural_threads"][0]["candidate"]["venue_id"] == VENUE_ID_CALICO
+    assert plan["cultural_thread"] is not None
+    assert (
+        plan["cultural_thread"]["thread_id"] == data["cultural_threads"][0]["thread_id"]
+    )
     assert (
         plan["possibility_assessment"]["aggregate_outcome"]
         == PossibilityOutcome.VERIFIED_FIT

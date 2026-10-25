@@ -48,9 +48,7 @@ class CulturalThreadAnchor(BaseModel):
 
     model_config = ConfigDict(frozen=True)
 
-    interest: str = Field(
-        description="The visitor-supplied starting interest term."
-    )
+    interest: str = Field(description="The visitor-supplied starting interest term.")
     source_type: ThreadSourceType = Field(
         default=ThreadSourceType.EXPLICIT_VISITOR_SELECTION,
         description="Source classification of this starting signal.",

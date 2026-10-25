@@ -112,8 +112,7 @@ def build_cultural_threads(
             for interest in clean_interests:
                 int_lower = interest.lower()
                 if int_lower in entity.name.lower() or (
-                    entity.disambiguation
-                    and int_lower in entity.disambiguation.lower()
+                    entity.disambiguation and int_lower in entity.disambiguation.lower()
                 ):
                     matched_interest = interest
                     match_kind = "direct"
@@ -176,9 +175,7 @@ def build_cultural_threads(
                 ),
             )
 
-        thread_slug = (
-            f"thread_{_slugify(entity.name)}_{_slugify(matched_interest)}"
-        )
+        thread_slug = f"thread_{_slugify(entity.name)}_{_slugify(matched_interest)}"
 
         threads.append(
             CulturalThread(

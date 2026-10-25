@@ -163,8 +163,7 @@ def test_2_valid_ahmedabad_discovery_request() -> None:
     assert data["cultural_threads"][0]["candidate"]["venue_id"] == VENUE_ID_CALICO
     assert plan["cultural_thread"] is not None
     assert (
-        plan["cultural_thread"]["thread_id"]
-        == data["cultural_threads"][0]["thread_id"]
+        plan["cultural_thread"]["thread_id"] == data["cultural_threads"][0]["thread_id"]
     )
     assert (
         plan["possibility_assessment"]["aggregate_outcome"]

@@ -174,4 +174,3 @@ class WorkflowNodes:
             "cultural_threads": threads,
             "workflow_summary": summary,
         }
-

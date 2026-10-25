@@ -12,7 +12,6 @@ Validates:
 - Discovery API backward-compatibility and thread exposure.
 """
 
-
 import pytest
 from fastapi.testclient import TestClient
 
@@ -78,10 +77,7 @@ def test_thread_synthesis_with_tag_matching() -> None:
     thread = threads[0]
     assert thread.starting_interest == "Textiles"
     assert thread.anchor.interest == "Textiles"
-    assert (
-        thread.anchor.source_type
-        == ThreadSourceType.EXPLICIT_VISITOR_SELECTION
-    )
+    assert thread.anchor.source_type == ThreadSourceType.EXPLICIT_VISITOR_SELECTION
     assert thread.anchor.matched_tag == "Textiles & Weaving"
 
     assert thread.connection.connection_type == ThreadConnectionType.SHARED_TAG
@@ -112,9 +108,7 @@ def test_thread_synthesis_with_subtype_matching() -> None:
 
     assert len(threads) == 1
     thread = threads[0]
-    assert (
-        thread.connection.connection_type == ThreadConnectionType.SHARED_SUBTYPE
-    )
+    assert thread.connection.connection_type == ThreadConnectionType.SHARED_SUBTYPE
     assert (
         thread.connection.source_type
         == ThreadSourceType.DETERMINISTIC_APPLICATION_MAPPING
@@ -174,12 +168,9 @@ def test_thread_synthesis_fallback_discovered_candidate() -> None:
     assert len(threads) == 1
     thread = threads[0]
     assert (
-        thread.connection.connection_type
-        == ThreadConnectionType.DISCOVERED_CANDIDATE
+        thread.connection.connection_type == ThreadConnectionType.DISCOVERED_CANDIDATE
     )
-    assert (
-        thread.connection.source_type == ThreadSourceType.ACTUAL_QLOO_RESPONSE
-    )
+    assert thread.connection.source_type == ThreadSourceType.ACTUAL_QLOO_RESPONSE
     assert "Stepwells" in thread.connection.shared_descriptors
 
 
@@ -224,8 +215,7 @@ def test_empty_interests_and_empty_candidates() -> None:
     assert build_cultural_threads(interests=[], resolved_candidates=[resolved]) == []
     assert build_cultural_threads(interests=["Textiles"], resolved_candidates=[]) == []
     assert (
-        build_cultural_threads(interests=["  "], resolved_candidates=[resolved])
-        == []
+        build_cultural_threads(interests=["  "], resolved_candidates=[resolved]) == []
     )
 
 
@@ -279,27 +269,21 @@ def test_unmapped_vs_mapped_candidate_evidence_flags() -> None:
 
     assert len(threads) == 3
     t_unmapped = threads[0]
-    assert (
-        t_unmapped.candidate.mapping_status == CandidateResolutionStatus.UNMAPPED
-    )
+    assert t_unmapped.candidate.mapping_status == CandidateResolutionStatus.UNMAPPED
     assert t_unmapped.candidate.has_reviewed_evidence is False
     assert t_unmapped.candidate.is_evaluation_eligible is False
     assert t_unmapped.candidate.venue_id is None
 
     t_missing = threads[1]
     assert (
-        t_missing.candidate.mapping_status
-        == CandidateResolutionStatus.MISSING_EVIDENCE
+        t_missing.candidate.mapping_status == CandidateResolutionStatus.MISSING_EVIDENCE
     )
     assert t_missing.candidate.has_reviewed_evidence is False
     assert t_missing.candidate.is_evaluation_eligible is False
     assert t_missing.candidate.venue_id == "ven_nonexistent"
 
     t_resolved = threads[2]
-    assert (
-        t_resolved.candidate.mapping_status
-        == CandidateResolutionStatus.RESOLVED
-    )
+    assert t_resolved.candidate.mapping_status == CandidateResolutionStatus.RESOLVED
     assert t_resolved.candidate.has_reviewed_evidence is True
     assert t_resolved.candidate.is_evaluation_eligible is True
     assert t_resolved.candidate.venue_id == "ven_verified"
@@ -401,8 +385,7 @@ def test_api_discover_exposes_cultural_threads(monkeypatch: pytest.MonkeyPatch) 
 
         assert thread["connection"]["connection_type"] == "shared_tag"
         assert (
-            thread["connection"]["source_type"]
-            == "deterministic_application_mapping"
+            thread["connection"]["source_type"] == "deterministic_application_mapping"
         )
         assert "Indian Textiles" in thread["connection"]["shared_descriptors"]
 
@@ -411,9 +394,7 @@ def test_api_discover_exposes_cultural_threads(monkeypatch: pytest.MonkeyPatch) 
         plan = data["plans"][0]
         assert "cultural_thread" in plan
         assert plan["cultural_thread"] is not None
-        assert (
-            plan["cultural_thread"]["thread_id"] == thread["thread_id"]
-        )
+        assert plan["cultural_thread"]["thread_id"] == thread["thread_id"]
 
     finally:
         app.dependency_overrides.clear()

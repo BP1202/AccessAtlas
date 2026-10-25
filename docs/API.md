@@ -419,3 +419,6 @@ The API test suite runs completely offline using `httpx.MockTransport`:
 ```powershell
 pytest tests/test_api_discover.py -v
 ```
+
+For browser-to-backend contract and integration testing instructions, see [`docs/CONTRACT_TESTING.md`](CONTRACT_TESTING.md).
+

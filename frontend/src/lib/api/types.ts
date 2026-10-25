@@ -123,6 +123,53 @@ export interface QlooEntity {
   properties?: Record<string, unknown>;
 }
 
+export type ThreadSourceType =
+  | "explicit_visitor_selection"
+  | "actual_qloo_response"
+  | "deterministic_application_mapping";
+
+export type ThreadConnectionType =
+  | "explicit_interest_match"
+  | "shared_tag"
+  | "shared_subtype"
+  | "discovered_candidate";
+
+export interface CulturalThreadAnchor {
+  interest: string;
+  source_type: ThreadSourceType;
+  resolved_entity_id?: string | null;
+  resolved_entity_name?: string | null;
+  matched_tag?: string | null;
+}
+
+export interface CulturalThreadConnection {
+  connection_type: ThreadConnectionType;
+  source_type: ThreadSourceType;
+  shared_descriptors: string[];
+  rationale: string;
+}
+
+export interface CulturalThreadCandidate {
+  entity_id: string;
+  name: string;
+  entity_type: string;
+  subtype?: string | null;
+  popularity?: number | null;
+  mapping_status: CandidateResolutionStatus;
+  has_reviewed_evidence: boolean;
+  is_evaluation_eligible: boolean;
+  venue_id?: string | null;
+}
+
+export interface CulturalThread {
+  thread_id: string;
+  starting_interest: string;
+  anchor: CulturalThreadAnchor;
+  candidate: CulturalThreadCandidate;
+  connection: CulturalThreadConnection;
+  provenance: string;
+}
+
 export interface CandidateParticipationPlan {
   candidate: QlooEntity;
   resolution_status: CandidateResolutionStatus;
@@ -134,6 +181,7 @@ export interface CandidateParticipationPlan {
   confirmation_questions: string[];
   suggested_next_actions: string[];
   provenance_sources: EvidenceSource[];
+  cultural_thread?: CulturalThread | null;
 }
 
 export interface DiscoverRequest {
@@ -150,6 +198,7 @@ export interface DiscoverResponse {
   total_candidates_found: number;
   candidates_evaluated: number;
   plans: CandidateParticipationPlan[];
+  cultural_threads?: CulturalThread[];
   discovery_error?: string | null;
   workflow_summary: string;
 }

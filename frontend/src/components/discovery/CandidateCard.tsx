@@ -16,6 +16,8 @@ export interface CandidateCardProps {
   onApplyFeedback?: (newMemory: TasteMemory, explanation: string, triggerRefresh?: boolean) => void;
   className?: string;
   defaultExpanded?: boolean;
+  isExpanded?: boolean;
+  onToggleExpand?: () => void;
 }
 
 export const CandidateCard: React.FC<CandidateCardProps> = ({
@@ -24,8 +26,19 @@ export const CandidateCard: React.FC<CandidateCardProps> = ({
   onApplyFeedback,
   className = "",
   defaultExpanded = false,
+  isExpanded: propIsExpanded,
+  onToggleExpand,
 }) => {
-  const [isExpanded, setIsExpanded] = useState(defaultExpanded);
+  const [localIsExpanded, setLocalIsExpanded] = useState(defaultExpanded);
+  const isExpanded = propIsExpanded !== undefined ? propIsExpanded : localIsExpanded;
+
+  const handleToggleExpand = () => {
+    if (onToggleExpand) {
+      onToggleExpand();
+    } else {
+      setLocalIsExpanded(!isExpanded);
+    }
+  };
 
   const {
     candidate,
@@ -40,6 +53,8 @@ export const CandidateCard: React.FC<CandidateCardProps> = ({
 
   return (
     <article
+      id={`candidate-card-${candidate.entity_id}`}
+      data-testid={`candidate-card-${candidate.entity_id}`}
       aria-label={`Cultural candidate: ${candidate.name}`}
       className={`rounded-3xl border border-[#e6e0d4] bg-white p-6 sm:p-8 shadow-xs transition-all hover:shadow-sm dark:border-[#323731] dark:bg-[#212520] ${className}`}
     >
@@ -100,6 +115,29 @@ export const CandidateCard: React.FC<CandidateCardProps> = ({
         </div>
       )}
 
+      {/* Cultural Thread Callout */}
+      {plan.cultural_thread && (
+        <div
+          data-testid={`candidate-cultural-thread-${candidate.entity_id}`}
+          className="mt-4 rounded-2xl border border-[#ede8dc] bg-[#faf8f5] p-3.5 text-xs text-[#252923] dark:border-[#323731] dark:bg-[#191c19] dark:text-[#e4ded0]"
+        >
+          <div className="flex flex-wrap items-center gap-2">
+            <span className="inline-flex items-center gap-1 font-semibold text-[#193a32] dark:text-[#a8d5c4]">
+              <span aria-hidden="true">🧵</span> Cultural Thread:
+            </span>
+            <span>
+              Connected from &ldquo;{plan.cultural_thread.starting_interest}&rdquo;
+            </span>
+            <span className="text-[#dfd8c8] dark:text-[#323731]" aria-hidden="true">
+              ·
+            </span>
+            <span className="text-[#62685d] dark:text-[#9da398]">
+              {plan.cultural_thread.connection.rationale}
+            </span>
+          </div>
+        </div>
+      )}
+
       {/* Visit Summary Highlights preview (if not expanded) */}
       {!isExpanded && (
         <div className="mt-6 space-y-2.5 pt-4 border-t border-[#ede8dc] dark:border-[#323731]">
@@ -129,7 +167,7 @@ export const CandidateCard: React.FC<CandidateCardProps> = ({
           type="button"
           variant={isExpanded ? "outline" : "primary"}
           size="md"
-          onClick={() => setIsExpanded(!isExpanded)}
+          onClick={handleToggleExpand}
           aria-expanded={isExpanded}
         >
           {isExpanded ? "Hide visit plan ↑" : "View visit plan →"}

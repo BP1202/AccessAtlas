@@ -681,4 +681,157 @@ test.describe("Visitor-First Discovery Experience (/explore)", () => {
     });
     await page.setViewportSize({ width: 1280, height: 720 });
   });
+
+  test("interacts with Question Kit copy controls, categorized next actions, and contact honesty notice", async ({
+    page,
+    context,
+  }) => {
+    // Grant clipboard permissions
+    await context.grantPermissions(["clipboard-read", "clipboard-write"]);
+
+    // Override API response to provide multiple questions, conflicting requirements, and next actions
+    await page.route("**/api/v1/discover", async (route) => {
+      await route.fulfill({
+        status: 200,
+        contentType: "application/json",
+        body: JSON.stringify({
+          city: "Ahmedabad",
+          cultural_interests: ["Heritage Architecture"],
+          total_candidates_found: 1,
+          candidates_evaluated: 1,
+          plans: [
+            {
+              candidate: {
+                entity_id: "qloo_calico_actions_test",
+                name: "Calico Museum of Textiles",
+                entity_type: "museum",
+                subtype: "Textile Museum",
+              },
+              resolution_status: "resolved",
+              venue_id: "calico_museum",
+              possibility_assessment: {
+                venue_id: "calico_museum",
+                aggregate_outcome: "NEEDS_CONFIRMATION",
+                evaluation_time: "2026-10-21T10:00:00Z",
+                summary: "Mandatory seating preference is unrecorded.",
+                assessments: [
+                  {
+                    requirement_id: "req_seating",
+                    attribute: "seating_available",
+                    priority: "mandatory",
+                    scope: "venue",
+                    outcome: "missing_evidence",
+                    explanation: "Rest benches are unrecorded in published records.",
+                    confirmation_need: "verify availability of seating benches in courtyard",
+                    evidence_references: [],
+                  },
+                  {
+                    requirement_id: "req_step_free",
+                    attribute: "step_free_entrance",
+                    priority: "mandatory",
+                    scope: "venue",
+                    outcome: "supported",
+                    explanation: "Ground floor entry is level.",
+                    evidence_references: [],
+                  },
+                ],
+              },
+              supported_findings: ["Main entrance is step-free."],
+              unresolved_gaps: ["Rest seating availability inside galleries."],
+              confirmation_questions: [
+                "Confirm seating_available: verify availability of seating benches in courtyard",
+              ],
+              suggested_next_actions: [
+                "Review official venue schedule and booking requirements prior to visit.",
+                "Contact venue accessibility coordinator to resolve the confirmation questions above.",
+                "Venue advisory (operational policy): Advance slot booking required via online portal.",
+              ],
+              provenance_sources: [
+                {
+                  source_type: "official_website",
+                  title: "Calico Museum Tour Guidelines & Registration",
+                  url: "https://www.calicomuseum.org/tour-guidelines/",
+                  verified_at: "2026-10-15T00:00:00Z",
+                },
+              ],
+            },
+          ],
+          workflow_summary: "Evaluated 1 candidate.",
+        }),
+      });
+    });
+
+    await page.goto("/explore");
+    await page.waitForLoadState("networkidle");
+
+    // Select suggestion chip "Textiles"
+    const textilesChip = page.getByRole("button", { name: /textiles/i });
+    await textilesChip.click();
+
+    // Continue to Stage 2
+    const continueBtn = page.getByRole("button", { name: /continue to visit preferences/i });
+    await continueBtn.click();
+
+    // Submit
+    const findBtn = page.getByRole("button", { name: /find cultural experiences/i });
+    await findBtn.click();
+
+    // Expand Visit Plan
+    const viewPlanBtn = page.getByRole("button", { name: /view visit plan/i });
+    await viewPlanBtn.click();
+
+    // 1. Verify Categorized Next Actions
+    const nextActionsSection = page.getByTestId("visit-plan-next-actions");
+    await expect(nextActionsSection).toBeVisible();
+    await expect(nextActionsSection.getByText("Review Booking Guidance")).toBeVisible();
+    await expect(nextActionsSection.getByText("Confirm Directly with Venue")).toBeVisible();
+    await expect(nextActionsSection.getByText("Operational Advisory")).toBeVisible();
+
+    // 2. Verify Question Kit
+    const questionKit = page.getByTestId("question-kit-section");
+    await expect(questionKit).toBeVisible();
+    await expect(questionKit.getByText("Question 1")).toBeVisible();
+    await expect(questionKit.getByText("Relates to: Seating available throughout")).toBeVisible();
+    await expect(questionKit.getByText("Venue scope")).toBeVisible();
+    await expect(questionKit.getByText("Reason needed:")).toBeVisible();
+
+    // 3. Test Individual Question Copy
+    const copySingleBtn = questionKit.getByRole("button", { name: /copy question 1/i });
+    await expect(copySingleBtn).toBeVisible();
+    await copySingleBtn.click();
+    await expect(questionKit.getByText("✓ Copied")).toBeVisible();
+
+    // 4. Test Copy All
+    const copyAllBtn = questionKit.getByRole("button", { name: /copy questions to ask/i });
+    await expect(copyAllBtn).toBeVisible();
+    await copyAllBtn.click();
+    await expect(questionKit.getByText("✓ Copied to clipboard")).toBeVisible();
+
+    // 5. Verify Non-autonomous Disclaimer
+    await expect(
+      questionKit.getByText(/AccessAtlas does not contact venues or send automated messages/i)
+    ).toBeVisible();
+
+    // 6. Verify Booking & Guidelines Portal and Direct Contact Honesty
+    const sourcesSection = page.getByTestId("visit-plan-provenance-sources");
+    await expect(sourcesSection.getByText("Booking & Guidelines Portal")).toBeVisible();
+    await expect(
+      sourcesSection.getByRole("link", { name: /open booking & guidelines/i })
+    ).toBeVisible();
+    await expect(page.getByTestId("contact-booking-honesty")).toBeVisible();
+
+    // Desktop Screenshot of Confirmation Questions and Actions
+    await page.screenshot({
+      path: "C:/Users/bhoom/.gemini/antigravity-ide/brain/299b5963-0cde-4153-bc40-f438c2b02466/confirmation_questions_actions_desktop.png",
+      fullPage: true,
+    });
+
+    // Mobile Screenshot
+    await page.setViewportSize({ width: 375, height: 812 });
+    await page.screenshot({
+      path: "C:/Users/bhoom/.gemini/antigravity-ide/brain/299b5963-0cde-4153-bc40-f438c2b02466/confirmation_questions_actions_mobile.png",
+      fullPage: true,
+    });
+    await page.setViewportSize({ width: 1280, height: 720 });
+  });
 });

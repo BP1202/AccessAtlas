@@ -80,6 +80,117 @@ export function renderOutcomeBadge(outcome: RequirementOutcome) {
   );
 }
 
+export type NextActionCategory =
+  | "reconsider_conflict"
+  | "confirm_venue"
+  | "booking_guidance"
+  | "review_source"
+  | "explore_alternative"
+  | "operational_advisory"
+  | "general";
+
+export interface CategorizedAction {
+  category: NextActionCategory;
+  badgeLabel: string;
+  badgeColorClass: string;
+  icon: string;
+  text: string;
+}
+
+export function categorizeNextAction(action: string): CategorizedAction {
+  const lower = action.toLowerCase();
+  if (
+    lower.includes("conflict") ||
+    lower.includes("contradicted") ||
+    lower.includes("incompatible")
+  ) {
+    return {
+      category: "reconsider_conflict",
+      badgeLabel: "Reconsider Essential Conflict",
+      badgeColorClass:
+        "bg-[#fdf0ec] text-[#a84422] border-[#f3c2b2] dark:bg-[#3a1d17] dark:text-[#f6b4a1] dark:border-[#582a20]",
+      icon: "✕",
+      text: action,
+    };
+  }
+  if (
+    lower.includes("alternative") ||
+    lower.includes("another supported") ||
+    lower.includes("consider alternative")
+  ) {
+    return {
+      category: "explore_alternative",
+      badgeLabel: "Explore Another Supported Candidate",
+      badgeColorClass:
+        "bg-[#f6f3eb] text-[#8c5914] border-[#eed49c] dark:bg-[#382b17] dark:text-[#f0d496] dark:border-[#544122]",
+      icon: "✦",
+      text: action,
+    };
+  }
+  if (lower.includes("venue advisory") || lower.includes("operational policy")) {
+    return {
+      category: "operational_advisory",
+      badgeLabel: "Operational Advisory",
+      badgeColorClass:
+        "bg-[#fdf0ec] text-[#c56f4d] border-[#f3c2b2] dark:bg-[#3a1d17] dark:text-[#f6b4a1] dark:border-[#582a20]",
+      icon: "ℹ",
+      text: action,
+    };
+  }
+  if (
+    lower.includes("booking") ||
+    lower.includes("reservation") ||
+    lower.includes("schedule and booking")
+  ) {
+    return {
+      category: "booking_guidance",
+      badgeLabel: "Review Booking Guidance",
+      badgeColorClass:
+        "bg-[#eaf2ee] text-[#193a32] border-[#bcd6cb] dark:bg-[#1d352b] dark:text-[#b8ded0] dark:border-[#2f5545]",
+      icon: "📅",
+      text: action,
+    };
+  }
+  if (
+    lower.includes("contact venue") ||
+    lower.includes("direct confirmation") ||
+    lower.includes("needs confirmation") ||
+    lower.includes("inquire")
+  ) {
+    return {
+      category: "confirm_venue",
+      badgeLabel: "Confirm Directly with Venue",
+      badgeColorClass:
+        "bg-[#fcf5e8] text-[#8c5914] border-[#eed49c] dark:bg-[#382b17] dark:text-[#f0d496] dark:border-[#544122]",
+      icon: "?",
+      text: action,
+    };
+  }
+  if (
+    lower.includes("consult official") ||
+    lower.includes("official venue sources") ||
+    lower.includes("source") ||
+    lower.includes("review documentation")
+  ) {
+    return {
+      category: "review_source",
+      badgeLabel: "Review Source",
+      badgeColorClass:
+        "bg-[#ede8dc] text-[#252923] border-[#dfd8c8] dark:bg-[#262a25] dark:text-[#f4f1ea] dark:border-[#384941]",
+      icon: "📄",
+      text: action,
+    };
+  }
+  return {
+    category: "general",
+    badgeLabel: "Action Note",
+    badgeColorClass:
+      "bg-[#ede8dc] text-[#62685d] border-[#dfd8c8] dark:bg-[#262a25] dark:text-[#9da398] dark:border-[#384941]",
+    icon: "→",
+    text: action,
+  };
+}
+
 export const VisitPlanDetail: React.FC<VisitPlanDetailProps> = ({
   plan,
   className = "",
@@ -104,6 +215,9 @@ export const VisitPlanDetail: React.FC<VisitPlanDetailProps> = ({
   // Identify conflict assessments for dedicated conflict alert section
   const conflictAssessments = assessments.filter(
     (a) => a.outcome === "contradicted" || a.outcome === "conflicting_evidence"
+  );
+  const hasMandatoryConflict = conflictAssessments.some(
+    (a) => a.priority === "mandatory"
   );
 
   return (
@@ -295,6 +409,27 @@ export const VisitPlanDetail: React.FC<VisitPlanDetailProps> = ({
               Documented Requirement Conflicts &amp; Disagreements
             </h5>
           </div>
+
+          {/* Essential requirement conflict prominent alert */}
+          {hasMandatoryConflict && (
+            <div
+              data-testid="essential-conflict-banner"
+              className="mt-4 rounded-2xl border-2 border-[#a84422] bg-[#fdf0ec] p-5 dark:border-[#f6b4a1] dark:bg-[#3a1d17] space-y-2"
+            >
+              <div className="flex items-center gap-2">
+                <span className="text-base font-bold text-[#a84422] dark:text-[#f6b4a1]" aria-hidden="true">⚠️</span>
+                <h6 className="font-serif text-base font-bold text-[#a84422] dark:text-[#f6b4a1]">
+                  Essential Requirement Conflict
+                </h6>
+              </div>
+              <p className="text-xs sm:text-sm text-[#252923] dark:text-[#e4ded0] leading-relaxed">
+                Published documentation indicates that one or more of your <strong>mandatory (essential) requirements</strong> cannot be accommodated at this venue.
+              </p>
+              <p className="text-xs text-[#a84422] dark:text-[#f6b4a1] font-medium leading-relaxed">
+                AccessAtlas does not offer unverified workarounds or silently downgrade essential requirements. We recommend reconsidering this outing or exploring another supported candidate that satisfies your essential participation needs.
+              </p>
+            </div>
+          )}
 
           <div className="mt-4 divide-y divide-[#f3c2b2] dark:divide-[#582a20]">
             {conflictAssessments.map((a, idx) => (
@@ -512,16 +647,38 @@ export const VisitPlanDetail: React.FC<VisitPlanDetailProps> = ({
           data-testid="visit-plan-next-actions"
           className="rounded-3xl border border-[#e6e0d4] bg-white p-6 sm:p-8 shadow-2xs dark:border-[#323731] dark:bg-[#212520]"
         >
-          <span className="text-xs font-semibold uppercase tracking-wider text-[#62685d] dark:text-[#9da398]">
-            Suggested Next Actions
-          </span>
-          <ul className="mt-3 space-y-2.5 text-sm text-[#252923] dark:text-[#e4ded0]" role="list">
-            {suggested_next_actions.map((act, idx) => (
-              <li key={idx} className="flex items-start gap-2.5">
-                <span className="font-mono text-[#c56f4d] font-bold select-none">→</span>
-                <span>{act}</span>
-              </li>
-            ))}
+          <div className="flex flex-col sm:flex-row sm:items-baseline sm:justify-between gap-1 pb-4 border-b border-[#ede8dc] dark:border-[#323731]">
+            <span className="text-xs font-semibold uppercase tracking-wider text-[#62685d] dark:text-[#9da398]">
+              Suggested Next Actions
+            </span>
+            <span className="text-[11px] text-[#62685d] dark:text-[#9da398]">
+              Grounded in current evaluation and published findings
+            </span>
+          </div>
+
+          <ul className="mt-4 space-y-3 text-sm text-[#252923] dark:text-[#e4ded0]" role="list">
+            {suggested_next_actions.map((act, idx) => {
+              const cat = categorizeNextAction(act);
+              return (
+                <li
+                  key={idx}
+                  data-testid={`next-action-item-${idx}`}
+                  className="rounded-2xl border border-[#ede8dc] bg-[#faf8f5] p-4 flex flex-col sm:flex-row sm:items-start justify-between gap-3 dark:border-[#323731] dark:bg-[#191c19]"
+                >
+                  <div className="flex items-start gap-3 flex-1">
+                    <span className="font-bold select-none text-base mt-0.5" aria-hidden="true">
+                      {cat.icon}
+                    </span>
+                    <span className="leading-relaxed">{act}</span>
+                  </div>
+                  <span
+                    className={`self-start sm:self-auto shrink-0 inline-flex items-center gap-1 rounded-full px-2.5 py-0.5 text-xs font-semibold border ${cat.badgeColorClass}`}
+                  >
+                    {cat.badgeLabel}
+                  </span>
+                </li>
+              );
+            })}
           </ul>
         </section>
       )}
@@ -532,6 +689,11 @@ export const VisitPlanDetail: React.FC<VisitPlanDetailProps> = ({
       <QuestionKit
         venueName={candidate.name}
         questions={confirmation_questions}
+        assessments={assessments}
+        hasUnresolvedEvidence={
+          unresolved_gaps.length > 0 ||
+          assessments.some((a) => a.outcome !== "supported")
+        }
       />
 
       {/* ====================================================================
@@ -552,36 +714,70 @@ export const VisitPlanDetail: React.FC<VisitPlanDetailProps> = ({
             </span>
           </div>
 
-          <ul className="mt-3 divide-y divide-[#ede8dc] dark:divide-[#323731] text-xs" role="list">
-            {provenance_sources.map((src, idx) => (
-              <li key={idx} className="py-3 flex flex-wrap items-center justify-between gap-3">
-                <div className="flex items-center gap-2">
-                  <span className="font-semibold text-sm text-[#252923] dark:text-[#f4f1ea]">
-                    {src.title || src.source_type}
-                  </span>
-                  <span className="rounded-md bg-[#ede8dc] px-2 py-0.5 font-mono text-[11px] text-[#62685d] dark:bg-[#262a25] dark:text-[#9da398]">
-                    {src.source_type}
-                  </span>
-                </div>
-                <div className="flex items-center gap-4 text-[#62685d] dark:text-[#9da398]">
-                  {src.verified_at && (
-                    <span>Verified: {new Date(src.verified_at).toLocaleDateString()}</span>
-                  )}
-                  {src.url && (
-                    <a
-                      href={src.url}
-                      target="_blank"
-                      rel="noopener noreferrer"
-                      className="text-[#193a32] underline hover:text-[#c56f4d] font-semibold dark:text-[#a8d5c4] inline-flex items-center gap-0.5"
-                    >
-                      <span>Official Link</span>
-                      <span aria-hidden="true">↗</span>
-                    </a>
-                  )}
-                </div>
-              </li>
-            ))}
+          {/* Source-backed research vs. on-site inspection notice */}
+          <p className="mt-3 text-xs leading-relaxed text-[#62685d] dark:text-[#9da398]">
+            Source-backed research is based on published institutional documentation, conservation reports, and official portals. It is not equivalent to an on-site accessibility inspection or real-time booking confirmation.
+          </p>
+
+          <ul className="mt-4 divide-y divide-[#ede8dc] dark:divide-[#323731] text-xs" role="list">
+            {provenance_sources.map((src, idx) => {
+              const isBookingOrGuidelines = Boolean(
+                src.url &&
+                  (src.url.includes("tour-guidelines") ||
+                    src.url.includes("booking") ||
+                    src.url.includes("reservation") ||
+                    (src.title && src.title.toLowerCase().includes("guidelines")) ||
+                    (src.title && src.title.toLowerCase().includes("booking")))
+              );
+
+              return (
+                <li key={idx} className="py-3.5 flex flex-wrap items-center justify-between gap-3">
+                  <div className="flex flex-wrap items-center gap-2">
+                    <span className="font-semibold text-sm text-[#252923] dark:text-[#f4f1ea]">
+                      {src.title || src.source_type}
+                    </span>
+                    <span className="rounded-md bg-[#ede8dc] px-2 py-0.5 font-mono text-[11px] text-[#62685d] dark:bg-[#262a25] dark:text-[#9da398]">
+                      {src.source_type}
+                    </span>
+                    {isBookingOrGuidelines && (
+                      <span className="rounded-md bg-[#eaf2ee] px-2 py-0.5 font-mono text-[11px] font-semibold text-[#193a32] border border-[#bcd6cb] dark:bg-[#1d352b] dark:text-[#b8ded0] dark:border-[#2f5545]">
+                        Booking &amp; Guidelines Portal
+                      </span>
+                    )}
+                  </div>
+                  <div className="flex items-center gap-4 text-[#62685d] dark:text-[#9da398]">
+                    {src.verified_at && (
+                      <span>Verified: {new Date(src.verified_at).toLocaleDateString()}</span>
+                    )}
+                    {src.url && (
+                      <a
+                        href={src.url}
+                        target="_blank"
+                        rel="noopener noreferrer"
+                        className="text-[#193a32] underline hover:text-[#c56f4d] font-semibold dark:text-[#a8d5c4] inline-flex items-center gap-0.5"
+                      >
+                        <span>{isBookingOrGuidelines ? "Open Booking & Guidelines" : "Official Link"}</span>
+                        <span aria-hidden="true">↗</span>
+                      </a>
+                    )}
+                  </div>
+                </li>
+              );
+            })}
           </ul>
+
+          {/* Contact and booking honesty callout */}
+          <div
+            data-testid="contact-booking-honesty"
+            className="mt-4 rounded-xl border border-[#dfd8c8] bg-white p-4 text-xs text-[#62685d] dark:border-[#323731] dark:bg-[#212520] dark:text-[#9da398] space-y-1"
+          >
+            <span className="font-semibold text-[#252923] dark:text-[#f4f1ea]">
+              Direct Contact &amp; Booking Notice:
+            </span>
+            <p className="leading-relaxed">
+              No direct phone numbers, personal email addresses, or automated booking forms are cataloged in repository records. AccessAtlas does not claim to have contacted the venue or conduct autonomous booking or outreach. Visitors should consult the official links above directly.
+            </p>
+          </div>
         </section>
       )}
 

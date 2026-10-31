@@ -1,0 +1,138 @@
+# ==============================================================================
+# AccessAtlas - Root .gitignore
+# ==============================================================================
+
+# ------------------------------------------------------------------------------
+# Secret-bearing files and Environment configurations (STRICTLY PROHIBITED IN GIT)
+# ------------------------------------------------------------------------------
+.env
+.env.*
+!.env.example
+.env.local
+.env.development.local
+.env.test.local
+.env.production.local
+*.local
+
+# Credentials, Keys, and Certificates
+*.pem
+*.key
+*.pfx
+*.p12
+*.cer
+*.crt
+*.der
+*.keystore
+*.jks
+id_rsa
+id_rsa.pub
+id_ed25519
+id_ed25519.pub
+id_ecdsa
+id_ecdsa.pub
+secrets/
+private/
+credentials.json
+client_secret*.json
+service-account*.json
+*.token
+*.auth
+
+# ------------------------------------------------------------------------------
+# Node.js & JavaScript/TypeScript Dependencies and Outputs
+# ------------------------------------------------------------------------------
+node_modules/
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+pnpm-debug.log*
+lerna-debug.log*
+.pnpm-store/
+.turbo/
+
+# Build artifacts
+dist/
+dist-ssr/
+build/
+out/
+.next/
+.nuxt/
+.output/
+*.tsbuildinfo
+
+# ------------------------------------------------------------------------------
+# Testing & Code Coverage
+# ------------------------------------------------------------------------------
+coverage/
+.nyc_output/
+*.lcov
+test-results/
+playwright-report/
+blob-report/
+
+# ------------------------------------------------------------------------------
+# Python & Backend Development Artifacts
+# ------------------------------------------------------------------------------
+__pycache__/
+*.py[cod]
+*$py.class
+*.so
+.Python
+env/
+venv/
+.venv/
+ENV/
+build/
+develop-eggs/
+dist/
+downloads/
+eggs/
+.eggs/
+lib/
+lib64/
+parts/
+sdist/
+var/
+wheels/
+*.egg-info/
+.installed.cfg
+*.egg
+.pytest_cache/
+.mypy_cache/
+.ruff_cache/
+
+# ------------------------------------------------------------------------------
+# IDE, Editor, and Operating System Artifacts
+# ------------------------------------------------------------------------------
+.DS_Store
+.DS_Store?
+._*
+.Spotlight-V100
+.Trashes
+ehthumbs.db
+Thumbs.db
+[Dd]esktop.ini
+
+# Editors
+.idea/
+*.suo
+*.ntvs*
+*.njsproj
+*.sln
+*.sw?
+*~
+.vscode/*
+!.vscode/extensions.json
+!.vscode/settings.json
+
+# ------------------------------------------------------------------------------
+# Temporary Files, Logs, and Local Scratch
+# ------------------------------------------------------------------------------
+*.log
+logs/
+tmp/
+temp/
+*.tmp
+*.bak
+scratch/
+.cache/

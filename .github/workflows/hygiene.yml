@@ -1,0 +1,115 @@
+name: Repository Hygiene & Security Baseline
+
+on:
+  push:
+    branches:
+      - dev
+      - main
+  pull_request:
+    branches:
+      - dev
+      - main
+
+permissions:
+  contents: read
+
+jobs:
+  hygiene-check:
+    name: Repository Hygiene & Secret Baseline
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Verify Required Governance Files Exist
+        run: |
+          echo "Checking essential governance files..."
+          required_files=(
+            "AGENTS.md"
+            "SECURITY.md"
+            ".gitignore"
+            "docs/PRODUCT.md"
+            "docs/ARCHITECTURE.md"
+            "docs/ENGINEERING.md"
+            ".github/pull_request_template.md"
+          )
+          missing_files=0
+          for file in "${required_files[@]}"; do
+            if [ ! -f "$file" ]; then
+              echo "::error file=$file::Missing required governance file: $file"
+              missing_files=$((missing_files + 1))
+            else
+              echo "  ✓ $file present"
+            fi
+          done
+
+          if [ $missing_files -ne 0 ]; then
+            echo "::error::Governance contract validation failed: $missing_files file(s) missing."
+            exit 1
+          fi
+
+      - name: Check for Prohibited Tracked Secret & Env Files
+        run: |
+          echo "Scanning tracked files for prohibited secret or environment files..."
+          PROHIBITED_PATTERNS=(
+            "\.env$"
+            "\.env\.local$"
+            "\.env\..*\.local$"
+            "\.pem$"
+            "\.key$"
+            "\.pfx$"
+            "\.p12$"
+            "id_rsa$"
+            "id_ed25519$"
+            "credentials\.json$"
+            "service-account.*\.json$"
+          )
+
+          LEAKED_FOUND=0
+          for pattern in "${PROHIBITED_PATTERNS[@]}"; do
+            MATCHES=$(git ls-files | grep -E "$pattern" || true)
+            if [ -n "$MATCHES" ]; then
+              echo "::error::Prohibited sensitive file tracked in git matching '$pattern':"
+              echo "$MATCHES"
+              LEAKED_FOUND=$((LEAKED_FOUND + 1))
+            fi
+          done
+
+          if [ $LEAKED_FOUND -ne 0 ]; then
+            echo "::error::Security baseline failed! Remove prohibited files from git index per SECURITY.md."
+            exit 1
+          fi
+          echo "  ✓ No prohibited secret or environment files tracked in git."
+
+      - name: Scan Tracked Files for Leaked Secret Signatures
+        run: |
+          echo "Scanning tracked files for high-entropy secret patterns..."
+          # Regex patterns for high-risk tokens and private keys
+          SECRET_PATTERNS="(-----BEGIN [A-Z ]*PRIVATE KEY-----|ghp_[A-Za-z0-9]{36}|github_pat_[A-Za-z0-9]{82}|AKIA[0-9A-Z]{16}|sk_live_[0-9a-zA-Z]{24})"
+          
+          # Scan tracked files, ignoring workflow definitions
+          SCAN_RESULTS=$(git grep -EI "$SECRET_PATTERNS" -- ':!.github/workflows/*' || true)
+          if [ -n "$SCAN_RESULTS" ]; then
+            echo "::error::Potential hardcoded secret signature found in tracked files:"
+            echo "$SCAN_RESULTS"
+            exit 1
+          fi
+          echo "  ✓ No known hardcoded secret patterns detected."
+
+      - name: Validate PR Target Branch
+        if: github.event_name == 'pull_request'
+        run: |
+          TARGET_BRANCH="${{ github.base_ref }}"
+          SOURCE_BRANCH="${{ github.head_ref }}"
+          echo "Pull request from '$SOURCE_BRANCH' targeting '$TARGET_BRANCH'"
+
+          # Enforce that feature/fix/chore/docs/test branches target dev, not main directly
+          if [ "$TARGET_BRANCH" = "main" ]; then
+            if [[ ! "$SOURCE_BRANCH" =~ ^(dev|release/.*) ]]; then
+              echo "::error::Feature, fix, and chore branches must target 'dev', not 'main'. Only 'dev' or release branches can merge into 'main'."
+              exit 1
+            fi
+          fi
+          echo "  ✓ PR target branch '$TARGET_BRANCH' conforms to Git workflow."
